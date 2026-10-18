@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { texts } from '../../texts'
 import { Badge } from './Badge'
 import { Button } from './Button'
 
@@ -11,7 +12,7 @@ type Props = {
   onAction: () => void
 }
 
-/** 메인 화면 상단 긴급 알림 (예: 컨피그 불일치) */
+/** 상단 긴급 알림 */
 export function NoticeBanner({ title, count, children, onDismiss, actionLabel, onAction }: Props) {
   return (
     <div
@@ -29,8 +30,8 @@ export function NoticeBanner({ title, count, children, onDismiss, actionLabel, o
         <span className="text-[13px] text-danger-text">{children}</span>
       </span>
       {onDismiss && (
-        <Button variant="secondary" size="sm" onClick={onDismiss} className="border-danger-line text-[#8a4a45]">
-          나중에 확인
+        <Button variant="secondary" size="sm" onClick={onDismiss} className="border-danger-line text-danger-muted">
+          {texts.common.notice.later}
         </Button>
       )}
       <Button variant="danger" size="sm" onClick={onAction} className="font-semibold">

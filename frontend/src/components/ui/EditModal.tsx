@@ -1,9 +1,12 @@
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
+import { texts } from '../../texts'
 import { Button } from './Button'
 import { ChangeSummary } from './ChangeSummary'
 import type { Change } from './ChangeSummary'
 import { Field, TextInput } from './Field'
+
+const t = texts.common.editModal
 
 export type AuditInfo = { actor: string; at: string; company: string; action: string }
 
@@ -22,14 +25,10 @@ type Props = {
   children: ReactNode
 }
 
-/**
- * 모든 수정 모달의 공통 틀.
- * 좌: 입력 영역(children) / 우: 변경 요약 · 티켓 · 사유 · 자동 기록 정보(340px 고정).
- * 요구사항: 수정 시 변경 전/후 저장, 티켓 번호 필수, 변경 내역 기록.
- */
+/** 수정 모달 공통 틀 (좌: 입력, 우: 변경 요약·티켓·사유·기록 정보) */
 export function EditModal({
   title,
-  description = '변경 전/후 값이 히스토리에 함께 저장됩니다.',
+  description = t.defaultDescription,
   changes,
   audit,
   ticket,
@@ -64,7 +63,7 @@ export function EditModal({
             </h2>
             <span className="text-[13px] text-ink-3">{description}</span>
           </div>
-          <button type="button" aria-label="닫기" onClick={onClose} className="flex size-8 items-center justify-center rounded-ctl text-ink-4 hover:bg-fill">
+          <button type="button" aria-label={texts.common.action.close} onClick={onClose} className="flex size-8 items-center justify-center rounded-ctl text-ink-4 hover:bg-fill">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
@@ -75,21 +74,21 @@ export function EditModal({
         <div className="grid items-start gap-5 overflow-y-auto px-6 py-5 [grid-template-columns:minmax(0,1fr)_340px]">
           <div className="flex min-w-0 flex-col gap-3">{children}</div>
 
-          <aside aria-label="변경 항목 및 히스토리 기록" className="sticky top-0 flex flex-col gap-4 self-stretch border-l-2 border-line pl-5">
+          <aside aria-label={t.asideLabel} className="sticky top-0 flex flex-col gap-4 self-stretch border-l-2 border-line pl-5">
             <ChangeSummary changes={changes} />
-            <Field label="Zendesk 티켓 번호" required>
-              {(id) => <TextInput id={id} value={ticket} onChange={(e) => onTicketChange(e.target.value)} placeholder="TKT-2024-0523-001" />}
+            <Field label={t.ticket.label} required>
+              {(id) => <TextInput id={id} value={ticket} onChange={(e) => onTicketChange(e.target.value)} placeholder={t.ticket.placeholder} />}
             </Field>
-            <Field label="작업 사유" required>
-              {(id) => <TextInput id={id} value={reason} onChange={(e) => onReasonChange(e.target.value)} placeholder="고객사 요청 내용 또는 내부 처리 사유" />}
+            <Field label={t.reason.label} required>
+              {(id) => <TextInput id={id} value={reason} onChange={(e) => onReasonChange(e.target.value)} placeholder={t.reason.placeholder} />}
             </Field>
             <dl className="m-0 grid grid-cols-2 gap-2.5 rounded-xl border border-line-soft bg-bg p-3.5 text-[13px]">
               {(
                 [
-                  ['액션 유저', audit.actor],
-                  ['액션 시각', audit.at],
-                  ['고객사', audit.company],
-                  ['작동 기능', audit.action],
+                  [t.audit.actor, audit.actor],
+                  [t.audit.at, audit.at],
+                  [t.audit.company, audit.company],
+                  [t.audit.action, audit.action],
                 ] as const
               ).map(([k, v]) => (
                 <div key={k} className="flex flex-col gap-0.5">
@@ -103,10 +102,10 @@ export function EditModal({
 
         <div className="flex justify-end gap-2.5 border-t border-line-soft bg-bg/60 px-6 py-3.5">
           <Button variant="secondary" onClick={onClose} className="h-[42px] px-[18px] text-sm">
-            취소
+            {texts.common.action.cancel}
           </Button>
           <Button variant="primary" onClick={onSave} loading={saving} disabled={!canSave} className="h-[42px] px-5 text-sm font-semibold">
-            저장 · 히스토리 기록
+            {t.save}
           </Button>
         </div>
       </div>
@@ -114,7 +113,7 @@ export function EditModal({
   )
 }
 
-/** 모달 좌측 입력 영역의 필드 묶음 카드 */
+/** 필드 묶음 카드 */
 export function FieldGroup({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-3 rounded-xl border border-line bg-bg/50 p-3.5">

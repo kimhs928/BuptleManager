@@ -27,7 +27,7 @@ export function Badge({ tone = 'neutral', children }: { tone?: Tone; children: R
   )
 }
 
-/** 서비스 구분 점 (Biz 주황 / Nova 보라) */
+/** 서비스 구분 점 */
 export function PlatformDot({ platform }: { platform: ServicePlatform }) {
   return (
     <span

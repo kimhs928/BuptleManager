@@ -1,3 +1,5 @@
+import { texts } from '../../texts'
+
 type LogoProps = { size?: number; shadow?: boolean }
 
 export function Logo({ size = 28, shadow = false }: LogoProps) {
@@ -7,7 +9,7 @@ export function Logo({ size = 28, shadow = false }: LogoProps) {
       height={size}
       viewBox="0 0 88 88"
       role="img"
-      aria-label="Buptle 로고"
+      aria-label={texts.common.logoAlt}
       className="shrink-0"
       style={shadow ? { filter: 'drop-shadow(0 6px 14px rgba(0,0,0,0.14))' } : undefined}
     >

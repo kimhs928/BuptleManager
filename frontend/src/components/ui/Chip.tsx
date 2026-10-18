@@ -3,7 +3,7 @@ import { cn } from '../../lib/cn'
 
 type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & { label: string }
 
-/** 복수 선택 칩 (체크박스) */
+/** 복수 선택 칩 */
 export function Chip({ label, checked, className, ...rest }: Props) {
   return (
     <label

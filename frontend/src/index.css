@@ -1,10 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
-/*
- * 디자인 토큰 — 화면정의서 Page 2(mac) 기준.
- * 컴포넌트는 색상·라운드·그림자를 하드코딩하지 않고 아래 이름(bg-primary, rounded-card 등)으로만 쓴다.
- */
+/* 디자인 토큰 (화면정의서 Page 2 기준) */
 @theme {
   /* 폰트 */
   --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
@@ -33,6 +30,7 @@
   --color-line: #e8e8ed;
   --color-line-strong: #d1d1d6;
   --color-line-soft: #f0f0f3;
+  --color-divider: #e5e5ea; /* 그룹 목록 행 사이 구분선 */
 
   /* 글자 */
   --color-ink: #1d1d1f;
@@ -47,6 +45,7 @@
   --color-danger-soft: #fff4f3;
   --color-danger-line: #ffd5d1;
   --color-danger-text: #7a3530;
+  --color-danger-muted: #8a4a45;
   --color-success: #4baaa2;
   --color-success-ink: #25736c;
   --color-success-soft: #e9f6f4;

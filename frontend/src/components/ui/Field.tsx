@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react'
 import { cn } from '../../lib/cn'
+import { texts } from '../../texts'
 
 const control =
   'w-full rounded-ctl border border-line-strong bg-surface px-3 text-[13px] text-ink placeholder:text-ink-5 focus:border-primary focus:outline-none focus:shadow-[0_0_0_3px_rgb(35_100_170/0.22)]'
@@ -14,7 +15,7 @@ type FieldProps = {
   children: (id: string) => ReactNode
 }
 
-/** label + control 한 세트. children 에 id 를 넘겨 label 과 연결한다. */
+/** label + control 묶음 */
 export function Field({ label, required, readOnlyHint, hint, className, children }: FieldProps) {
   const id = useId()
   return (
@@ -22,7 +23,7 @@ export function Field({ label, required, readOnlyHint, hint, className, children
       <label htmlFor={id} className="inline-flex items-center gap-2 text-xs font-medium text-ink-2">
         {label}
         {required && <span className="text-danger-ink">*</span>}
-        {readOnlyHint && <span className="text-[11px] font-normal text-ink-4">읽기 전용</span>}
+        {readOnlyHint && <span className="text-[11px] font-normal text-ink-4">{texts.common.field.readOnly}</span>}
       </label>
       {children(id)}
       {hint && <span className="text-[11px] text-ink-4">{hint}</span>}

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
+import { texts } from '../../texts'
 import { Card } from './Card'
 
 export type Option = { id: string; title: string; subtitle?: string; trailing?: string }
@@ -12,7 +13,7 @@ type Props = {
   label: string
 }
 
-/** 고객사 선택 등에 쓰는 단일 선택 리스트 */
+/** 단일 선택 리스트 */
 export function OptionList({ options, selectedId, onSelect, emptyMessage, label }: Props) {
   return (
     <Card className="p-1">
@@ -45,7 +46,7 @@ export function OptionList({ options, selectedId, onSelect, emptyMessage, label 
           )
         })}
         {options.length === 0 && (
-          <li className="px-4 py-[18px] text-center text-[13px] text-ink-4">{emptyMessage ?? '결과가 없습니다.'}</li>
+          <li className="px-4 py-[18px] text-center text-[13px] text-ink-4">{emptyMessage ?? texts.common.state.noResult}</li>
         )}
       </ul>
     </Card>

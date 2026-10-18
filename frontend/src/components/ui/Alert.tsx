@@ -33,7 +33,7 @@ const icons: Record<Tone, ReactNode> = {
   ),
 }
 
-/** 인라인 안내 박스 (정보 / 주의 / 경고) */
+/** 안내 박스 (정보/주의/경고) */
 export function Alert({ tone = 'info', children, className }: { tone?: Tone; children: ReactNode; className?: string }) {
   return (
     <div
