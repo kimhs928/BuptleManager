@@ -19,6 +19,7 @@ export function LoginRoute({ initialView = 'login' }: { initialView?: LoginView 
     setBusy(true)
     timer.current = window.setTimeout(() => {
       setBusy(false)
+      // TODO: 백엔드 연동 시 인증 결과에 따라 분기. 현재는 목이라 항상 '미등록 계정' 화면으로 이동
       setView('denied')
     }, MOCK_LOGIN_DELAY_MS)
   }
