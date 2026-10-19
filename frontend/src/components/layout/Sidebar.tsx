@@ -63,7 +63,7 @@ function LogoUploader() {
 }
 
 const features: { key: keyof typeof t.features; href: string }[] = [
-  { key: 'contract', href: '#contract' },
+  { key: 'contract', href: '?contract' },
   { key: 'counsel', href: '#counsel' },
   { key: 'litigation', href: '#litigation' },
   { key: 'user', href: '#user' },
@@ -73,14 +73,16 @@ const features: { key: keyof typeof t.features; href: string }[] = [
 type Props = {
   /** 메인(고객사 선택) 화면 주소 */
   mainHref: string
+  /** 현재 화면이 속한 메뉴 */
+  active?: 'company' | 'contract'
 }
 
 /** 고객사 선택 후 화면의 좌측 메뉴 */
-export function Sidebar({ mainHref }: Props) {
+export function Sidebar({ mainHref, active = 'company' }: Props) {
   const [open, setOpen] = useState(true)
 
   return (
-    <aside className="flex w-[248px] shrink-0 flex-col gap-px border-r border-[#ebebee] bg-[#f7f7f8] px-2.5 pb-3.5 pt-4">
+    <aside className="flex w-[248px] shrink-0 flex-col gap-px border-r border-[#e4e4ec] bg-[#f6f6fa] px-2.5 pb-3.5 pt-4">
       <div className="flex items-center gap-1 pb-3.5 pl-2.5 pr-1.5 pt-0.5">
         <span className="flex min-w-0 flex-1 items-center gap-2.5">
           <LogoUploader />
@@ -96,7 +98,7 @@ export function Sidebar({ mainHref }: Props) {
         </a>
       </div>
 
-      <NavLink href="?company" current icon={<BuildingIcon size={16} />}>
+      <NavLink href="?company" current={active === 'company'} icon={<BuildingIcon size={16} />}>
         {t.companyInfo}
       </NavLink>
 
@@ -108,7 +110,12 @@ export function Sidebar({ mainHref }: Props) {
       {open && (
         <div className="ml-[18px] mt-0.5 mb-1.5 flex flex-col gap-px border-l border-line-strong/70 pl-2.5">
           {features.map((f) => (
-            <a key={f.key} href={f.href} className="flex h-8 items-center rounded-ctl px-2.5 text-[13px] font-medium text-ink-3 hover:bg-fill">
+            <a
+              key={f.key}
+              href={f.href}
+              aria-current={active === f.key ? 'page' : undefined}
+              className={cn('flex h-8 items-center rounded-ctl px-2.5 text-[13px] font-medium hover:bg-fill', active === f.key ? 'bg-surface text-ink shadow-seg hover:bg-surface' : 'text-ink-3')}
+            >
               {t.features[f.key]}
             </a>
           ))}
@@ -123,7 +130,7 @@ export function Sidebar({ mainHref }: Props) {
       </NavLink>
 
       <span className="flex-1" />
-      <div className="flex flex-col gap-px border-t border-[#ebebee] px-2.5 pb-0.5 pt-3">
+      <div className="flex flex-col gap-px border-t border-[#e4e4ec] px-2.5 pb-0.5 pt-3">
         <span className="text-[13px] font-semibold">{MOCK_ACCOUNT.name}</span>
         <span className="text-[11.5px] text-ink-4">{MOCK_ACCOUNT.role}</span>
       </div>
