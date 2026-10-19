@@ -1,3 +1,4 @@
+import { LockIcon } from '../../components/icons'
 import { Alert, Button } from '../../components/ui'
 import { texts } from '../../texts'
 import { AppIcon, AuthCard, AuthLayout, PlatformFooter } from './AuthLayout'
@@ -30,12 +31,7 @@ export function LoginPage({ busy, error, onLogin }: Props) {
           loading={busy}
           onClick={onLogin}
           className="mt-8"
-          icon={
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <rect x="3" y="11" width="18" height="10" rx="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-          }
+          icon={<LockIcon size={17} strokeWidth={1.9} />}
         >
           {busy ? t.buttonBusy : t.button}
         </Button>
