@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Card, PlatformDot } from '../../components/ui'
+import { Card, Lines, PlatformDot } from '../../components/ui'
 import { InfoIcon, LockIcon } from '../../components/icons'
 import { cn } from '../../lib/cn'
 import { platformLabel } from '../../lib/platform'
@@ -90,9 +90,7 @@ export function BasicInfoTab({ company, liveUserCount }: Props) {
         <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-line-strong bg-[#f2f2f5] px-3.5 py-3 text-[13px] leading-normal">
           <InfoIcon size={15} className="mt-0.5 shrink-0 text-ink-3" />
           <span>
-            {t.syncedNotice[0]}
-            <br />
-            {t.syncedNotice[1]}
+            <Lines lines={t.syncedNotice} />
           </span>
         </div>
       </section>
