@@ -2,6 +2,9 @@ import { lazy, Suspense } from 'react'
 import { LoginRoute } from './pages/login/LoginRoute'
 import type { LoginView } from './pages/login/LoginRoute'
 import { CompanyPage } from './pages/company/CompanyPage'
+import { ContractDetailPage } from './pages/contract/ContractDetailPage'
+import type { ContractTab } from './pages/contract/ContractDetailPage'
+import { ContractSearchPage } from './pages/contract/ContractSearchPage'
 import type { CompanyTab } from './pages/company/CompanyPage'
 import { MainPage } from './pages/main/MainPage'
 
@@ -9,11 +12,11 @@ import { MainPage } from './pages/main/MainPage'
 const ComponentGallery = import.meta.env.DEV ? lazy(() => import('./pages/ComponentGallery')) : null
 
 const companyTabs: CompanyTab[] = ['basic', 'config', 'users']
-const MAIN_HREF = '?main'
+const contractTabs: ContractTab[] = ['basic', 'members', 'workflow']
 
 const loginViews: LoginView[] = ['login', 'network', 'denied']
 
-/** 임시 진입점: /, /?view=network, /?view=denied, /?main, /?main&notice, /?company, /?company&tab=config, /?company&tab=users, /?gallery */
+/** 임시 진입점: /, /?view=network, /?view=denied, /?main, /?main&notice, /?company, /?company&tab=config, /?company&tab=users, /?contract, /?contract=CT-2024-0315&tab=members, /?gallery */
 export default function App() {
   const params = new URLSearchParams(window.location.search)
   if (ComponentGallery && params.has('gallery')) {
@@ -25,7 +28,15 @@ export default function App() {
   }
   if (params.has('company')) {
     const tab = companyTabs.find((t) => t === params.get('tab')) ?? 'basic'
-    return <CompanyPage initialTab={tab} mainHref={MAIN_HREF} />
+    return <CompanyPage initialTab={tab} />
+  }
+  if (params.has('contract')) {
+    // 계약 ID가 있으면 상세, 없으면 검색
+    if (params.get('contract')) {
+      const tab = contractTabs.find((t) => t === params.get('tab')) ?? 'basic'
+      return <ContractDetailPage initialTab={tab} />
+    }
+    return <ContractSearchPage initialQuery={params.get('q') ?? ''} />
   }
   if (params.has('main')) {
     // TODO: 라우터 도입 시 선택한 고객사(schema)를 경로로 전달
