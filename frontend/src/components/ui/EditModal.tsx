@@ -23,6 +23,8 @@ type Props = {
   onClose: () => void
   onSave: () => void
   saving?: boolean
+  /** 저장 버튼 문구 (기본: 저장 · 히스토리 기록) */
+  saveLabel?: string
   children: ReactNode
 }
 
@@ -39,6 +41,7 @@ export function EditModal({
   onClose,
   onSave,
   saving,
+  saveLabel = t.save,
   children,
 }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -140,7 +143,7 @@ export function EditModal({
             {texts.common.action.cancel}
           </Button>
           <Button variant="primary" onClick={onSave} loading={saving} disabled={!canSave} className="h-[42px] px-5 text-sm font-semibold">
-            {t.save}
+            {saveLabel}
           </Button>
         </div>
       </div>
