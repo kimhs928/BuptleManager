@@ -1,8 +1,12 @@
 import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
+import type { ServicePlatform } from '../../lib/platform'
 import { platformLabel } from '../../lib/platform'
 import { texts } from '../../texts'
+import { Footer } from '../../components/layout/Footer'
 import { Logo, PlatformDot } from '../../components/ui'
+
+const platforms = Object.keys(platformLabel) as ServicePlatform[]
 
 type Props = {
   networkOk?: boolean
@@ -28,11 +32,7 @@ export function AuthLayout({ networkOk = true, maxWidth = 'sm', children }: Prop
         <div className={cn('flex w-full flex-col', maxWidth === 'sm' ? 'max-w-[420px]' : 'max-w-[440px]')}>{children}</div>
       </main>
 
-      <footer className="flex justify-center gap-4 px-6 pb-7 text-[11px] text-ink-4">
-        <span>{texts.common.footer.copyright}</span>
-        <span>{texts.common.footer.authorizedOnly}</span>
-        <span>{texts.common.footer.version}</span>
-      </footer>
+      <Footer className="pb-7" />
     </div>
   )
 }
@@ -69,14 +69,12 @@ export function AppIcon({ size, badge }: { size: number; badge?: ReactNode }) {
 export function PlatformFooter() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-3.5 text-xs text-ink-4">
-      <span className="inline-flex items-center gap-1.5">
-        <PlatformDot platform="BUPTLE_BIZ" />
-        {platformLabel.BUPTLE_BIZ}
-      </span>
-      <span className="inline-flex items-center gap-1.5">
-        <PlatformDot platform="BUPTLE_NOVA" />
-        {platformLabel.BUPTLE_NOVA}
-      </span>
+      {platforms.map((p) => (
+        <span key={p} className="inline-flex items-center gap-1.5">
+          <PlatformDot platform={p} />
+          {platformLabel[p]}
+        </span>
+      ))}
       <span>{texts.common.consoleLabel}</span>
     </div>
   )

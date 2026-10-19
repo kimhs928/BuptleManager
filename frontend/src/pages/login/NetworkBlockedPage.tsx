@@ -1,18 +1,9 @@
+import { WifiOffIcon } from '../../components/icons'
 import { Lines } from '../../components/ui'
 import { texts } from '../../texts'
 import { AppIcon, AuthCard, AuthLayout, PlatformFooter } from './AuthLayout'
 
-const wifiOff = (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="2" y1="2" x2="22" y2="22" />
-    <path d="M8.5 16.5a5 5 0 0 1 7 0" />
-    <path d="M5 12.9a10 10 0 0 1 5.2-2.8" />
-    <path d="M19 12.9a10 10 0 0 0-2.3-1.6" />
-    <path d="M2 8.8a15 15 0 0 1 4.2-2.7" />
-    <path d="M22 8.8a15 15 0 0 0-11.3-3.7" />
-    <line x1="12" y1="20" x2="12.01" y2="20" />
-  </svg>
-)
+const wifiOff = <WifiOffIcon size={15} strokeWidth={2.4} />
 
 const t = texts.login.network
 

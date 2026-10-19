@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { texts } from '../../texts'
+import { CloseIcon } from '../icons'
 import { Button } from './Button'
 import { ChangeSummary } from './ChangeSummary'
 import type { Change } from './ChangeSummary'
@@ -40,17 +41,54 @@ export function EditModal({
   saving,
   children,
 }: Props) {
+  const dialogRef = useRef<HTMLDivElement>(null)
+  // onClose가 매 렌더링마다 바뀌어도 이벤트 리스너를 다시 등록하지 않도록 ref로 보관
+  const onCloseRef = useRef(onClose)
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    onCloseRef.current = onClose
+  })
+
+  // 열릴 때 포커스를 모달로 옮기고, Esc로 닫고, Tab을 모달 안에 가두고, 닫힐 때 원래 위치로 되돌린다
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const focusable = () =>
+      Array.from(dialog.querySelectorAll<HTMLElement>('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])')).filter(
+        (el) => !el.hasAttribute('disabled'),
+      )
+    // 제목 옆 닫기 버튼 대신 첫 입력 요소를 우선 포커스한다
+    const first = dialog.querySelector<HTMLElement>('input, select, textarea') ?? focusable()[0]
+    first?.focus()
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') return onCloseRef.current()
+      if (e.key !== 'Tab') return
+      const items = focusable()
+      if (items.length === 0) return
+      const head = items[0]
+      const tail = items[items.length - 1]
+      if (e.shiftKey && document.activeElement === head) {
+        e.preventDefault()
+        tail.focus()
+      } else if (!e.shiftKey && document.activeElement === tail) {
+        e.preventDefault()
+        head.focus()
+      }
+    }
     document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      previous?.focus()
+    }
+  }, [])
 
   const canSave = changes.length > 0 && ticket.trim() !== '' && reason.trim() !== ''
 
   return (
     <div className="fixed inset-0 z-20 flex items-center justify-center bg-navy/55 p-6">
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="edit-modal-title"
@@ -64,10 +102,7 @@ export function EditModal({
             <span className="text-[13px] text-ink-3">{description}</span>
           </div>
           <button type="button" aria-label={texts.common.action.close} onClick={onClose} className="flex size-8 items-center justify-center rounded-ctl text-ink-4 hover:bg-fill">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
+            <CloseIcon size={16} strokeWidth={2.2} />
           </button>
         </div>
 
