@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import type { ReactNode } from 'react'
+import { useModalFocus } from '../../hooks/useModalFocus'
 import { texts } from '../../texts'
 import { CloseIcon } from '../icons'
 import { Button } from './Button'
@@ -25,6 +26,11 @@ type Props = {
   saving?: boolean
   /** 저장 버튼 문구 (기본: 저장 · 히스토리 기록) */
   saveLabel?: string
+  /** 변경 항목·티켓·사유 외에 저장 조건이 더 있을 때 (기본 true) */
+  canSubmit?: boolean
+  /** 오른쪽 목록 제목과 비었을 때 문구 (기본: 변경 항목) */
+  changesTitle?: string
+  changesEmpty?: string
   children: ReactNode
 }
 
@@ -42,51 +48,15 @@ export function EditModal({
   onSave,
   saving,
   saveLabel = t.save,
+  canSubmit = true,
+  changesTitle,
+  changesEmpty,
   children,
 }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null)
-  // onClose가 매 렌더링마다 바뀌어도 이벤트 리스너를 다시 등록하지 않도록 ref로 보관
-  const onCloseRef = useRef(onClose)
-  useEffect(() => {
-    onCloseRef.current = onClose
-  })
+  useModalFocus(dialogRef, onClose)
 
-  // 열릴 때 포커스를 모달로 옮기고, Esc로 닫고, Tab을 모달 안에 가두고, 닫힐 때 원래 위치로 되돌린다
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    const focusable = () =>
-      Array.from(dialog.querySelectorAll<HTMLElement>('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])')).filter(
-        (el) => !el.hasAttribute('disabled'),
-      )
-    // 제목 옆 닫기 버튼 대신 첫 입력 요소를 우선 포커스한다
-    const first = dialog.querySelector<HTMLElement>('input, select, textarea') ?? focusable()[0]
-    first?.focus()
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') return onCloseRef.current()
-      if (e.key !== 'Tab') return
-      const items = focusable()
-      if (items.length === 0) return
-      const head = items[0]
-      const tail = items[items.length - 1]
-      if (e.shiftKey && document.activeElement === head) {
-        e.preventDefault()
-        tail.focus()
-      } else if (!e.shiftKey && document.activeElement === tail) {
-        e.preventDefault()
-        head.focus()
-      }
-    }
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      previous?.focus()
-    }
-  }, [])
-
-  const canSave = changes.length > 0 && ticket.trim() !== '' && reason.trim() !== ''
+  const canSave = canSubmit && changes.length > 0 && ticket.trim() !== '' && reason.trim() !== ''
 
   return (
     <div className="fixed inset-0 z-20 flex items-center justify-center bg-navy/55 p-6">
@@ -113,7 +83,7 @@ export function EditModal({
           <div className="flex min-w-0 flex-col gap-3">{children}</div>
 
           <aside aria-label={t.asideLabel} className="sticky top-0 flex flex-col gap-4 self-stretch border-l-2 border-line pl-5">
-            <ChangeSummary changes={changes} />
+            <ChangeSummary changes={changes} title={changesTitle} emptyText={changesEmpty} />
             <Field label={t.ticket.label} required>
               {(id) => <TextInput id={id} value={ticket} onChange={(e) => onTicketChange(e.target.value)} placeholder={t.ticket.placeholder} />}
             </Field>
@@ -154,8 +124,8 @@ export function EditModal({
 /** 필드 묶음 카드 */
 export function FieldGroup({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-3 rounded-xl border border-line bg-bg/50 p-3.5">
-      <span className="text-[11px] font-semibold tracking-wide text-ink-4">{title}</span>
+    <section className="flex flex-col gap-3 rounded-xl border border-ink-2 bg-surface p-4">
+      <span className="text-xs font-bold tracking-wide text-ink">{title}</span>
       <div className="grid grid-cols-2 gap-3">{children}</div>
     </section>
   )

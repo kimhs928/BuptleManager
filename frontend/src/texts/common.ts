@@ -38,7 +38,7 @@ export const common = {
   },
 
   field: {
-    readOnly: '읽기 전용',
+    readOnly: '수정 불가',
   },
 
   notice: {

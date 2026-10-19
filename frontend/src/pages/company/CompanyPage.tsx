@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { CompanyTopBar } from '../../components/layout/CompanyTopBar'
-import { Sidebar } from '../../components/layout/Sidebar'
+import { CompanyShell } from '../../components/layout/CompanyShell'
 import { CloseIcon } from '../../components/icons'
 import { cn } from '../../lib/cn'
 import { MOCK_COMPANY_DETAIL, MOCK_CONFIGS, MOCK_LIVE_USERS } from '../../mocks/companyDetail'
@@ -18,8 +17,6 @@ const tabKeys: Record<CompanyTab, string> = { basic: 'basic', config: 'config', 
 
 type Props = {
   initialTab?: CompanyTab
-  /** 메인(고객사 선택) 화면 주소 */
-  mainHref: string
 }
 
 function Dot({ className }: { className?: string }) {
@@ -27,7 +24,7 @@ function Dot({ className }: { className?: string }) {
 }
 
 /** 고객사 정보 화면 (기본 정보 · 컨피그 · 실시간 접속 유저) */
-export function CompanyPage({ initialTab = 'basic', mainHref }: Props) {
+export function CompanyPage({ initialTab = 'basic' }: Props) {
   const company = MOCK_COMPANY_DETAIL
   const [tab, setTab] = useState<CompanyTab>(initialTab)
   const [users, setUsers] = useState<LiveUser[]>(MOCK_LIVE_USERS)
@@ -50,19 +47,7 @@ export function CompanyPage({ initialTab = 'basic', mainHref }: Props) {
   const tabLabel = t.tabs[tabKeys[tab] as keyof typeof t.tabs]
 
   return (
-    <div className="flex min-h-screen w-full bg-bg">
-      <Sidebar mainHref={mainHref} />
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <CompanyTopBar
-          platform={company.platform}
-          companyName={company.name}
-          schema={company.schema}
-          mainHref={mainHref}
-          trail={[{ label: t.breadcrumb.companyInfo, href: '?company' }, { label: tabLabel }]}
-        />
-
-        <main className="flex flex-1 flex-col gap-6 px-9 pb-10 pt-7">
+    <CompanyShell active="company" trail={[{ label: t.breadcrumb.companyInfo, href: '?company' }, { label: tabLabel }]}>
           <div className="flex flex-col gap-[18px]">
             {toast && (
               <div role="status" className="flex items-center gap-2.5 rounded-xl border border-success-line bg-success-soft px-3.5 py-2.5 text-[13px] text-success-ink">
@@ -102,7 +87,7 @@ export function CompanyPage({ initialTab = 'basic', mainHref }: Props) {
               </dl>
             </div>
 
-            <div role="tablist" aria-label={t.tabs.label} className="flex gap-6 border-b border-divider">
+            <div role="tablist" aria-label={t.tabs.label} className="flex gap-6 border-b border-line-strong">
               {(Object.keys(tabKeys) as CompanyTab[]).map((key) => {
                 const active = key === tab
                 const count = counts[key]
@@ -133,8 +118,6 @@ export function CompanyPage({ initialTab = 'basic', mainHref }: Props) {
             {tab === 'config' && <ConfigTab />}
             {tab === 'users' && <LiveUsersTab company={company} users={users} onForceLogout={forceLogout} />}
           </div>
-        </main>
-      </div>
-    </div>
+    </CompanyShell>
   )
 }

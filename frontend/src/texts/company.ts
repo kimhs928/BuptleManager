@@ -116,7 +116,7 @@ export const company = {
 
   liveUsers: {
     title: '현재 접속 중인 유저',
-    description: (platform: string, refreshedAt: string) => `마지막 갱신 : ${refreshedAt}`,
+    description: (_platform: string, refreshedAt: string) => `마지막 갱신 : ${refreshedAt}`,
     justNow: '방금 전',
     refresh: '새로고침',
     forceLogout: '강제 로그아웃',

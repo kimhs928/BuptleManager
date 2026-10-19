@@ -2,6 +2,7 @@ import { useId } from 'react'
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react'
 import { cn } from '../../lib/cn'
 import { texts } from '../../texts'
+import { LockIcon } from '../icons'
 
 const control =
   'w-full rounded-ctl border border-line-strong bg-surface px-3 text-[13px] text-ink placeholder:text-ink-5 focus:border-primary focus:outline-none focus:shadow-[0_0_0_3px_rgb(35_100_170/0.22)]'
@@ -20,10 +21,15 @@ export function Field({ label, required, readOnlyHint, hint, className, children
   const id = useId()
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={id} className="inline-flex items-center gap-2 text-xs font-medium text-ink-2">
+      <label htmlFor={id} className={cn('inline-flex items-center gap-2 text-xs font-medium', readOnlyHint ? 'text-ink-4' : 'text-ink-2')}>
         {label}
         {required && <span className="text-danger-ink">*</span>}
-        {readOnlyHint && <span className="text-[11px] font-normal text-ink-4">{texts.common.field.readOnly}</span>}
+        {readOnlyHint && (
+          <span className="inline-flex items-center gap-[3px] text-[10px] font-normal text-ink-5">
+            <LockIcon size={9} />
+            {texts.common.field.readOnly}
+          </span>
+        )}
       </label>
       {children(id)}
       {hint && <span className="text-[11px] text-ink-4">{hint}</span>}
@@ -35,7 +41,7 @@ export function TextInput({ className, readOnly, ...rest }: InputHTMLAttributes<
   return (
     <input
       readOnly={readOnly}
-      className={cn(control, 'h-[38px]', readOnly && 'cursor-not-allowed border-line bg-bg text-ink-3', className)}
+      className={cn(control, 'h-[38px]', readOnly && 'cursor-not-allowed select-none border-line-strong/40 bg-[#ececf0] text-ink-4 focus:border-line-strong/40 focus:shadow-none', className)}
       {...rest}
     />
   )
