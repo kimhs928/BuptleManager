@@ -60,10 +60,12 @@ function ShortcutTile({ href, icon, iconClass, title, description }: { href: str
 type Props = {
   /** 컨피그 불일치 알림 노출 */
   configMismatch?: boolean
+  /** 고객사 선택 후 이동 */
+  onEnter?: (schema: string) => void
 }
 
 /** 메인 화면 (고객사 선택) */
-export function MainPage({ configMismatch = false }: Props) {
+export function MainPage({ configMismatch = false, onEnter }: Props) {
   const [platform, setPlatform] = useState<ServicePlatform>('BUPTLE_BIZ')
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<string | null>(null)
@@ -157,8 +159,7 @@ export function MainPage({ configMismatch = false }: Props) {
                 </button>
               ))}
               <span className="flex-1" />
-              {/* TODO: 고객사 정보 화면 연결 */}
-              <Button disabled={!hasSelection} onClick={() => undefined} className="text-[13px]">
+              <Button disabled={!hasSelection} onClick={() => selected && onEnter?.(selected)} className="text-[13px]">
                 {t.enter}
               </Button>
             </div>
