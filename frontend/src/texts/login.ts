@@ -1,7 +1,7 @@
 /** 로그인 화면 문구 (여러 줄은 배열) */
 export const login = {
   title: '운영관리 시스템',
-  subtitle: 'Buptle naver works 계정으로만 로그인할 수 있습니다.',
+  subtitle: 'Naver works 계정으로만 로그인할 수 있습니다.',
   button: 'Naver Works 로그인',
   buttonBusy: '인증 페이지로 이동 중',
   redirectHint: '버튼을 누르면 네이버 웍스 인증 페이지로 이동합니다.',
