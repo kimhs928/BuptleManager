@@ -1,0 +1,149 @@
+/** 고객사 정보 화면 문구 */
+export const company = {
+  sidebar: {
+    logoTitle: '로고 이미지 변경',
+    logoUpload: '로고 이미지 업로드',
+    logoAlt: '로고',
+    search: '검색',
+    switchCompany: '고객사 변경',
+    companyInfo: '고객사 정보',
+    mainFeatures: '주요 기능',
+    features: {
+      contract: '계약',
+      counsel: '자문',
+      litigation: '소송',
+      user: '유저',
+      errorReport: '오류 리포트',
+    },
+    config: '컨피그 관리',
+    history: '변경 히스토리',
+  },
+
+  breadcrumb: {
+    label: '경로',
+    main: '메인',
+    companyInfo: '고객사 정보',
+  },
+
+  switchCompany: '고객사 변경',
+
+  summary: {
+    active: '활성',
+    inactive: '비활성',
+    users: '유저',
+    schema: '스키마',
+    domain: '도메인',
+    count: (n: number) => `${n}명`,
+  },
+
+  tabs: {
+    label: '고객사 정보 탭',
+    basic: '기본 정보',
+    config: '컨피그',
+    liveUsers: '실시간 접속 유저',
+  },
+
+  toast: {
+    history: '히스토리 보기',
+    close: '닫기',
+    forceLogoutDone: (n: number, names: string, ticket: string) =>
+      `${n}명(${names}) 강제 로그아웃 완료. ${ticket} 티켓으로 변경 히스토리에 기록되었습니다.`,
+  },
+
+  basic: {
+    infoTitle: '고객사 기본 정보',
+    readOnly: '조회 전용',
+    fields: {
+      name: '이름',
+      representative: '대표자명',
+      businessNo: '사업자 번호',
+      phone: '번호',
+      domain: '도메인',
+      schema: '스키마명',
+      createdAt: '생성일',
+      status: '활성화 유무',
+      users: '유저 수',
+      service: '서비스',
+      address: '주소',
+    },
+    statusActive: '활성',
+    statusInactive: '비활성',
+    userLimit: (n: number) => `/ limit ${n}명`,
+    syncedNotice: ['고객사 기본 정보는 수정할 수 없습니다. 변경이 필요할 경우 운영팀에 요청하세요.'],
+
+    opsTitle: '운영 현황',
+    ops: {
+      configs: '적용 컨피그',
+      online: '현재 접속',
+      jobs: '최근 30일 작업',
+      tickets: '열린 티켓',
+    },
+    unit: { count: '개', person: '명', job: '건' },
+    recentTitle: '이 고객사의 최근 작업',
+    recentAll: '전체 보기',
+  },
+
+  config: {
+    title: '적용된 컨피그',
+    description: '컨피그 등록은 컨피그 관리 탭에서 작업해주세요.',
+    searchLabel: '컨피그 검색',
+    searchPlaceholder: '컨피그명 또는 설명 검색',
+    filterLabel: '범위 필터',
+    filterAll: '전체',
+    filterPublic: 'PUBLIC',
+    columns: {
+      type: 'CONFIG TYPE',
+      name: 'CONFIG NAME',
+      value: 'CONFIG VALUE',
+      description: 'CONFIG DESCRIPTION',
+      appliedAt: '적용일자',
+      appliedBy: '등록자',
+    },
+    typeLabel: {
+      COMPONENT: 'COMPONENT',
+      MODULES: 'MODULES',
+      STANDALONE: '단독',
+    },
+    publicGroup: 'PUBLIC 컨피그',
+    tenantGroup: '테넌트 컨피그',
+    groupCount: (n: number) => `${n}개`,
+    noValue: '—',
+    emptyTitle: '결과 없음',
+    emptyDescription: '조건에 맞는 컨피그가 없습니다.',
+    footer: (n: number, syncedAt: string) => `${n}개 표시 · 마지막 동기화 ${syncedAt}`,
+    goManage: '컨피그 관리로 이동',
+  },
+
+  liveUsers: {
+    title: '현재 접속 중인 유저',
+    description: (platform: string, refreshedAt: string) => `마지막 갱신 : ${refreshedAt}`,
+    justNow: '방금 전',
+    refresh: '새로고침',
+    forceLogout: '강제 로그아웃',
+    forceLogoutWithCount: (n: number) => `강제 로그아웃 (${n})`,
+    selectAll: '전체 선택',
+    selectUser: (name: string) => `${name} 선택`,
+    columns: {
+      user: '유저',
+      employeeNo: '사번',
+      ip: '접속 IP',
+      session: '세션 ID',
+      lastActive: '마지막 활동',
+      loginAt: '접속 시간',
+    },
+    empty: '현재 접속 중인 유저가 없습니다.',
+    footer: (total: number, selected: number) => `${total}명 접속 중 · ${selected}명 선택`,
+    footerHint: '강제 로그아웃은 티켓 번호와 사유가 필요하며 변경 히스토리에 기록됩니다.',
+
+    modal: {
+      title: '강제 로그아웃',
+      description: (platform: string) => `선택한 유저의 ${platform} 세션을 즉시 종료합니다.`,
+      targets: (n: number) => `대상 유저 · ${n}명`,
+      warning: '확인을 누르면 세션이 즉시 종료되고 작업 내용이 변경 히스토리에 함께 저장됩니다. 되돌릴 수 없습니다.',
+      before: '접속 중',
+      after: '강제 로그아웃',
+      action: '세션 · 강제 로그아웃',
+      confirm: (n: number) => `확인 · ${n}명 로그아웃`,
+    },
+  },
+} as const
