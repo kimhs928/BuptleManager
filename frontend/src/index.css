@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+/* 디자인 토큰 (화면정의서 Page 2 기준) */
+@theme {
+  /* 폰트 */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+
+  /* 브랜드 */
+  --color-primary: #2364aa;
+  --color-primary-soft: #eaf2fa;
+  --color-navy: #1c2740;
+  --color-link: #0066cc;
+
+  /* 서비스 구분 */
+  --color-biz: #ea7317;
+  --color-biz-soft: #fdeee2;
+  --color-biz-line: #f6c9a4;
+  --color-biz-ink: #a84f0d;
+  --color-nova: #5e5ce6;
+
+  /* 배경·면 */
+  --color-bg: #f5f5f7;
+  --color-surface: #ffffff;
+  --color-fill: #e8e8ed; /* 입력창·칩 배경 */
+  --color-fill-strong: #e3e3e8; /* 세그먼트 트랙·비활성 버튼 */
+  --color-hover: #f5f5f7;
+
+  /* 선 */
+  --color-line: #e8e8ed;
+  --color-line-strong: #d1d1d6;
+  --color-line-soft: #f0f0f3;
+  --color-divider: #e5e5ea; /* 그룹 목록 행 사이 구분선 */
+
+  /* 글자 */
+  --color-ink: #1d1d1f;
+  --color-ink-2: #3a3a3c;
+  --color-ink-3: #6e6e73;
+  --color-ink-4: #86868b;
+  --color-ink-5: #a1a1a6;
+
+  /* 상태 */
+  --color-danger: #ff3b30;
+  --color-danger-ink: #d70015;
+  --color-danger-soft: #fff4f3;
+  --color-danger-line: #ffd5d1;
+  --color-danger-text: #7a3530;
+  --color-danger-muted: #8a4a45;
+  --color-success: #4baaa2;
+  --color-success-ink: #25736c;
+  --color-success-soft: #e9f6f4;
+  --color-success-line: #bfe3df;
+  --color-warn-soft: #fff7db;
+  --color-warn-line: #fbe08a;
+  --color-warn-ink: #7a5a0e;
+
+  /* 라운드 */
+  --radius-ctl: 8px; /* 입력·작은 버튼 */
+  --radius-btn: 12px;
+  --radius-card: 14px;
+  --radius-panel: 20px;
+
+  /* 그림자 */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px -18px rgba(0, 0, 0, 0.14);
+  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.04), 0 24px 48px -24px rgba(0, 0, 0, 0.18);
+  --shadow-seg: 0 1px 2px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+  --shadow-modal: 0 32px 64px -24px rgba(19, 35, 61, 0.5);
+
+  --animate-pulse-ring: pulse-ring 1.6s ease-out infinite;
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+    100% {
+      transform: scale(1.9);
+      opacity: 0;
+    }
+  }
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 3px solid rgb(35 100 170 / 0.4);
+    outline-offset: 1px;
+  }
+}
