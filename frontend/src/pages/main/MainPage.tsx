@@ -170,8 +170,8 @@ export function MainPage({ configMismatch = false, onEnter }: Props) {
 
           <section aria-label={t.shortcuts.title} className="border-t border-line-strong pt-6">
             <Card className="grid grid-cols-2 divide-x divide-divider overflow-hidden">
-              <ShortcutTile href="#config" icon={configIcon} iconClass="bg-success" {...t.shortcuts.config} />
-              <ShortcutTile href="#history" icon={historyIcon} iconClass="bg-primary" {...t.shortcuts.history} />
+              <ShortcutTile href="?config&all" icon={configIcon} iconClass="bg-success" {...t.shortcuts.config} />
+              <ShortcutTile href="?history&all" icon={historyIcon} iconClass="bg-primary" {...t.shortcuts.history} />
             </Card>
           </section>
         </div>
