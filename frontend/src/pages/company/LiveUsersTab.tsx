@@ -66,7 +66,7 @@ export function LiveUsersTab({ company, users, onForceLogout }: Props) {
   return (
     <section aria-labelledby="live-title" className="flex flex-col gap-1.5">
       <div className="flex flex-wrap items-end justify-between gap-3 px-3">
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h2 id="live-title" className="m-0 inline-flex items-center gap-2 text-[13px] font-semibold">
             <span aria-hidden="true" className="relative inline-flex size-2">
               <span className="absolute inset-0 rounded-full bg-success" />
@@ -74,7 +74,9 @@ export function LiveUsersTab({ company, users, onForceLogout }: Props) {
             </span>
             {t.title}
           </h2>
-          <span className="text-xs text-ink-4">{t.description(platform, refreshedAt)}</span>
+          <span className="text-xs text-ink-4">
+            {t.footer(users.length, selectedUsers.length)} · {t.description(platform, refreshedAt)}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="secondary" size="sm" icon={<RefreshIcon size={14} />} onClick={() => setRefreshedAt(formatTime())}>
@@ -129,10 +131,6 @@ export function LiveUsersTab({ company, users, onForceLogout }: Props) {
             </tbody>
           </table>
           {users.length === 0 && <div className="px-6 py-14 text-center text-[13px] text-ink-4">{t.empty}</div>}
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line-soft bg-bg/60 px-4 py-2.5 text-xs text-ink-4">
-          <span>{t.footer(users.length, selectedUsers.length)}</span>
         </div>
       </Card>
 

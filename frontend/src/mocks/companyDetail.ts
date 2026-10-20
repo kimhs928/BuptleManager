@@ -56,6 +56,9 @@ export type ConfigRow = {
 
 export type PublicConfigRow = Omit<ConfigRow, 'scope' | 'value'>
 
+/** 값이 매우 긴 컨피그 예시 (200명 분의 수신 제외 대상) */
+const NOTIFY_DISABLED_LIST_VALUE = JSON.stringify({ excludedUserIds: Array.from({ length: 200 }, (_, i) => `U-${String(1001 + i).padStart(5, '0')}`) }, null, 2)
+
 export const MOCK_CONFIGS: ConfigRow[] = [
   { id: 'c1', scope: 'MODULES', name: 'FILE_ATTACH_REQUIRED_IN_NEW_CONTRACT', description: '신규 계약 생성 시 파일 첨부를 필수로 지정', value: '', appliedAt: '2024-03-15', appliedBy: '이준호' },
   { id: 'c2', scope: 'MODULES', name: 'COMPONENT', description: '컴포넌트 기능 모듈 사용', value: '', appliedAt: '2024-03-15', appliedBy: '이준호' },
@@ -64,7 +67,7 @@ export const MOCK_CONFIGS: ConfigRow[] = [
   { id: 'c5', scope: 'COMPONENT', name: 'CMPNT055_CONTRACT_LIST_BY_DEPT', description: '부서별 계약 목록 조회 기능', value: '', appliedAt: '2024-06-11', appliedBy: '박민지' },
   { id: 'c6', scope: 'MODULES', name: 'ENABLE_PDF_UPLOAD', description: 'PDF 업로드 모듈 사용', value: '', appliedAt: '2024-03-15', appliedBy: '이준호' },
   { id: 'c7', scope: 'COMPONENT', name: 'CMPNT416_MENTION_SERVICE', description: '코멘트 내 사용자 멘션(@) 기능', value: '', appliedAt: '2024-03-20', appliedBy: '이준호' },
-  { id: 'c8', scope: 'STANDALONE', name: 'NOTIFY_DISABLED_LIST', description: '알림 수신 제외 대상 목록', value: '200', appliedAt: '2024-03-15', appliedBy: '이준호' },
+  { id: 'c8', scope: 'STANDALONE', name: 'NOTIFY_DISABLED_LIST', description: '알림 수신 제외 대상 목록', value: NOTIFY_DISABLED_LIST_VALUE, appliedAt: '2024-03-15', appliedBy: '이준호' },
   // 디자인 시안에 컨피그명이 비어 있던 행. 이름은 임시 값이며 API 연동 시 실제 값으로 대체
   { id: 'c9', scope: 'STANDALONE', name: 'SESSION_TIMEOUT_MINUTES', description: '세션 만료 시간(분)', value: '60', appliedAt: '2024-03-15', appliedBy: '이준호' },
   { id: 'c10', scope: 'STANDALONE', name: 'BLOCK_DUPLICATE_LOGIN', description: '동일 계정 동시 로그인 차단', value: 'true', appliedAt: '2024-09-02', appliedBy: '김효선' },

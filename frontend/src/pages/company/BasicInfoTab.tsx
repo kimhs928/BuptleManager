@@ -40,6 +40,12 @@ export function BasicInfoTab({ company, liveUserCount }: Props) {
   return (
     <div className="grid grid-cols-1 items-start gap-7 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
       <section aria-labelledby="company-basic" className="flex flex-col gap-1.5">
+        <div className="mb-2.5 flex items-start gap-2.5 rounded-xl border border-line-strong bg-[#f2f2f5] px-3.5 py-3 text-[13px] leading-normal">
+          <InfoIcon size={15} className="mt-0.5 shrink-0 text-ink-3" />
+          <span>
+            <Lines lines={t.syncedNotice} />
+          </span>
+        </div>
         <div className="flex items-center justify-between gap-3 px-3">
           <h2 id="company-basic" className="m-0 text-[13px] font-semibold">
             {t.infoTitle}
@@ -51,7 +57,7 @@ export function BasicInfoTab({ company, liveUserCount }: Props) {
         </div>
 
         <Card className="overflow-hidden">
-          <dl className="m-0 grid grid-cols-2 gap-x-7 px-4">
+          <dl className="m-0 grid grid-cols-2 gap-x-14 px-4">
             <Field label={t.fields.name}>{company.name}</Field>
             <Field label={t.fields.representative}>{company.representative}</Field>
             <Field label={t.fields.businessNo}>{company.businessNo}</Field>
@@ -87,12 +93,6 @@ export function BasicInfoTab({ company, liveUserCount }: Props) {
           </dl>
         </Card>
 
-        <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-line-strong bg-[#f2f2f5] px-3.5 py-3 text-[13px] leading-normal">
-          <InfoIcon size={15} className="mt-0.5 shrink-0 text-ink-3" />
-          <span>
-            <Lines lines={t.syncedNotice} />
-          </span>
-        </div>
       </section>
 
       <div className="flex flex-col gap-6">

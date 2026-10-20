@@ -7,7 +7,7 @@ import { Sidebar } from './Sidebar'
 export const MAIN_HREF = '?main'
 
 type Props = {
-  active: 'company' | 'contract'
+  active: 'company' | 'contract' | 'user'
   trail: { label: string; href?: string }[]
   children: ReactNode
 }
