@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useModalFocus } from '../../hooks/useModalFocus'
+import { cn } from '../../lib/cn'
 import { texts } from '../../texts'
 import { CloseIcon } from '../icons'
 import { Button } from './Button'
@@ -30,6 +31,8 @@ type Props = {
   canSubmit?: boolean
   /** 오른쪽 목록 제목과 비었을 때 문구 (기본: 변경 항목) */
   changesTitle?: string
+  /** false면 오른쪽에 변경 항목 목록을 감춘다 (추출처럼 값을 바꾸지 않는 작업) */
+  showChanges?: boolean
   changesEmpty?: string
   children: ReactNode
 }
@@ -50,13 +53,14 @@ export function EditModal({
   saveLabel = t.save,
   canSubmit = true,
   changesTitle,
+  showChanges = true,
   changesEmpty,
   children,
 }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null)
   useModalFocus(dialogRef, onClose)
 
-  const canSave = canSubmit && changes.length > 0 && ticket.trim() !== '' && reason.trim() !== ''
+  const canSave = canSubmit && (!showChanges || changes.length > 0) && ticket.trim() !== '' && reason.trim() !== ''
 
   return (
     <div className="fixed inset-0 z-20 flex items-center justify-center bg-navy/55 p-6">
@@ -83,14 +87,14 @@ export function EditModal({
           <div className="flex min-w-0 flex-col gap-3">{children}</div>
 
           <aside aria-label={t.asideLabel} className="sticky top-0 flex flex-col gap-4 self-stretch border-l-2 border-line pl-5">
-            <ChangeSummary changes={changes} title={changesTitle} emptyText={changesEmpty} />
+            {showChanges && <ChangeSummary changes={changes} title={changesTitle} emptyText={changesEmpty} />}
             <Field label={t.ticket.label} required>
               {(id) => <TextInput id={id} value={ticket} onChange={(e) => onTicketChange(e.target.value)} placeholder={t.ticket.placeholder} />}
             </Field>
             <Field label={t.reason.label} required>
               {(id) => <TextInput id={id} value={reason} onChange={(e) => onReasonChange(e.target.value)} placeholder={t.reason.placeholder} />}
             </Field>
-            <dl className="m-0 grid grid-cols-2 gap-2.5 rounded-xl border border-line-soft bg-bg p-3.5 text-[13px]">
+            <dl className="m-0 grid grid-cols-2 gap-2.5 rounded-xl border border-line-soft bg-[#f5f5f7] p-3.5 text-[13px]">
               {(
                 [
                   [t.audit.actor, audit.actor],
@@ -122,11 +126,11 @@ export function EditModal({
 }
 
 /** 필드 묶음 카드 */
-export function FieldGroup({ title, children }: { title: string; children: ReactNode }) {
+export function FieldGroup({ title, children, className, columns = 2 }: { title: ReactNode; children: ReactNode; className?: string; columns?: 1 | 2 }) {
   return (
-    <section className="flex flex-col gap-3 rounded-xl border border-ink-2 bg-surface p-4">
+    <section className={cn('flex flex-col gap-3 rounded-xl border border-ink-2 bg-surface p-4', className)}>
       <span className="text-xs font-bold tracking-wide text-ink">{title}</span>
-      <div className="grid grid-cols-2 gap-3">{children}</div>
+      <div className={cn('grid gap-3', columns === 2 ? 'grid-cols-2' : 'grid-cols-1')}>{children}</div>
     </section>
   )
 }

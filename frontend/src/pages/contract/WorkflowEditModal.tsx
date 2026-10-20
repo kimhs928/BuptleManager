@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { EditModal, Field, FieldGroup, TextInput } from '../../components/ui'
+import { CheckGroup, GroupField, EditModal, Field, FieldGroup, TextInput } from '../../components/ui'
 import type { Change } from '../../components/ui'
 import { formatDateTime } from '../../lib/date'
 import type { Workflow } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { makeAudit } from './audit'
-import { CheckGroup, GroupField } from './shared'
 import { joinList } from './format'
 
 const t = texts.contract.workflowEdit
