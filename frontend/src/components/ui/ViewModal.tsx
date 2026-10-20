@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import type { ReactNode } from 'react'
+import { cn } from '../../lib/cn'
 import { useModalFocus } from '../../hooks/useModalFocus'
 import { texts } from '../../texts'
 import { CloseIcon } from '../icons'
@@ -11,11 +12,13 @@ type Props = {
   onClose: () => void
   /** 닫기 버튼 왼쪽에 놓을 동작 */
   actions?: ReactNode
+  /** 비교 표처럼 넓은 내용을 담을 때 */
+  wide?: boolean
   children: ReactNode
 }
 
 /** 조회용 모달 틀 (입력·저장 없음) */
-export function ViewModal({ title, description, onClose, actions, children }: Props) {
+export function ViewModal({ title, description, onClose, actions, wide, children }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null)
   useModalFocus(dialogRef, onClose)
 
@@ -26,7 +29,7 @@ export function ViewModal({ title, description, onClose, actions, children }: Pr
         role="dialog"
         aria-modal="true"
         aria-labelledby="view-modal-title"
-        className="flex max-h-full w-full max-w-[720px] flex-col overflow-hidden rounded-[18px] bg-surface shadow-modal"
+        className={cn('flex max-h-full w-full flex-col overflow-hidden rounded-[18px] bg-surface shadow-modal', wide ? 'max-w-[1040px]' : 'max-w-[720px]')}
       >
         <div className="flex items-center gap-3.5 border-b border-line-soft px-6 py-[18px]">
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">

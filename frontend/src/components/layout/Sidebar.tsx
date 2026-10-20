@@ -1,21 +1,13 @@
 import { useState } from 'react'
 import type { ChangeEvent, ReactNode } from 'react'
 import { cn } from '../../lib/cn'
+import { Logo } from '../ui/Logo'
 import { texts } from '../../texts'
+import { readLogo, saveLogo } from '../../lib/brandLogo'
 import { MOCK_ACCOUNT } from '../../mocks/auth'
-import { BuildingIcon, ChevronDownIcon, ChevronRightIcon, HistoryIcon, ImageIcon, SlidersIcon } from '../icons'
+import { BuildingIcon, ChevronDownIcon, ChevronRightIcon, HistoryIcon, SlidersIcon } from '../icons'
 
 const t = texts.company.sidebar
-const LOGO_KEY = 'bm-logo'
-
-function readLogo(): string {
-  try {
-    return localStorage.getItem(LOGO_KEY) ?? ''
-  } catch {
-    return ''
-  }
-}
-
 /** 사이드바 상태를 저장해 두어 화면을 옮겨도 같은 모습을 유지한다 */
 function usePersistedFlag(key: string, initial: boolean) {
   const [value, setValue] = useState<boolean>(() => {
@@ -62,11 +54,7 @@ function LogoUploader() {
     const reader = new FileReader()
     reader.onload = () => {
       const src = String(reader.result)
-      try {
-        localStorage.setItem(LOGO_KEY, src)
-      } catch {
-        // 저장 공간이 없어도 현재 화면에는 반영한다
-      }
+      saveLogo(src)
       setLogo(src)
     }
     reader.readAsDataURL(file)
@@ -75,34 +63,30 @@ function LogoUploader() {
   return (
     <label title={t.logoTitle} className="relative inline-flex size-8 shrink-0 cursor-pointer overflow-hidden rounded-ctl focus-within:outline focus-within:outline-3 focus-within:outline-primary/40">
       <input type="file" accept="image/*" aria-label={t.logoUpload} onChange={onChange} className="absolute size-px opacity-0" />
-      {logo ? (
-        <img src={logo} alt={t.logoAlt} className="size-8 object-cover" />
-      ) : (
-        <span className="inline-flex size-8 items-center justify-center rounded-ctl border-[1.5px] border-dashed border-ink-5 bg-surface text-ink-5">
-          <ImageIcon size={16} />
-        </span>
-      )}
+      <Logo size={32} src={logo} />
     </label>
   )
 }
 
 const features: { key: keyof typeof t.features; href: string }[] = [
   { key: 'contract', href: '?contract' },
-  { key: 'counsel', href: '#counsel' },
-  { key: 'litigation', href: '#litigation' },
+  { key: 'counsel', href: '?counsel' },
+  { key: 'lawsuit', href: '?lawsuit' },
   { key: 'user', href: '?user' },
-  { key: 'errorReport', href: '#error-report' },
+  { key: 'errorReport', href: '?report' },
 ]
 
 type Props = {
   /** 메인(고객사 선택) 화면 주소 */
   mainHref: string
   /** 현재 화면이 속한 메뉴 */
-  active?: 'company' | 'contract' | 'user'
+  /** 고객사를 고르지 않은 상태. 고객사 정보와 주요 기능을 감춘다 */
+  noCompany?: boolean
+  active?: 'company' | 'config' | 'contract' | 'counsel' | 'lawsuit' | 'user' | 'errorReport' | 'history'
 }
 
 /** 고객사 선택 후 화면의 좌측 메뉴 */
-export function Sidebar({ mainHref, active = 'company' }: Props) {
+export function Sidebar({ mainHref, noCompany, active = 'company' }: Props) {
   const [open, setOpen] = usePersistedFlag('bm-sidebar-open', true)
   const [collapsed, setCollapsed] = usePersistedFlag('bm-sidebar-collapsed', false)
 
@@ -133,16 +117,20 @@ export function Sidebar({ mainHref, active = 'company' }: Props) {
         </span>
       </div>
 
-      <NavLink href="?company" current={active === 'company'} icon={<BuildingIcon size={16} />}>
-        {t.companyInfo}
-      </NavLink>
+      {!noCompany && (
+        <NavLink href="?company" current={active === 'company'} icon={<BuildingIcon size={16} />}>
+          {t.companyInfo}
+        </NavLink>
+      )}
 
+      {!noCompany && (
       <button type="button" aria-expanded={open} onClick={() => setOpen((v) => !v)} className={cn(navItem, 'border-0 bg-transparent text-left')}>
         <SlidersIcon size={16} />
         <span className="flex-1">{t.mainFeatures}</span>
         <ChevronDownIcon size={14} className={cn('shrink-0 text-ink-4 transition-transform', !open && '-rotate-90')} />
       </button>
-      {open && (
+      )}
+      {!noCompany && open && (
         <div className="ml-[18px] mt-0.5 mb-1.5 flex flex-col gap-px border-l border-line-strong/70 pl-2.5">
           {features.map((f) => (
             <a
@@ -157,10 +145,10 @@ export function Sidebar({ mainHref, active = 'company' }: Props) {
         </div>
       )}
 
-      <NavLink href="#config" icon={<SlidersIcon size={16} />} trailing={<ChevronRightIcon size={14} className="text-ink-5" />}>
+      <NavLink href={noCompany ? '?config&all' : '?config'} current={active === 'config'} icon={<SlidersIcon size={16} />} trailing={<ChevronRightIcon size={14} className="text-ink-5" />}>
         {t.config}
       </NavLink>
-      <NavLink href="#history" icon={<HistoryIcon size={16} />} trailing={<ChevronRightIcon size={14} className="text-ink-5" />}>
+      <NavLink href={noCompany ? '?history&all' : '?history'} current={active === 'history'} icon={<HistoryIcon size={16} />} trailing={<ChevronRightIcon size={14} className="text-ink-5" />}>
         {t.history}
       </NavLink>
 

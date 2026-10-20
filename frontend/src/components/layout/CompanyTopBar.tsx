@@ -9,13 +9,15 @@ type Props = {
   platform: ServicePlatform
   companyName: string
   schema: string
+  /** 고객사를 고르지 않고 들어온 화면 (컨피그 관리 · 변경 히스토리) */
+  noCompany?: boolean
   mainHref: string
   /** 현재 위치. 마지막 항목이 현재 화면 */
   trail: { label: string; href?: string }[]
 }
 
 /** 고객사 선택 후 화면의 상단 바 (경로 · 서비스 · 선택 고객사) */
-export function CompanyTopBar({ platform, companyName, schema, mainHref, trail }: Props) {
+export function CompanyTopBar({ platform, companyName, schema, noCompany, mainHref, trail }: Props) {
   const crumbs = [{ label: t.breadcrumb.main, href: mainHref }, ...trail]
   return (
     <header className="flex h-[58px] shrink-0 items-center justify-between gap-4 border-b border-divider bg-surface/85 px-7">
@@ -39,13 +41,19 @@ export function CompanyTopBar({ platform, companyName, schema, mainHref, trail }
         })}
       </nav>
       <div className="flex items-center gap-2.5">
-        <Badge tone={platform === 'BUPTLE_BIZ' ? 'biz' : 'nova'}>{platformLabel[platform]}</Badge>
-        <span className="inline-flex h-8 items-center gap-2 rounded-full bg-[#f2f2f5] px-3 text-[13px]">
-          <span className="font-medium">{companyName}</span>
-          <span className="text-ink-4">{schema}</span>
-        </span>
+        {noCompany ? (
+          <span className="inline-flex h-8 items-center rounded-full bg-[#f2f2f5] px-3 text-[13px] text-ink-4">{t.noCompany}</span>
+        ) : (
+          <>
+            <Badge tone={platform === 'BUPTLE_BIZ' ? 'biz' : 'nova'}>{platformLabel[platform]}</Badge>
+            <span className="inline-flex h-8 items-center gap-2 rounded-full bg-[#f2f2f5] px-3 text-[13px]">
+              <span className="font-medium">{companyName}</span>
+              <span className="text-ink-4">{schema}</span>
+            </span>
+          </>
+        )}
         <a href={mainHref} className="inline-flex h-8 items-center rounded-ctl border border-line-strong bg-surface px-3.5 text-[13px] font-medium text-ink hover:bg-hover">
-          {t.switchCompany}
+          {noCompany ? t.pickCompany : t.switchCompany}
         </a>
       </div>
     </header>

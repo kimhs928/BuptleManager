@@ -13,7 +13,7 @@ export const company = {
     features: {
       contract: '계약',
       counsel: '자문',
-      litigation: '소송',
+      lawsuit: '소송',
       user: '유저',
       errorReport: '오류 리포트',
     },
@@ -28,6 +28,8 @@ export const company = {
   },
 
   switchCompany: '고객사 변경',
+  noCompany: '고객사 선택 안 됨',
+  pickCompany: '고객사 선택',
 
   summary: {
     active: '활성',

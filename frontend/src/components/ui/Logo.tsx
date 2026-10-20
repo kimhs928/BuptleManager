@@ -1,8 +1,28 @@
+import { readLogo } from '../../lib/brandLogo'
 import { texts } from '../../texts'
 
-type LogoProps = { size?: number; shadow?: boolean }
+type LogoProps = {
+  size?: number
+  shadow?: boolean
+  /** 보여 줄 로고 이미지. 없으면 사이드바에서 올려 둔 로고를, 그것도 없으면 기본 로고를 보여 준다 */
+  src?: string
+}
 
-export function Logo({ size = 28, shadow = false }: LogoProps) {
+/** 서비스 로고. 모든 화면에서 같은 로고를 쓴다 */
+export function Logo({ size = 28, shadow = false, src }: LogoProps) {
+  const image = src ?? readLogo()
+  if (image) {
+    return (
+      <img
+        src={image}
+        alt={texts.common.logoAlt}
+        width={size}
+        height={size}
+        className="shrink-0 object-cover"
+        style={{ width: size, height: size, borderRadius: size * 0.22, ...(shadow ? { filter: 'drop-shadow(0 6px 14px rgba(0,0,0,0.14))' } : undefined) }}
+      />
+    )
+  }
   return (
     <svg
       width={size}
