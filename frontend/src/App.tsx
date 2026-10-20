@@ -2,9 +2,18 @@ import { lazy, Suspense } from 'react'
 import { LoginRoute } from './pages/login/LoginRoute'
 import type { LoginView } from './pages/login/LoginRoute'
 import { CompanyPage } from './pages/company/CompanyPage'
+import { ConfigManagePage } from './pages/configManage/ConfigManagePage'
 import { ContractDetailPage } from './pages/contract/ContractDetailPage'
 import type { ContractTab } from './pages/contract/ContractDetailPage'
 import { ContractSearchPage } from './pages/contract/ContractSearchPage'
+import { CounselDetailPage } from './pages/counsel/CounselDetailPage'
+import type { CounselTab } from './pages/counsel/CounselDetailPage'
+import { CounselSearchPage } from './pages/counsel/CounselSearchPage'
+import { HistoryPage } from './pages/history/HistoryPage'
+import { LawsuitDetailPage } from './pages/lawsuit/LawsuitDetailPage'
+import type { LawsuitTab } from './pages/lawsuit/LawsuitDetailPage'
+import { LawsuitSearchPage } from './pages/lawsuit/LawsuitSearchPage'
+import { ReportPage } from './pages/report/ReportPage'
 import type { CompanyTab } from './pages/company/CompanyPage'
 import { MainPage } from './pages/main/MainPage'
 import { UserListPage } from './pages/user/UserListPage'
@@ -16,9 +25,12 @@ const ComponentGallery = import.meta.env.DEV ? lazy(() => import('./pages/Compon
 const companyTabs: CompanyTab[] = ['basic', 'config', 'users']
 const contractTabs: ContractTab[] = ['basic', 'members', 'workflow']
 
+const counselTabs: CounselTab[] = ['basic', 'members', 'process', 'comments']
+const lawsuitTabs: LawsuitTab[] = ['basic', 'members']
+
 const loginViews: LoginView[] = ['login', 'network', 'denied']
 
-/** 임시 진입점: /, /?view=network, /?view=denied, /?main, /?main&notice, /?company, /?company&tab=config, /?company&tab=users, /?contract, /?contract=CT-2024-0315&tab=members, /?user, /?user=transfer, /?gallery */
+/** 임시 진입점: /, /?view=network, /?view=denied, /?main, /?main&notice, /?company, /?company&tab=config, /?company&tab=users, /?contract, /?contract=CT-2024-0315&tab=members, /?counsel, /?counsel=CN-2024-0112&tab=members, /?lawsuit, /?lawsuit=LT-2024-0101, /?config, /?config&all, /?history, /?report, /?user, /?user=transfer, /?gallery */
 export default function App() {
   const params = new URLSearchParams(window.location.search)
   if (ComponentGallery && params.has('gallery')) {
@@ -41,6 +53,27 @@ export default function App() {
     }
     return <ContractSearchPage initialQuery={params.get('q') ?? ''} />
   }
+  if (params.has('counsel')) {
+    // 자문 ID가 있으면 상세, 없으면 검색
+    const counselId = params.get('counsel')
+    if (counselId) {
+      const tab = counselTabs.find((t) => t === params.get('tab')) ?? 'basic'
+      return <CounselDetailPage counselId={counselId} initialTab={tab} />
+    }
+    return <CounselSearchPage initialQuery={params.get('q') ?? ''} />
+  }
+  if (params.has('lawsuit')) {
+    // 소송 ID가 있으면 상세, 없으면 검색
+    const lawsuitId = params.get('lawsuit')
+    if (lawsuitId) {
+      const tab = lawsuitTabs.find((t) => t === params.get('tab')) ?? 'basic'
+      return <LawsuitDetailPage lawsuitId={lawsuitId} initialTab={tab} />
+    }
+    return <LawsuitSearchPage initialQuery={params.get('q') ?? ''} />
+  }
+  if (params.has('config')) return <ConfigManagePage global={params.has('all')} />
+  if (params.has('history')) return <HistoryPage />
+  if (params.has('report')) return <ReportPage />
   if (params.has('user')) {
     return params.get('user') === 'transfer' ? <UserTransferPage /> : <UserListPage />
   }
