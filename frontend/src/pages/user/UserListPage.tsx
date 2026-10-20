@@ -187,7 +187,7 @@ export function UserListPage() {
           <span className="flex items-baseline gap-2">
             <span className="text-[15px] font-semibold">{t.resultTitle}</span>
             <span className="text-[13px] text-ink-4" aria-live="polite">
-              {t.footer(rows.length, nowText)} · {t.pages}
+              {t.footer(rows.length, nowText)}
             </span>
           </span>
           <button type="button" onClick={() => setExporting(true)} className="inline-flex h-8 items-center gap-[7px] rounded-ctl bg-[#73bfb8] px-3.5 text-[13px] font-semibold text-[#0f3b37] hover:brightness-105">
