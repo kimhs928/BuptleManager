@@ -13,12 +13,11 @@ export const main = {
   list: {
     label: '고객사',
     title: (platform: string) => `${platform} 고객사`,
-    resultCount: (n: number) => `검색 결과 ${n}개`,
     users: (n: number) => `유저 ${n}명`,
     empty: '검색 결과가 없습니다. 스키마명을 다시 확인해 주세요.',
   },
 
-  recent: '최근 작업',
+  recent: '최근 검색',
   enter: '고객사로 이동',
 
   /** 고객사 선택 없이 쓰는 기능 */

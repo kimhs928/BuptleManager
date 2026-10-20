@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Header } from '../../components/layout/Header'
-import { Button, Card, NoticeBanner, OptionList, PlatformDot, SearchInput, SectionLabel, SegmentedControl } from '../../components/ui'
+import { Button, Card, NoticeBanner, OptionList, PlatformDot, SearchInput, SegmentedControl } from '../../components/ui'
 import { platformLabel } from '../../lib/platform'
 import type { ServicePlatform } from '../../lib/platform'
 import { MOCK_ACCOUNT } from '../../mocks/auth'
@@ -119,54 +119,56 @@ export function MainPage({ configMismatch = false, onEnter }: Props) {
               />
             </div>
 
-            <form role="search" className="flex items-center gap-2" onSubmit={(e) => e.preventDefault()}>
-              <SearchInput aria-label={t.search.label} placeholder={t.search.placeholder} value={query} onChange={(e) => setQuery(e.target.value)} />
-              <Button type="submit" variant="dark" icon={searchIcon} className="rounded-[10px] font-semibold">
-                {texts.common.action.search}
-              </Button>
-            </form>
-
-            {/* 검색어를 입력했을 때만 고객사 목록 노출 */}
-            {q && (
-              <div className="flex flex-col gap-1.5">
-                <SectionLabel>{t.list.resultCount(filtered.length)}</SectionLabel>
-                <OptionList
-                  label={t.list.label}
-                  options={filtered.map((c) => ({
-                    id: c.schema,
-                    title: c.name,
-                    subtitle: `${c.schema} · ${c.domain}`,
-                    trailing: t.list.users(c.users),
-                  }))}
-                  selectedId={selected}
-                  onSelect={setSelected}
-                  emptyMessage={t.list.empty}
-                />
+            {/* 검색창과 최근 작업을 한 영역에 담는다 */}
+            <div className="flex flex-col gap-3 rounded-card border border-line-strong bg-surface p-3.5">
+              <form role="search" className="flex items-center gap-2" onSubmit={(e) => e.preventDefault()}>
+                <SearchInput aria-label={t.search.label} placeholder={t.search.placeholder} value={query} onChange={(e) => setQuery(e.target.value)} />
+                <Button type="submit" variant="dark" icon={searchIcon} className="rounded-[10px] font-semibold">
+                  {texts.common.action.search}
+                </Button>
+              </form>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-ink-4">{t.recent}</span>
+                {MOCK_RECENT.map((r) => (
+                  <button
+                    key={r.schema}
+                    type="button"
+                    onClick={() => pickRecent(r)}
+                    className="inline-flex h-[26px] items-center gap-1.5 rounded-full bg-fill px-2.5 text-xs text-ink"
+                  >
+                    <PlatformDot platform={r.platform} />
+                    {r.schema}
+                  </button>
+                ))}
               </div>
-            )}
+              {/* 검색어를 입력했을 때만 고객사 목록 노출 */}
+              {q && (
+                <div className="flex flex-col gap-1.5 border-t border-line-soft pt-3">
+                  <OptionList
+                    bare
+                    label={t.list.label}
+                    options={filtered.map((c) => ({
+                      id: c.schema,
+                      title: c.name,
+                      subtitle: `${c.schema} · ${c.domain}`,
+                      trailing: t.list.users(c.users),
+                    }))}
+                    selectedId={selected}
+                    onSelect={setSelected}
+                    emptyMessage={t.list.empty}
+                  />
+                </div>
+              )}
+            </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="pl-3 text-xs text-ink-4">{t.recent}</span>
-              {MOCK_RECENT.map((r) => (
-                <button
-                  key={r.schema}
-                  type="button"
-                  onClick={() => pickRecent(r)}
-                  className="inline-flex h-[26px] items-center gap-1.5 rounded-full bg-fill px-2.5 text-xs text-ink"
-                >
-                  <PlatformDot platform={r.platform} />
-                  {r.schema}
-                </button>
-              ))}
-              <span className="flex-1" />
+            <div className="flex justify-end">
               <Button disabled={!hasSelection} onClick={() => selected && onEnter?.(selected)} className="text-[13px]">
                 {t.enter}
               </Button>
             </div>
           </section>
 
-          <section className="flex flex-col gap-1.5">
-            <SectionLabel>{t.shortcuts.title}</SectionLabel>
+          <section aria-label={t.shortcuts.title} className="border-t border-line-strong pt-6">
             <Card className="grid grid-cols-2 divide-x divide-divider overflow-hidden">
               <ShortcutTile href="#config" icon={configIcon} iconClass="bg-success" {...t.shortcuts.config} />
               <ShortcutTile href="#history" icon={historyIcon} iconClass="bg-primary" {...t.shortcuts.history} />
