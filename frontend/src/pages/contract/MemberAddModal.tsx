@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Alert, EditModal, Field, FieldGroup, Select, TextInput } from '../../components/ui'
+import { CheckGroup, GroupField, Alert, EditModal, Field, FieldGroup, Select, TextInput } from '../../components/ui'
 import type { Change } from '../../components/ui'
 import { CheckIcon, CloseIcon } from '../../components/icons'
 import { cn } from '../../lib/cn'
@@ -9,7 +9,6 @@ import { MOCK_DIRECTORY } from '../../mocks/contract'
 import type { ContractMember, MemberKind } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { makeAudit } from './audit'
-import { CheckGroup, GroupField } from './shared'
 import { joinList } from './format'
 
 const t = texts.contract.memberAdd

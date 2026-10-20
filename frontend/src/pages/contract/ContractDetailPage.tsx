@@ -3,7 +3,7 @@ import { CloseIcon, SearchIcon } from '../../components/icons'
 import { CompanyShell } from '../../components/layout/CompanyShell'
 import { Button } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import { MOCK_CONTRACT_DETAIL, MOCK_EMAILS, MOCK_HISTORY, MOCK_HISTORY_USERS, MOCK_MEMBERS, MOCK_WORKFLOW } from '../../mocks/contract'
+import { getContractDetail, MOCK_EMAILS, MOCK_HISTORY, MOCK_HISTORY_USERS, MOCK_MEMBERS, MOCK_WORKFLOW } from '../../mocks/contract'
 import type { ContractDetail, ContractMember, HistoryRow, Workflow } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { BasicTab } from './BasicTab'
@@ -20,20 +20,22 @@ export type ContractTab = 'basic' | 'members' | 'workflow'
 const tabKeys: ContractTab[] = ['basic', 'members', 'workflow']
 
 type Props = {
+  /** 보여 줄 계약 ID */
+  contractId: string
   initialTab?: ContractTab
 }
 
 const dot = <span aria-hidden="true" className="size-[3px] rounded-full bg-ink-5" />
 
 /** 계약 상세 */
-export function ContractDetailPage({ initialTab = 'basic' }: Props) {
+export function ContractDetailPage({ contractId, initialTab = 'basic' }: Props) {
   const [tab, setTab] = useState<ContractTab>(initialTab)
-  const [contract, setContract] = useState<ContractDetail>(MOCK_CONTRACT_DETAIL)
+  const [contract, setContract] = useState<ContractDetail>(() => getContractDetail(contractId))
   const [members, setMembers] = useState<ContractMember[]>(MOCK_MEMBERS)
   const [workflow, setWorkflow] = useState<Workflow>(MOCK_WORKFLOW)
   const [history, setHistory] = useState<HistoryRow[]>(MOCK_HISTORY)
   const [toast, setToast] = useState('')
-  const [query, setQuery] = useState(MOCK_CONTRACT_DETAIL.id)
+  const [query, setQuery] = useState(contractId)
 
   const changeTab = (next: ContractTab) => {
     setTab(next)

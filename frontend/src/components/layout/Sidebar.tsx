@@ -3,7 +3,7 @@ import type { ChangeEvent, ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 import { texts } from '../../texts'
 import { MOCK_ACCOUNT } from '../../mocks/auth'
-import { BuildingIcon, ChevronDownIcon, ChevronRightIcon, HistoryIcon, ImageIcon, SearchIcon, SlidersIcon, SwapIcon } from '../icons'
+import { BuildingIcon, ChevronDownIcon, ChevronRightIcon, HistoryIcon, ImageIcon, SlidersIcon } from '../icons'
 
 const t = texts.company.sidebar
 const LOGO_KEY = 'bm-logo'
@@ -14,6 +14,30 @@ function readLogo(): string {
   } catch {
     return ''
   }
+}
+
+/** 사이드바 상태를 저장해 두어 화면을 옮겨도 같은 모습을 유지한다 */
+function usePersistedFlag(key: string, initial: boolean) {
+  const [value, setValue] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(key)
+      return saved === null ? initial : saved === '1'
+    } catch {
+      return initial
+    }
+  })
+  const update = (next: boolean | ((prev: boolean) => boolean)) => {
+    setValue((prev) => {
+      const v = typeof next === 'function' ? next(prev) : next
+      try {
+        localStorage.setItem(key, v ? '1' : '0')
+      } catch {
+        // 저장할 수 없는 환경에서는 현재 화면에서만 유지한다
+      }
+      return v
+    })
+  }
+  return [value, update] as const
 }
 
 const navItem = 'flex h-[34px] items-center gap-2.5 rounded-ctl px-2.5 text-[13.5px] font-semibold text-ink hover:bg-fill'
@@ -66,7 +90,7 @@ const features: { key: keyof typeof t.features; href: string }[] = [
   { key: 'contract', href: '?contract' },
   { key: 'counsel', href: '#counsel' },
   { key: 'litigation', href: '#litigation' },
-  { key: 'user', href: '#user' },
+  { key: 'user', href: '?user' },
   { key: 'errorReport', href: '#error-report' },
 ]
 
@@ -74,28 +98,39 @@ type Props = {
   /** 메인(고객사 선택) 화면 주소 */
   mainHref: string
   /** 현재 화면이 속한 메뉴 */
-  active?: 'company' | 'contract'
+  active?: 'company' | 'contract' | 'user'
 }
 
 /** 고객사 선택 후 화면의 좌측 메뉴 */
 export function Sidebar({ mainHref, active = 'company' }: Props) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = usePersistedFlag('bm-sidebar-open', true)
+  const [collapsed, setCollapsed] = usePersistedFlag('bm-sidebar-collapsed', false)
 
   return (
-    <aside className="flex w-[248px] shrink-0 flex-col gap-px border-r border-[#e4e4ec] bg-[#f6f6fa] px-2.5 pb-3.5 pt-4">
-      <div className="flex items-center gap-1 pb-3.5 pl-2.5 pr-1.5 pt-0.5">
+    <div className={cn('group/side relative shrink-0 transition-[width] duration-200', collapsed ? 'w-5' : 'w-[248px]')}>
+      {/* 접힌 상태에서는 20px만 보이고, 마우스를 올리면 본문 위로 펼쳐지며, 펼쳐진 영역을 누르면 고정된다 */}
+      <div
+        onClick={() => collapsed && setCollapsed(false)}
+        className={cn(
+          'sticky top-0 z-20 h-screen transition-[width] duration-200',
+          collapsed ? 'w-5 group-hover/side:w-[248px]' : 'w-full',
+        )}
+      >
+        <aside
+          id="sidebar"
+          className={cn(
+            'flex h-full overflow-hidden border-r border-sidebar-line shadow-[2px_0_10px_rgba(20,20,40,0.06)] transition-colors duration-200',
+            collapsed ? 'bg-fill group-hover/side:bg-sidebar' : 'bg-sidebar',
+          )}
+        >
+        <div className={cn('flex w-[247px] shrink-0 flex-col gap-px overflow-y-auto px-2.5 pb-3.5 pt-4 transition-opacity duration-150', collapsed && 'opacity-0 group-hover/side:opacity-100')}>
+      <div className="flex items-center gap-1 pb-7 pl-2.5 pr-1.5 pt-0.5">
         <span className="flex min-w-0 flex-1 items-center gap-2.5">
           <LogoUploader />
           <a href={mainHref} className="min-w-0 truncate text-[19px] font-bold tracking-[-0.02em] text-ink">
             {texts.common.appName}
           </a>
         </span>
-        <button type="button" aria-label={t.search} className="inline-flex size-[30px] items-center justify-center rounded-ctl text-ink-2 hover:bg-fill">
-          <SearchIcon size={16} />
-        </button>
-        <a href={mainHref} aria-label={t.switchCompany} title={t.switchCompany} className="inline-flex size-[30px] items-center justify-center rounded-ctl text-ink-2 hover:bg-fill">
-          <SwapIcon size={16} />
-        </a>
       </div>
 
       <NavLink href="?company" current={active === 'company'} icon={<BuildingIcon size={16} />}>
@@ -130,10 +165,28 @@ export function Sidebar({ mainHref, active = 'company' }: Props) {
       </NavLink>
 
       <span className="flex-1" />
-      <div className="flex flex-col gap-px border-t border-[#e4e4ec] px-2.5 pb-0.5 pt-3">
+      <div className="flex flex-col gap-px border-t border-sidebar-line px-2.5 pb-0.5 pt-3">
         <span className="text-[13px] font-semibold">{MOCK_ACCOUNT.name}</span>
         <span className="text-[11.5px] text-ink-4">{MOCK_ACCOUNT.role}</span>
       </div>
-    </aside>
+        </div>
+        </aside>
+
+      {/* 구분선 전체가 접기 · 펴기 버튼이다. 마우스를 올리면 선과 화살표가 나타난다 */}
+      <button
+        type="button"
+        aria-label={collapsed ? t.expand : t.collapse}
+        aria-expanded={!collapsed}
+        aria-controls="sidebar"
+        onClick={() => setCollapsed((v) => !v)}
+        className="group absolute inset-y-0 -right-3 z-10 w-3 cursor-pointer border-0 bg-transparent p-0"
+      >
+        <span className="absolute inset-y-0 left-0 w-0.5 bg-primary opacity-0 transition-opacity group-hover:opacity-60 group-focus-visible:opacity-60" aria-hidden="true" />
+        <span className="absolute left-[-9px] top-1/2 inline-flex size-[22px] -translate-y-1/2 items-center justify-center rounded-full border border-line-strong bg-surface text-ink-3 opacity-0 shadow-seg transition-opacity group-hover:opacity-100 group-hover:text-ink group-focus-visible:opacity-100" aria-hidden="true">
+          <ChevronRightIcon size={11} className={cn(!collapsed && 'rotate-180')} />
+        </span>
+      </button>
+      </div>
+    </div>
   )
 }

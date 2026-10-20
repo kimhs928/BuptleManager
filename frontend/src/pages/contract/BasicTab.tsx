@@ -72,13 +72,11 @@ export function BasicTab({ contract, recentHistory, historyCount, onSave, onShow
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:gap-7">
-        <div className="flex items-center justify-end gap-3">
-          <span className="text-xs text-ink-4">{t.editHint}</span>
-          <Button size="md" icon={<EditIcon size={14} />} onClick={() => setEditing(true)} className="h-9 rounded-ctl px-[18px] font-semibold">
-            {t.edit}
-          </Button>
-        </div>
+      <div className="flex items-center justify-end gap-3">
+        <span className="text-xs text-ink-4">{t.editHint}</span>
+        <Button size="md" icon={<EditIcon size={14} />} onClick={() => setEditing(true)} className="h-9 rounded-ctl px-[18px] font-semibold">
+          {t.edit}
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 items-start gap-7 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
@@ -96,7 +94,7 @@ export function BasicTab({ contract, recentHistory, historyCount, onSave, onShow
                 <dt className="text-[13px]">{t.fields.summary}</dt>
                 <dd className="m-0">
                   {/* 길면 이 영역 안에서만 스크롤한다 */}
-                  <div tabIndex={0} role="region" aria-label={t.summaryLabel} className="max-h-[92px] overflow-y-auto whitespace-pre-wrap rounded-[10px] bg-bg px-3 py-[9px] text-[13px] leading-[1.6] text-ink-2">
+                  <div tabIndex={0} role="region" aria-label={t.summaryLabel} className="max-h-[92px] overflow-y-auto whitespace-pre-wrap rounded-[10px] bg-[#f5f5f7] px-3 py-[9px] text-[13px] leading-[1.6] text-ink-2">
                     {contract.summary}
                   </div>
                 </dd>

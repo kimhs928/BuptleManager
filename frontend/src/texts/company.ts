@@ -1,6 +1,8 @@
 /** 고객사 정보 화면 문구 */
 export const company = {
   sidebar: {
+    collapse: '사이드바 접기',
+    expand: '사이드바 펴기',
     logoTitle: '로고 이미지 변경',
     logoUpload: '로고 이미지 업로드',
     logoAlt: '로고',
@@ -52,9 +54,9 @@ export const company = {
 
   basic: {
     infoTitle: '고객사 기본 정보',
-    readOnly: '조회 전용',
+    readOnly: '수정 불가',
     fields: {
-      name: '이름',
+      name: '회사명',
       representative: '대표자명',
       businessNo: '사업자 번호',
       phone: '번호',
@@ -88,6 +90,7 @@ export const company = {
     description: '컨피그 등록은 컨피그 관리 탭에서 작업해주세요.',
     searchLabel: '컨피그 검색',
     searchPlaceholder: '컨피그명 또는 설명 검색',
+    searchClear: '검색어 지우기',
     filterLabel: '범위 필터',
     filterAll: '전체',
     filterPublic: 'PUBLIC',
@@ -110,13 +113,26 @@ export const company = {
     noValue: '—',
     emptyTitle: '결과 없음',
     emptyDescription: '조건에 맞는 컨피그가 없습니다.',
-    footer: (n: number, syncedAt: string) => `${n}개 표시 · 마지막 동기화 ${syncedAt}`,
+    footer: (n: number, syncedAt: string) => `${n}개 · 마지막 동기화 ${syncedAt}`,
     goManage: '컨피그 관리로 이동',
+    viewValue: '상세보기',
+    viewDescription: '상세보기',
+    valueView: {
+      title: '컨피그 값',
+      fields: { type: 'CONFIG TYPE', name: 'CONFIG NAME', appliedAt: '적용일자', appliedBy: '등록자' },
+      descriptionTitle: '컨피그 설명',
+      value: 'CONFIG VALUE',
+      description: 'CONFIG DESCRIPTION',
+      length: (n: number) => `${n.toLocaleString()}자`,
+      copy: '값 복사',
+      copyDescription: '설명 복사',
+      copied: '복사됨',
+    },
   },
 
   liveUsers: {
     title: '현재 접속 중인 유저',
-    description: (_platform: string, refreshedAt: string) => `마지막 갱신 : ${refreshedAt}`,
+    description: (_platform: string, refreshedAt: string) => `마지막 갱신 (${refreshedAt})`,
     justNow: '방금 전',
     refresh: '새로고침',
     forceLogout: '강제 로그아웃',
@@ -139,7 +155,7 @@ export const company = {
       title: '강제 로그아웃',
       description: (platform: string) => `선택한 유저의 ${platform} 세션을 즉시 종료합니다.`,
       targets: (n: number) => `대상 유저 · ${n}명`,
-      warning: '확인을 누르면 세션이 즉시 종료되고 작업 내용이 변경 히스토리에 함께 저장됩니다. 되돌릴 수 없습니다.',
+      warning: '확인을 누르면 세션이 즉시 종료되고 작업 내용이 변경 히스토리에 함께 저장됩니다.',
       before: '접속 중',
       after: '강제 로그아웃',
       action: '세션 · 강제 로그아웃',

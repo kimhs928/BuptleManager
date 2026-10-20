@@ -12,17 +12,20 @@ type Props = {
   onSelect: (id: string) => void
   emptyMessage?: ReactNode
   label: string
+  /** true면 카드 테두리·그림자 없이 목록만 그린다 */
+  bare?: boolean
 }
 
 /** 단일 선택 리스트 (listbox). 위/아래/Home/End로 이동하고 Enter/Space로 선택한다. */
-export function OptionList({ options, selectedId, onSelect, emptyMessage, label }: Props) {
+export function OptionList({ options, selectedId, onSelect, emptyMessage, label, bare }: Props) {
+  const Wrapper = bare ? 'div' : Card
   const refs = useRef<(HTMLLIElement | null)[]>([])
 
   if (options.length === 0) {
     return (
-      <Card className="p-1">
+      <Wrapper className={bare ? undefined : 'p-1'}>
         <p className="m-0 px-4 py-[18px] text-center text-[13px] text-ink-4">{emptyMessage ?? texts.common.state.noResult}</p>
-      </Card>
+      </Wrapper>
     )
   }
 
@@ -57,8 +60,8 @@ export function OptionList({ options, selectedId, onSelect, emptyMessage, label 
   }
 
   return (
-    <Card className="p-1">
-      <ul role="listbox" aria-label={label} className="m-0 list-none p-0">
+    <Wrapper className={bare ? undefined : 'p-1'}>
+      <ul role="listbox" aria-label={label} className={cn('m-0 list-none p-0', bare && 'divide-y divide-line-soft')}>
         {options.map((o, i) => {
           const selected = o.id === selectedId
           return (
@@ -92,6 +95,6 @@ export function OptionList({ options, selectedId, onSelect, emptyMessage, label 
           )
         })}
       </ul>
-    </Card>
+    </Wrapper>
   )
 }
