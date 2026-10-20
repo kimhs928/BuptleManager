@@ -121,6 +121,7 @@ export function MembersTab({ members, onEdit, onAdd }: Props) {
   const [editing, setEditing] = useState<ContractMember | null>(null)
   const [adding, setAdding] = useState<MemberKind | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [includeDeleted, setIncludeDeleted] = useState(true)
   const menuRef = useRef<HTMLDivElement>(null)
 
   // 메뉴 바깥을 누르거나 Esc를 누르면 닫는다
@@ -138,7 +139,8 @@ export function MembersTab({ members, onEdit, onAdd }: Props) {
     }
   }, [menuOpen])
 
-  const internalCount = members.filter((m) => m.kind === 'internal').length
+  const shown = members.filter((m) => includeDeleted || !m.deleted)
+  const internalCount = shown.filter((m) => m.kind === 'internal').length
 
   return (
     <section aria-labelledby="members-title" className="flex flex-col gap-2">
@@ -147,7 +149,7 @@ export function MembersTab({ members, onEdit, onAdd }: Props) {
           <h2 id="members-title" className="m-0 text-[13px] font-semibold">
             {t.title}
           </h2>
-          <span className="text-xs text-ink-4">{t.description}</span>
+          <span className="text-xs tabular-nums text-ink-4">{t.summary(shown.length, internalCount, shown.length - internalCount)}</span>
         </div>
         <div ref={menuRef} className="relative">
           <Button aria-haspopup="menu" aria-expanded={menuOpen} icon={<PlusIcon size={14} strokeWidth={2.4} />} onClick={() => setMenuOpen((v) => !v)} className="h-9 rounded-ctl px-[18px] font-semibold">
@@ -181,15 +183,21 @@ export function MembersTab({ members, onEdit, onAdd }: Props) {
       </div>
 
       <div className="flex flex-col rounded-card border border-line bg-surface shadow-card">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line-soft px-5 py-3 text-xs text-ink-4">
-          <span className="tabular-nums">{t.summary(members.length, internalCount, members.length - internalCount)}</span>
-          <span className="inline-flex items-center gap-1.5">
-            <InfoIcon size={13} />
-            <span>{t.footerHint}</span>
-          </span>
+        <div className="flex flex-wrap items-center justify-start gap-3 px-5 pb-0 pt-3 text-xs text-ink-4">
+          <div className="flex flex-wrap items-center justify-start gap-x-3.5 gap-y-1.5">
+            <label className="inline-flex cursor-pointer select-none items-center gap-1.5 text-[12.5px] text-ink">
+              <input type="checkbox" checked={includeDeleted} onChange={(e) => setIncludeDeleted(e.target.checked)} className="m-0 size-[15px] accent-primary" />
+              {t.includeDeleted}
+            </label>
+            <span aria-hidden="true" className="h-3 w-px bg-line-strong" />
+            <span className="inline-flex items-center gap-1.5">
+              <InfoIcon size={13} />
+              <span>{t.footerHint}</span>
+            </span>
+          </div>
         </div>
         <ul className="m-0 flex list-none flex-col gap-3 p-5">
-          {members.map((m) => (
+          {shown.map((m) => (
             <MemberCard key={m.id} m={m} onEdit={() => setEditing(m)} />
           ))}
         </ul>

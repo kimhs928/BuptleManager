@@ -1,4 +1,5 @@
 // TODO: 백엔드 연동 시 제거
+import { MOCK_DOC_TITLES } from './user'
 
 export type ContractStatus = '작성중' | '검토중' | '서명 진행중' | '체결 완료' | '반려'
 
@@ -233,3 +234,19 @@ export const MOCK_EMAILS: ContractEmail[] = [
     body: '장변호사님,\n\n계약 템플릿이 최신 버전(v3)으로 변경되어 초안이 재작성되었습니다.\n이전 초안은 삭제 처리되었으니 새 초안을 기준으로 검토해 주세요.\n\n김효선 드림',
   },
 ]
+
+/** 계약 ID로 상세를 만든다. 목 데이터는 CT-2024-0315 한 건뿐이라 ID, 이름, 상태, 삭제 여부만 바꾼다 */
+export function getContractDetail(id: string): ContractDetail {
+  const summary = MOCK_CONTRACTS.find((c) => c.id === id)
+  const name = summary?.name ?? MOCK_DOC_TITLES.contract[id]
+  if (id === MOCK_CONTRACT_DETAIL.id || !name) return MOCK_CONTRACT_DETAIL
+  return {
+    ...MOCK_CONTRACT_DETAIL,
+    id,
+    idPlain: id.replace(/\D/g, ''),
+    name,
+    status: summary?.status ?? MOCK_CONTRACT_DETAIL.status,
+    deleted: summary?.deleted ?? false,
+    deletedAt: summary?.deletedAt ? summary.deletedAt.replace(' ', 'T') : '',
+  }
+}

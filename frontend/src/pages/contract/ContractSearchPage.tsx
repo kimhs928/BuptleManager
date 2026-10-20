@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { ChevronRightIcon, CloseIcon, InfoIcon, SearchIcon, TrashIcon } from '../../components/icons'
+import { ChevronRightIcon, CloseIcon, SearchIcon, TrashIcon } from '../../components/icons'
 import { CompanyShell } from '../../components/layout/CompanyShell'
 import { Button, Card, Lines } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import { MOCK_COMPANY_DETAIL } from '../../mocks/companyDetail'
 import { MOCK_CONTRACTS } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { deletedName, deletedRow, tableTd, tableTh } from './format'
@@ -33,7 +32,6 @@ export function ContractSearchPage({ initialQuery = '' }: Props) {
         <section className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <h1 className="m-0 text-[26px] font-bold tracking-[-0.02em]">{t.title}</h1>
-            <p className="m-0 text-sm text-ink-3">{t.description(MOCK_COMPANY_DETAIL.name)}</p>
           </div>
 
           <form role="search" className="flex gap-2.5" onSubmit={(e) => e.preventDefault()}>
@@ -62,11 +60,6 @@ export function ContractSearchPage({ initialQuery = '' }: Props) {
           </form>
 
           <div className="flex flex-wrap items-center gap-3.5 text-[12.5px] text-ink-4">
-            <span className="inline-flex items-center gap-1.5">
-              <InfoIcon size={13} />
-              {t.hint}
-            </span>
-            <span aria-hidden="true" className="h-3 w-px bg-line-strong" />
             <label className="inline-flex cursor-pointer select-none items-center gap-1.5 text-ink">
               <input type="checkbox" checked={includeDeleted} onChange={(e) => setIncludeDeleted(e.target.checked)} className="m-0 size-[15px] accent-primary" />
               {t.includeDeleted}
