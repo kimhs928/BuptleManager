@@ -120,8 +120,8 @@ export function UserListPage() {
         </a>
       </div>
 
-      <section className="flex flex-col gap-3.5 rounded-card border border-line bg-surface px-5 pb-5 pt-[18px] shadow-card">
-        <span className="text-xs font-semibold text-ink-4">{t.searchTitle}</span>
+      <section className="flex flex-col gap-3.5 rounded-card border border-primary/30 bg-[#eaf2fb] px-5 pb-5 pt-[18px] shadow-card">
+        <span className="text-xs font-bold text-primary">{t.searchTitle}</span>
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
           <Labeled label={t.fields.pk}>{input('pk')}</Labeled>
           <Labeled label={t.fields.name}>{input('name')}</Labeled>
