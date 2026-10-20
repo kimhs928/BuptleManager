@@ -35,7 +35,7 @@ export const MOCK_USERS: CompanyUser[] = [
   { id: 'u8', pk: '2104', name: '오세훈', email: 'sehun.oh@acetech.co.kr', lastLogin: '2024-05-02 16:44', roles: ['일반유저'], active: true, joinedAt: '2024-01-15 09:16:54', createdAt: '2024-01-15 08:30:02', updatedAt: '2024-01-15 09:16:54', phone: '010-3030-4545', dept: '구매팀', title: '사원', desc: '', empNo: 'A00712', migrated: false },
 ]
 
-export type DocKind = 'contract' | 'counsel' | 'litigation'
+export type DocKind = 'contract' | 'counsel' | 'lawsuit'
 
 /** 유저가 참여 중인 문서의 ID → 제목 */
 export const MOCK_DOC_TITLES: Record<DocKind, Record<string, string>> = {
@@ -50,7 +50,7 @@ export const MOCK_DOC_TITLES: Record<DocKind, Record<string, string>> = {
     'CN-2024-0112': '개인정보 처리방침 개정 관련 법률 자문', 'CN-2024-0205': '해외 고객 데이터 이전 적법성 검토', 'CN-2024-0318': '임직원 겸업 금지 조항 해석', 'CN-2023-1120': '파트너사 계약 해지 통지 절차',
     'CN-2024-0127': '상표권 침해 경고장 대응 (초안)', 'CN-2024-0229': '근로계약서 표준안 검토',
   },
-  litigation: {
+  lawsuit: {
     'LW-2024-0087': '임금 청구 소송 (원고 3인)', 'LW-2024-0142': '상표권 침해 금지 청구', 'LW-2024-0201': '공급계약 대금 지급 청구', 'LW-2022-0310': '부당해고 구제 신청 사건',
     'LW-2023-0455': '임대차 보증금 반환 청구 (초안)', 'LW-2024-0099': '손해배상 청구 소송 (취하)',
   },
@@ -60,14 +60,14 @@ const MANY_CONTRACTS = ['CT-2024-0315', 'CT-2024-0518', 'CT-2024-0120', 'CT-2024
 
 /** 유저별 참여 문서 ID */
 export const MOCK_JOINED: Record<string, Record<DocKind, string[]>> = {
-  u1: { contract: ['CT-2024-0315', 'CT-2024-0402', 'CT-2024-0207'], counsel: ['CN-2024-0229', 'CN-2024-0318'], litigation: ['LW-2024-0087'] },
-  u2: { contract: MANY_CONTRACTS, counsel: ['CN-2024-0112', 'CN-2024-0205', 'CN-2023-1120'], litigation: ['LW-2024-0142', 'LW-2024-0201'] },
-  u3: { contract: ['CT-2024-0402', 'CT-2024-0518'], counsel: ['CN-2024-0112', 'CN-2024-0205', 'CN-2024-0127', 'CN-2024-0229'], litigation: ['LW-2024-0087', 'LW-2024-0142', 'LW-2022-0310', 'LW-2024-0099'] },
-  u4: { contract: ['CT-2024-0402', 'CT-2024-0207', 'CT-2024-0330'], counsel: [], litigation: ['LW-2024-0201'] },
-  u5: { contract: ['CT-2024-0120'], counsel: ['CN-2023-1120'], litigation: [] },
-  u6: { contract: ['CT-2024-0518'], counsel: [], litigation: ['LW-2023-0455'] },
-  u7: { contract: ['CT-2024-0315', 'CT-2024-0402', 'CT-2024-0518', 'CT-2024-0120', 'CT-2024-0207'], counsel: ['CN-2024-0112', 'CN-2024-0318'], litigation: ['LW-2024-0142', 'LW-2023-0455', 'LW-2024-0099'] },
-  u8: { contract: [], counsel: [], litigation: [] },
+  u1: { contract: ['CT-2024-0315', 'CT-2024-0402', 'CT-2024-0207'], counsel: ['CN-2024-0229', 'CN-2024-0318'], lawsuit: ['LW-2024-0087'] },
+  u2: { contract: MANY_CONTRACTS, counsel: ['CN-2024-0112', 'CN-2024-0205', 'CN-2023-1120'], lawsuit: ['LW-2024-0142', 'LW-2024-0201'] },
+  u3: { contract: ['CT-2024-0402', 'CT-2024-0518'], counsel: ['CN-2024-0112', 'CN-2024-0205', 'CN-2024-0127', 'CN-2024-0229'], lawsuit: ['LW-2024-0087', 'LW-2024-0142', 'LW-2022-0310', 'LW-2024-0099'] },
+  u4: { contract: ['CT-2024-0402', 'CT-2024-0207', 'CT-2024-0330'], counsel: [], lawsuit: ['LW-2024-0201'] },
+  u5: { contract: ['CT-2024-0120'], counsel: ['CN-2023-1120'], lawsuit: [] },
+  u6: { contract: ['CT-2024-0518'], counsel: [], lawsuit: ['LW-2023-0455'] },
+  u7: { contract: ['CT-2024-0315', 'CT-2024-0402', 'CT-2024-0518', 'CT-2024-0120', 'CT-2024-0207'], counsel: ['CN-2024-0112', 'CN-2024-0318'], lawsuit: ['LW-2024-0142', 'LW-2023-0455', 'LW-2024-0099'] },
+  u8: { contract: [], counsel: [], lawsuit: [] },
 }
 
 /** 이관에서 이름·이메일·user_id가 모두 일치해야 선택되는 사내 유저 */

@@ -5,14 +5,14 @@ import type { CompanyUser, DocKind } from '../../mocks/user'
 import { texts } from '../../texts'
 
 const t = texts.user.list
-const KINDS: DocKind[] = ['contract', 'counsel', 'litigation']
+const KINDS: DocKind[] = ['contract', 'counsel', 'lawsuit']
 const PER_PAGE = 10
 
 /** 문서 상세 화면 주소. 계약 상세만 구현되어 있고, 자문 · 소송 상세는 화면이 생기면 연결된다 */
 const docHref: Record<DocKind, (id: string) => string> = {
   contract: (id) => `?contract=${id}`,
   counsel: (id) => `?counsel=${id}`,
-  litigation: (id) => `?litigation=${id}`,
+  lawsuit: (id) => `?lawsuit=${id}`,
 }
 
 type Props = {
@@ -26,7 +26,7 @@ type Props = {
 
 /** 유저가 참여 중인 계약 · 자문 · 소송 (행 펼침 영역) */
 export function UserDocsDetail({ user, selected, page, onSelect, onPage }: Props) {
-  const joined = MOCK_JOINED[user.id] ?? { contract: [], counsel: [], litigation: [] }
+  const joined = MOCK_JOINED[user.id] ?? { contract: [], counsel: [], lawsuit: [] }
   const ids = selected ? joined[selected] : []
   const last = Math.max(1, Math.ceil(ids.length / PER_PAGE))
   const current = Math.min(Math.max(1, page), last)
