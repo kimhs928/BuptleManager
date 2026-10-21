@@ -43,11 +43,6 @@ export function ContractDetailPage({ contractId, initialTab = 'basic' }: Props) 
     window.history.replaceState(null, '', `?contract=${contract.id}${next === 'basic' ? '' : `&tab=${next}`}`)
   }
 
-  const recentHistory = [...history]
-    .filter((h) => !h.deleted)
-    .sort((a, b) => (a.at < b.at ? 1 : -1))
-    .slice(0, 3)
-
   return (
     <CompanyShell active="contract" trail={[{ label: t.breadcrumb.features }, { label: t.breadcrumb.contract, href: '?contract' }, { label: contract.id }]}>
       <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-6">
@@ -147,13 +142,10 @@ export function ContractDetailPage({ contractId, initialTab = 'basic' }: Props) 
           {tab === 'basic' && (
             <BasicTab
               contract={contract}
-              recentHistory={recentHistory}
-              historyCount={history.length}
               onSave={(next, count, ticket) => {
                 setContract(next)
                 setToast(t.toast.basicSaved(count, ticket))
               }}
-              onShowHistory={() => changeTab('workflow')}
               onShowWorkflow={() => changeTab('workflow')}
             />
           )}

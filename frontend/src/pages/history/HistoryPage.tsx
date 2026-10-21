@@ -20,19 +20,40 @@ const ALL_LIMIT = 50
 /** 입력한 조건을 결합하는 방식. or: 하나라도 일치, and: 모두 일치 */
 type Mode = 'or' | 'and'
 
-type Condition = { ticket: string; user: string; func: string; from: string; to: string; mode: Mode }
+/** docId는 다른 화면에서 문서 하나의 내역만 보려고 넘긴 범위 조건이다. 결합 방식과 상관없이 항상 적용한다 */
+type Condition = { ticket: string; user: string; func: string; target: string; docId: string; from: string; to: string; mode: Mode }
 
-const blank: Condition = { ticket: '', user: '', func: '', from: '', to: '', mode: 'or' }
+const blank: Condition = { ticket: '', user: '', func: '', target: '', docId: '', from: '', to: '', mode: 'or' }
+
+/** 다른 화면에서 넘어온 검색 조건(주소의 func, docId, target, ticket, user, from, to, mode)을 읽는다 */
+function conditionFromUrl(): Condition {
+  const p = new URLSearchParams(window.location.search)
+  const func = p.get('func') ?? ''
+  const user = p.get('user') ?? ''
+  return {
+    ticket: p.get('ticket') ?? '',
+    user: HISTORY_USERS.includes(user) ? user : '',
+    func: HISTORY_FUNCS.includes(func as (typeof HISTORY_FUNCS)[number]) ? func : '',
+    target: p.get('target') ?? '',
+    docId: p.get('docId') ?? '',
+    from: p.get('from') ?? '',
+    to: p.get('to') ?? '',
+    mode: p.get('mode') === 'and' ? 'and' : 'or',
+  }
+}
 
 /** 입력한 조건을 OR(하나라도 일치) 또는 AND(모두 일치)로 결합해 조회한다 */
 function matches(r: HistoryRecord, c: Condition): boolean {
+  if (c.docId && r.docId !== c.docId) return false
   const ticket = c.ticket.trim().toLowerCase()
-  if (!ticket && !c.user && !c.func && !c.from && !c.to) return true
+  const target = c.target.trim().toLowerCase()
+  if (!ticket && !c.user && !c.func && !target && !c.from && !c.to) return true
   const day = r.at.slice(0, 10)
   const tests: boolean[] = []
   if (ticket !== '') tests.push(r.ticket.toLowerCase().includes(ticket))
   if (c.user !== '') tests.push(r.user === c.user)
   if (c.func !== '') tests.push(r.func === c.func)
+  if (target !== '') tests.push(r.target.toLowerCase().includes(target))
   if (c.from !== '' || c.to !== '') tests.push((!c.from || day >= c.from) && (!c.to || day <= c.to))
   return c.mode === 'and' ? tests.every(Boolean) : tests.some(Boolean)
 }
@@ -59,14 +80,14 @@ export function HistoryPage() {
   const current = HISTORY_CURRENT_CUSTOMER
 
   const [pick, setPick] = useState('')
-  const [draft, setDraft] = useState<Condition>(blank)
-  const [applied, setApplied] = useState<Condition>(blank)
+  const [draft, setDraft] = useState<Condition>(conditionFromUrl)
+  const [applied, setApplied] = useState<Condition>(conditionFromUrl)
   const [page, setPage] = useState(1)
   const [openId, setOpenId] = useState<number | null>(null)
 
   const scope = allMode ? pick : current.id
   const scopeCustomer = HISTORY_CUSTOMERS.find((c) => c.id === scope)
-  const hasCondition = [applied.ticket, applied.user, applied.func, applied.from, applied.to].some((v) => v.trim() !== '')
+  const hasCondition = [applied.ticket, applied.user, applied.func, applied.target, applied.docId, applied.from, applied.to].some((v) => v.trim() !== '')
   const invalid = draft.from !== '' && draft.to !== '' && draft.from > draft.to
 
   const found = MOCK_HISTORY_RECORDS.filter((r) => (!scope || r.customerId === scope) && matches(r, applied))
@@ -137,6 +158,26 @@ export function HistoryPage() {
         </div>
       )}
 
+      {applied.docId && (
+        <div role="note" className="flex items-center gap-2.5 rounded-xl border border-line-strong bg-[#f2f2f5] px-3.5 py-2.5 text-[13px]">
+          <InfoIcon size={15} className="shrink-0 text-ink-3" />
+          <span className="flex-1">
+            <b className="font-semibold">{t.banner.doc(applied.docId)}</b>
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setDraft((d) => ({ ...d, docId: '' }))
+              setApplied((a) => ({ ...a, docId: '' }))
+              setPage(1)
+            }}
+            className="h-7 rounded-[7px] border border-line-strong bg-surface px-2.5 text-xs font-medium hover:bg-hover"
+          >
+            {t.banner.docClear}
+          </button>
+        </div>
+      )}
+
       <section aria-label={t.search.title} className="flex flex-col gap-3.5 rounded-card border border-line bg-surface px-5 pb-5 pt-[18px] shadow-card">
         <div className="flex flex-col gap-2">
           <span className="text-xs font-semibold text-ink-4">{t.search.title}</span>
@@ -196,6 +237,9 @@ export function HistoryPage() {
                 </option>
               ))}
             </Select>
+          </Labeled>
+          <Labeled label={t.search.target} htmlFor="h-target">
+            <TextInput id="h-target" autoComplete="off" placeholder={t.search.targetPlaceholder} value={draft.target} onChange={(e) => set('target')(e.target.value)} />
           </Labeled>
           <Labeled label={t.search.from} htmlFor="h-from">
             <TextInput id="h-from" type="date" value={draft.from} onChange={(e) => set('from')(e.target.value)} />

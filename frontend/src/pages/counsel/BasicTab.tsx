@@ -3,18 +3,17 @@ import type { ReactNode } from 'react'
 import { EditIcon } from '../../components/icons'
 import { Button } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import type { CounselDetail, CounselHistoryRow } from '../../mocks/counsel'
+import type { CounselDetail } from '../../mocks/counsel'
+import { historyHref, historyOf } from '../../mocks/history'
 import { texts } from '../../texts'
 import { SectionHead } from '../contract/shared'
 import { BasicEditModal } from './BasicEditModal'
 import { StatusDot } from './shared'
 
-const t = texts.counsel.basic
+/** 최근 히스토리에 보여 주는 최대 건수 */
+const RECENT_LIMIT = 10
 
-/** 최근 히스토리의 점 색: 도착 단계 기준 */
-function stageDot(stage: string): string {
-  return stage === '초안' ? 'bg-ink-5' : 'bg-success'
-}
+const t = texts.counsel.basic
 
 /** 시안의 카드: 둥근 흰 박스 */
 const box = 'overflow-hidden rounded-card border border-line bg-surface shadow-card'
@@ -30,16 +29,16 @@ function Row({ label, children, wide }: { label: string; children: ReactNode; wi
 
 type Props = {
   counsel: CounselDetail
-  /** 삭제되지 않은 히스토리 최근순 */
-  recentHistory: CounselHistoryRow[]
-  historyCount: number
   onSave: (next: CounselDetail, changeCount: number, ticket: string) => void
-  onShowHistory: () => void
 }
 
 /** 기본 정보 탭 */
-export function BasicTab({ counsel, recentHistory, historyCount, onSave, onShowHistory }: Props) {
+export function BasicTab({ counsel, onSave }: Props) {
   const [editing, setEditing] = useState(false)
+
+  // 이 자문의 처리 내역(변경 히스토리). 전체 보기는 검색 조건이 걸린 처리 내역 히스토리 화면으로 연다
+  const changes = historyOf('자문', counsel.id)
+  const recentHistory = changes.slice(0, RECENT_LIMIT)
 
   return (
     <div className="flex flex-col gap-6">
@@ -89,17 +88,17 @@ export function BasicTab({ counsel, recentHistory, historyCount, onSave, onShowH
             <h2 id="counsel-recent" className="m-0 text-[13px] font-semibold">
               {t.recentTitle}
             </h2>
-            <button type="button" onClick={onShowHistory} className="text-xs text-link hover:underline">
-              {t.recentAll(historyCount)}
-            </button>
+            <a href={historyHref('자문', counsel.id)} className="text-xs text-link hover:underline">
+              {t.recentAll(changes.length)}
+            </a>
           </div>
           <ol className={cn(box, 'm-0 list-none p-0')}>
             {recentHistory.map((h) => (
               <li key={h.id} className="flex gap-2.5 border-t border-line-soft px-3.5 py-2.5 first:border-t-0">
-                <span aria-hidden="true" className={cn('mt-[5px] size-2 shrink-0 rounded-full', stageDot(h.to))} />
-                <span className="flex flex-col gap-0.5">
+                <span aria-hidden="true" className="mt-[5px] size-2 shrink-0 rounded-full bg-primary" />
+                <span className="flex min-w-0 flex-col gap-0.5">
                   <span className="text-[13px]">
-                    {h.action} · {h.from} → {h.to}
+                    {h.type} · {h.target}
                   </span>
                   <span className="text-xs text-ink-4">
                     {h.user} · {h.at}

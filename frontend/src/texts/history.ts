@@ -14,6 +14,8 @@ export const history = {
     allRest: ' 아래 고객사 항목에서 고객사를 선택하면 해당 고객사의 전체 처리 내역을 조회할 수 있습니다.',
     picked: (name: string) => `${name} 의 처리 내역만 표시하고 있습니다.`,
     clear: '선택 해제 · 전체 보기',
+    doc: (id: string) => `문서 ${id} 의 처리 내역만 표시하고 있습니다.`,
+    docClear: '문서 조건 해제',
   },
 
   search: {
@@ -31,6 +33,8 @@ export const history = {
     customerAllDescription: '모든 고객사의 최신 처리 내역 50건',
     customerCount: (n: number) => `${n}건`,
     customerEmpty: '일치하는 고객사가 없습니다',
+    target: '대상 데이터',
+    targetPlaceholder: '예: CT-2024-0315',
     ticket: 'Zendesk 티켓 번호',
     ticketPlaceholder: 'TKT-2024-0523-001',
     user: '액션 유저',

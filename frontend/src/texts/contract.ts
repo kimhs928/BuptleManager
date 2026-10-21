@@ -109,6 +109,7 @@ export const contract = {
     template: { name: '템플릿명', category: '카테고리', description: '설명', draftUpload: '초안 업로드', draftFile: '초안 파일' },
     subCategory: '하위',
     recentTitle: '최근 히스토리',
+    recentEmpty: '처리 내역이 없습니다.',
     recentAll: (n: number) => `전체 ${n}건`,
   },
 
@@ -162,6 +163,9 @@ export const contract = {
   members: {
     title: '계약 참여 유저',
     includeDeleted: '삭제된 유저 포함',
+    sort: { label: '유저 생성 시간', desc: '최신순', asc: '오래된순' },
+    filter: { label: '구분', all: '전체' },
+    emptyFiltered: '조건에 맞는 참여 유저가 없습니다.',
     add: '추가',
     menu: { internal: '내부 유저 추가', external: '외부 유저 추가' },
     menuInternalHint: '사내 유저 확인 필요',
@@ -181,11 +185,10 @@ export const contract = {
       updated: '수정',
       deletedAt: '삭제',
     },
-    kind: { internal: '내부', external: '외부' },
+    kind: { internal: '내부 유저', external: '외부 유저' },
     deleted: '삭제됨',
     edit: '참여 정보 수정',
     summary: (total: number, internal: number, external: number) => `${total}명 · 내부 ${internal} · 외부 ${external}`,
-    footerHint: '이미 참여 중인 유저는 추가할 수 없습니다. 수정 기능을 통해 변경해 주세요.',
     none: '-',
   },
 
@@ -202,7 +205,7 @@ export const contract = {
 
   memberEdit: {
     title: (name: string) => `참여 유저 수정 · ${name}`,
-    description: (kind: string) => `${kind} 유저 · 변경 전/후 값이 히스토리에 저장됩니다.`,
+    description: (kind: string) => `${kind} · 변경 전/후 값이 히스토리에 저장됩니다.`,
     action: '계약 · 참여 유저 수정',
     groups: { info: '유저 정보', roles: '계약 내 역할 · 권한', sign: '서명', dates: '일자 · 삭제' },
     fields: {
@@ -232,7 +235,7 @@ export const contract = {
 
   memberAdd: {
     title: '계약 참여 유저 추가',
-    description: (kind: string) => `${kind} 유저 · 추가 작업은 히스토리에 기록됩니다.`,
+    description: (kind: string) => `${kind} · 추가 작업은 히스토리에 기록됩니다.`,
     action: '계약 · 참여 유저 추가',
     save: '실행',
     groups: { info: '유저 정보', roles: '계약 내 역할 · 권한', sign: '서명' },

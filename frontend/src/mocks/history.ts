@@ -34,6 +34,8 @@ export type HistoryField = { label: string; value: string }
 type Template = {
   func: HistoryFunc
   type: HistoryType
+  /** 대상 문서의 ID (계약 · 자문 · 소송). 문서와 관계없는 작업이면 비운다 */
+  docId?: string
   target: string
   before: string
   after: string
@@ -52,6 +54,7 @@ const TEMPLATES: Template[] = [
   {
     func: '계약',
     type: '수정',
+    docId: 'CT-2024-0402',
     target: '계약 기본 정보 · CT-2024-0402',
     before: '만료일 2024-12-31',
     after: '만료일 2025-03-31',
@@ -78,6 +81,7 @@ const TEMPLATES: Template[] = [
   {
     func: '계약',
     type: '수정',
+    docId: 'CT-2024-0315',
     target: '참여 유저 · 상대방 서명자',
     before: '서명 방식 이메일',
     after: '서명 방식 휴대전화 인증',
@@ -102,6 +106,7 @@ const TEMPLATES: Template[] = [
   {
     func: '계약',
     type: '추가',
+    docId: 'CT-2024-0315',
     target: '참여 유저 · 외부 참여자',
     before: '-',
     after: '외부 참여자 한지민 (상대방 서명자)',
@@ -130,6 +135,7 @@ const TEMPLATES: Template[] = [
   {
     func: '계약',
     type: '수정',
+    docId: 'CT-2024-0518',
     target: '워크플로우 · CT-2024-0518',
     before: '승인 단계 2단계',
     after: '승인 단계 3단계',
@@ -154,6 +160,7 @@ const TEMPLATES: Template[] = [
   {
     func: '자문',
     type: '수정',
+    docId: 'CN-2024-0205',
     target: '자문 상태 · CN-2024-0205',
     before: '검토중',
     after: '답변완료',
@@ -176,6 +183,7 @@ const TEMPLATES: Template[] = [
   {
     func: '자문',
     type: '수정',
+    docId: 'CN-2024-0112',
     target: '참여 유저 · 담당 변호사',
     before: '이서준 변호사',
     after: '정하윤 변호사',
@@ -199,6 +207,7 @@ const TEMPLATES: Template[] = [
   {
     func: '소송',
     type: '수정',
+    docId: 'LW-2024-0031',
     target: '소송 상세 · LW-2024-0031',
     before: '상태 접수',
     after: '상태 진행중',
@@ -223,6 +232,7 @@ const TEMPLATES: Template[] = [
   {
     func: '소송',
     type: '추가',
+    docId: 'LW-2024-0031',
     target: '참여 유저 · 소송 대리인',
     before: '-',
     after: '소송 대리인 오지훈 변호사',
@@ -390,6 +400,8 @@ export type HistoryChat = { from: 'staff' | 'customer'; name: string; role: stri
 
 export type HistoryRecord = {
   id: number
+  /** 대상 문서 ID. 문서와 관계없는 작업이면 빈 문자열 */
+  docId: string
   /** YYYY-MM-DD HH:mm */
   at: string
   user: string
@@ -453,6 +465,7 @@ function makeRecords(): HistoryRecord[] {
       zendeskId: `#${458310 - i * 4}`,
       func: t.func,
       type: t.type,
+      docId: t.docId ?? '',
       target: t.target,
       before: t.before,
       after: t.after,
@@ -473,3 +486,13 @@ function makeRecords(): HistoryRecord[] {
 
 /** 최신순 처리 내역 */
 export const MOCK_HISTORY_RECORDS: HistoryRecord[] = makeRecords()
+
+/** 문서(계약 · 자문 등) 하나의 처리 내역. 최신순 */
+export function historyOf(func: HistoryFunc, docId: string, customerId: string = HISTORY_CURRENT_CUSTOMER.id): HistoryRecord[] {
+  return MOCK_HISTORY_RECORDS.filter((r) => r.customerId === customerId && r.func === func && r.docId === docId)
+}
+
+/** 처리 내역 히스토리 화면을 해당 문서의 검색 조건으로 여는 주소 */
+export function historyHref(func: HistoryFunc, docId: string): string {
+  return `?history&func=${encodeURIComponent(func)}&docId=${encodeURIComponent(docId)}&mode=and`
+}

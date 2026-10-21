@@ -3,12 +3,16 @@ import type { ReactNode } from 'react'
 import { EditIcon, FileIcon, LockIcon } from '../../components/icons'
 import { Button } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import { MOCK_CONTRACT_DOCS, MOCK_CONTRACT_TEMPLATE, STAGE_ORDER } from '../../mocks/contract'
-import type { ContractDetail, HistoryRow } from '../../mocks/contract'
+import { MOCK_CONTRACT_DOCS, MOCK_CONTRACT_TEMPLATE } from '../../mocks/contract'
+import { historyHref, historyOf } from '../../mocks/history'
+import type { ContractDetail } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { BasicEditModal } from './BasicEditModal'
 import { showDateTime } from './format'
 import { StatusDot } from './shared'
+
+/** 최근 히스토리에 보여 주는 최대 건수 */
+const RECENT_LIMIT = 10
 
 const t = texts.contract.basic
 
@@ -47,36 +51,29 @@ function Stack({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
-/** 최근 히스토리의 점 색: 도착 단계 기준 */
-function stageDot(stage: string): string {
-  if (stage.includes('서명')) return 'bg-[#3da5d9]'
-  if ((STAGE_ORDER[stage] ?? 0) === 0) return 'bg-ink-5'
-  return 'bg-success'
-}
-
 type Props = {
   contract: ContractDetail
-  /** 삭제되지 않은 히스토리 최근순 */
-  recentHistory: HistoryRow[]
-  historyCount: number
   onSave: (next: ContractDetail, changeCount: number, ticket: string) => void
-  onShowHistory: () => void
   onShowWorkflow: () => void
 }
 
 /** 기본 정보 탭 */
-export function BasicTab({ contract, recentHistory, historyCount, onSave, onShowHistory, onShowWorkflow }: Props) {
+export function BasicTab({ contract, onSave, onShowWorkflow }: Props) {
   const [editing, setEditing] = useState(false)
   const docs = MOCK_CONTRACT_DOCS
   const tpl = MOCK_CONTRACT_TEMPLATE
 
+  // 이 계약의 처리 내역(변경 히스토리). 전체 보기는 검색 조건이 걸린 처리 내역 히스토리 화면으로 연다
+  const changes = historyOf('계약', contract.id)
+  const recentHistory = changes.slice(0, RECENT_LIMIT)
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-end gap-3">
-        <span className="text-xs text-ink-4">{t.editHint}</span>
+      <div className="flex items-center justify-start gap-3">
         <Button size="md" icon={<EditIcon size={14} />} onClick={() => setEditing(true)} className="h-9 rounded-ctl px-[18px] font-semibold">
           {t.edit}
         </Button>
+        <span className="text-xs text-ink-4">{t.editHint}</span>
       </div>
 
       <div className="grid grid-cols-1 items-start gap-7 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
@@ -227,17 +224,17 @@ export function BasicTab({ contract, recentHistory, historyCount, onSave, onShow
               <h2 id="contract-recent" className="m-0 text-[13px] font-semibold">
                 {t.recentTitle}
               </h2>
-              <button type="button" onClick={onShowHistory} className="text-xs text-link hover:underline">
-                {t.recentAll(historyCount)}
-              </button>
+              <a href={historyHref('계약', contract.id)} className="text-xs text-link hover:underline">
+                {t.recentAll(changes.length)}
+              </a>
             </div>
             <ol className={cn(box, 'm-0 list-none p-0')}>
               {recentHistory.map((h) => (
                 <li key={h.id} className="flex gap-2.5 border-t border-line-soft px-3.5 py-2.5 first:border-t-0">
-                  <span aria-hidden="true" className={cn('mt-[5px] size-2 shrink-0 rounded-full', stageDot(h.to))} />
-                  <span className="flex flex-col gap-0.5">
+                  <span aria-hidden="true" className="mt-[5px] size-2 shrink-0 rounded-full bg-primary" />
+                  <span className="flex min-w-0 flex-col gap-0.5">
                     <span className="text-[13px]">
-                      {h.action} · {h.from} → {h.to}
+                      {h.type} · {h.target}
                     </span>
                     <span className="text-xs text-ink-4">
                       {h.user} · {h.at}
@@ -245,6 +242,7 @@ export function BasicTab({ contract, recentHistory, historyCount, onSave, onShow
                   </span>
                 </li>
               ))}
+              {recentHistory.length === 0 && <li className="px-3.5 py-5 text-center text-[13px] text-ink-4">{t.recentEmpty}</li>}
             </ol>
           </section>
         </div>

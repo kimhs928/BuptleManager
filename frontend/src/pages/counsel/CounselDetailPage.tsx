@@ -44,11 +44,6 @@ export function CounselDetailPage({ counselId, initialTab = 'basic' }: Props) {
     window.history.replaceState(null, '', `?counsel=${counsel.id}${next === 'basic' ? '' : `&tab=${next}`}`)
   }
 
-  const recentHistory = [...history]
-    .filter((h) => !h.deleted)
-    .sort((a, b) => (a.at < b.at ? 1 : -1))
-    .slice(0, 3)
-
   const counts: Partial<Record<CounselTab, number>> = { members: members.length, comments: comments.length }
 
   return (
@@ -138,13 +133,10 @@ export function CounselDetailPage({ counselId, initialTab = 'basic' }: Props) {
           {tab === 'basic' && (
             <BasicTab
               counsel={counsel}
-              recentHistory={recentHistory}
-              historyCount={history.length}
               onSave={(next, count, ticket) => {
                 setCounsel(next)
                 setToast(t.toast.basicSaved(count, ticket))
               }}
-              onShowHistory={() => changeTab('process')}
             />
           )}
           {tab === 'members' && (
