@@ -56,7 +56,7 @@ export const contract = {
     searchLabel: '계약 검색',
     searchPlaceholder: '계약 ID 또는 계약명',
     searchSubmit: '검색',
-    searchHint: '00000-0000 / 00000000 형식으로 검색 · 삭제된 계약 포함',
+    searchHint: '00000-0000 / 00000000 형식으로 검색 · 삭제된 계약 검색 가능',
     deleted: '삭제됨',
     stage: '계약 단계',
     kind: '계약 종류',
@@ -260,7 +260,7 @@ export const contract = {
     externalRoleNote: '외부 유저의 역할은 상대방 서명자로 고정되며, 권한과 시스템 내 역할은 없습니다.',
     externalEmailNote: '이메일이 이미 참여 중인 유저와 겹치면 추가할 수 없습니다.',
     duplicateEmail: '이미 참여 중인 이메일입니다.',
-    dateNote: (now: string) => `참여 일자와 수정 일자는 추가 시각(${now})으로 자동 기록됩니다. 이후 변경은 참여 유저 수정에서 합니다.`,
+    dateNote: () => '참여 일자와 수정 일자는 실행한 시각으로 자동 기록됩니다. 이후 변경은 참여 유저 수정에서 합니다.',
     match: {
       idle: '이름, 이메일, user_id가 모두 일치해야 추가 가능합니다.',
       ok: '사내 유저와 일치합니다. 이름, 이메일, user_id 3개 항목이 모두 확인되었습니다.',

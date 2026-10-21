@@ -258,7 +258,7 @@ export function MemberAddModal({ kind, members, onClose, onSave }: Props) {
         </Field>
       </FieldGroup>
 
-      <Alert tone="info">{t.dateNote(openedAt)}</Alert>
+      <Alert tone="info">{t.dateNote()}</Alert>
     </EditModal>
   )
 }

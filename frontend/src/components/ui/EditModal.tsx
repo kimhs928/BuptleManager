@@ -1,7 +1,9 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useModalFocus } from '../../hooks/useModalFocus'
+import { useNow } from '../../hooks/useNow'
 import { cn } from '../../lib/cn'
+import { formatDateTime, formatDateTimeSec } from '../../lib/date'
 import { texts } from '../../texts'
 import { CloseIcon } from '../icons'
 import { Button } from './Button'
@@ -11,7 +13,19 @@ import { Field, TextInput } from './Field'
 
 const t = texts.common.editModal
 
-export type AuditInfo = { actor: string; at: string; company: string; action: string }
+export type AuditInfo = {
+  actor: string
+  /** 모달을 연 시각. 화면에는 흘러가는 현재 시각을 보여 주므로 쓰지 않는다 */
+  at?: string
+  company: string
+  action: string
+}
+
+/** 흘러가는 현재 시각. 이 부분만 다시 그려서 입력 중인 내용에 영향을 주지 않는다 */
+function LiveClock() {
+  const now = useNow()
+  return <span className="tabular-nums">{formatDateTimeSec(now)}</span>
+}
 
 type Props = {
   title: string
@@ -23,7 +37,8 @@ type Props = {
   reason: string
   onReasonChange: (v: string) => void
   onClose: () => void
-  onSave: () => void
+  /** 실행을 누른 시각('YYYY-MM-DD HH:mm')과 작업 요청자를 넘겨 준다. 히스토리에는 이 값으로 기록한다 */
+  onSave: (at: string, requester: string) => void
   saving?: boolean
   /** 저장 버튼 문구 (기본: 저장 · 히스토리 기록) */
   saveLabel?: string
@@ -58,9 +73,10 @@ export function EditModal({
   children,
 }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null)
+  const [requester, setRequester] = useState('')
   useModalFocus(dialogRef, onClose)
 
-  const canSave = canSubmit && (!showChanges || changes.length > 0) && ticket.trim() !== '' && reason.trim() !== ''
+  const canSave = canSubmit && (!showChanges || changes.length > 0) && ticket.trim() !== '' && requester.trim() !== '' && reason.trim() !== ''
 
   return (
     <div className="fixed inset-0 z-20 flex items-center justify-center bg-navy/55 p-6">
@@ -91,6 +107,9 @@ export function EditModal({
             <Field label={t.ticket.label} required>
               {(id) => <TextInput id={id} value={ticket} onChange={(e) => onTicketChange(e.target.value)} placeholder={t.ticket.placeholder} />}
             </Field>
+            <Field label={t.requester.label} required>
+              {(id) => <TextInput id={id} value={requester} onChange={(e) => setRequester(e.target.value)} placeholder={t.requester.placeholder} autoComplete="off" />}
+            </Field>
             <Field label={t.reason.label} required>
               {(id) => <TextInput id={id} value={reason} onChange={(e) => onReasonChange(e.target.value)} placeholder={t.reason.placeholder} />}
             </Field>
@@ -98,7 +117,7 @@ export function EditModal({
               {(
                 [
                   [t.audit.actor, audit.actor],
-                  [t.audit.at, audit.at],
+                  [t.audit.at, <LiveClock key="clock" />],
                   [t.audit.company, audit.company],
                   [t.audit.action, audit.action],
                 ] as const
@@ -116,7 +135,7 @@ export function EditModal({
           <Button variant="secondary" onClick={onClose} className="h-[42px] px-[18px] text-sm">
             {texts.common.action.cancel}
           </Button>
-          <Button variant="primary" onClick={onSave} loading={saving} disabled={!canSave} className="h-[42px] px-5 text-sm font-semibold">
+          <Button variant="primary" onClick={() => onSave(formatDateTime(), requester.trim())} loading={saving} disabled={!canSave} className="h-[42px] px-5 text-sm font-semibold">
             {saveLabel}
           </Button>
         </div>

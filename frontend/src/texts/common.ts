@@ -58,6 +58,10 @@ export const common = {
       label: 'Zendesk 티켓 번호',
       placeholder: 'TKT-2024-0523-001',
     },
+    requester: {
+      label: '작업 요청자',
+      placeholder: '요청자 이름',
+    },
     reason: {
       label: '작업 사유',
       placeholder: '고객사 요청 내용 또는 내부 처리 사유',
