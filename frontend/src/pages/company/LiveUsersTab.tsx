@@ -148,25 +148,27 @@ export function LiveUsersTab({ company, users, onForceLogout }: Props) {
           onClose={closeModal}
           onSave={confirm}
         >
-          <Card className="overflow-hidden">
-            <div className="border-b border-line-soft px-4 py-2.5 text-xs font-semibold text-ink-2">{t.modal.targets(selectedUsers.length)}</div>
-            <div className="grid grid-cols-[1.6fr_0.8fr_1fr_1.2fr] gap-3 border-b border-line-soft px-4 py-2 text-[11px] font-semibold text-ink-4">
-              <span>{t.columns.user}</span>
-              <span>{t.columns.employeeNo}</span>
-              <span>{t.columns.ip}</span>
-              <span>{t.columns.session}</span>
-            </div>
-            <ul className="m-0 list-none divide-y divide-line-soft p-0">
-              {selectedUsers.map((u) => (
-                <li key={u.id} className="grid grid-cols-[1.6fr_0.8fr_1fr_1.2fr] items-center gap-3 px-4 py-2.5 text-[13px]">
-                  <UserCell user={u} />
-                  <span className="tabular-nums">{u.employeeNo}</span>
-                  <span className="font-mono text-xs">{u.ip}</span>
-                  <span className="font-mono text-xs">{u.session}</span>
-                </li>
-              ))}
-            </ul>
-          </Card>
+          <section aria-label={t.modal.targets(selectedUsers.length)} className="flex flex-col gap-2">
+            <div className="px-1 text-xs font-semibold text-ink-2">{t.modal.targets(selectedUsers.length)}</div>
+            <Card className="overflow-hidden">
+              <div className="grid grid-cols-[1.6fr_0.8fr_1fr_1.2fr] gap-3 border-b border-line-soft px-4 py-2 text-[11px] font-semibold text-ink-4">
+                <span>{t.columns.user}</span>
+                <span>{t.columns.employeeNo}</span>
+                <span>{t.columns.ip}</span>
+                <span>{t.columns.session}</span>
+              </div>
+              <ul className="m-0 list-none divide-y divide-line-soft p-0">
+                {selectedUsers.map((u) => (
+                  <li key={u.id} className="grid grid-cols-[1.6fr_0.8fr_1fr_1.2fr] items-center gap-3 px-4 py-2.5 text-[13px]">
+                    <UserCell user={u} />
+                    <span className="tabular-nums">{u.employeeNo}</span>
+                    <span className="font-mono text-xs">{u.ip}</span>
+                    <span className="font-mono text-xs">{u.session}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </section>
           <Alert tone="danger">{t.modal.warning}</Alert>
         </EditModal>
       )}
