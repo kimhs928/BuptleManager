@@ -47,7 +47,7 @@ export const configManage = {
 
   list: {
     title: '적용된 컨피그',
-    count: (n: number, syncedAt: string) => `${n}개 · 마지막 동기화 ${syncedAt}`,
+    count: (n: number, syncedAt: string) => `${n}개 · 마지막 동기화 (${syncedAt})`,
     columns: { customer: '고객사', type: 'CONFIG TYPE', name: 'CONFIG NAME', value: 'CONFIG VALUE', description: 'CONFIG DESCRIPTION', appliedAt: '적용일자', appliedBy: '컨피그 개발자', action: '작업' },
     typeLabel: { COMPONENT: 'COMPONENT', MODULES: 'MODULES', STANDALONE: '단독', PUBLIC: 'PUBLIC' },
     publicGroup: 'PUBLIC 컨피그',
@@ -55,7 +55,7 @@ export const configManage = {
     groupCount: (n: number) => `${n}개`,
     allCustomers: '전체 고객사',
     noValue: '—',
-    viewDetail: '상세보기',
+    viewDetail: '',
     edit: '수정',
     remove: '삭제',
     readOnly: '수정 불가',

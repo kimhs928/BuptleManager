@@ -31,7 +31,7 @@ export const contract = {
     clear: '검색어 지우기',
     submit: '검색',
     includeDeleted: '삭제된 계약 포함',
-    recentTitle: '최근 조회한 계약',
+    recentTitle: '최근 조회 계약',
     resultTitle: '검색 결과',
     count: (n: number, includeDeleted: boolean) => `${n}건${includeDeleted ? ' · 삭제 포함' : ''}`,
     columns: {

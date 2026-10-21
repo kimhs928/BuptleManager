@@ -89,7 +89,7 @@ export const company = {
 
   config: {
     title: '적용된 컨피그',
-    description: '컨피그 등록은 컨피그 관리 탭에서 작업해주세요.',
+    description: '컨피그 DESCRIPTION 설정은 컨피그 관리 탭에서 작업해주세요.',
     searchLabel: '컨피그 검색',
     searchPlaceholder: '컨피그명 또는 설명 검색',
     searchClear: '검색어 지우기',
@@ -115,10 +115,10 @@ export const company = {
     noValue: '—',
     emptyTitle: '결과 없음',
     emptyDescription: '조건에 맞는 컨피그가 없습니다.',
-    footer: (n: number, syncedAt: string) => `${n}개 · 마지막 동기화 ${syncedAt}`,
+    footer: (n: number, syncedAt: string) => `${n}개 · 마지막 동기화 (${syncedAt})`,
     goManage: '컨피그 관리로 이동',
-    viewValue: '상세보기',
-    viewDescription: '상세보기',
+    viewValue: '',
+    viewDescription: '',
     valueView: {
       title: '컨피그 값',
       fields: { type: 'CONFIG TYPE', name: 'CONFIG NAME', appliedAt: '적용일자', appliedBy: '등록자' },
