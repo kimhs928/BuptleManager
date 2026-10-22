@@ -161,7 +161,7 @@ export const counsel = {
 
   historyEdit: {
     title: '히스토리 액션 수정',
-    description: '액션 유저 · 액션 일자 · 삭제 유무 · 코멘트를 수정할 수 있습니다. 변경 전/후 값이 히스토리에 함께 저장됩니다.',
+    description: '액션 유저 · 액션 일자 · 삭제 유무 · 코멘트를 수정할 수 있습니다.',
     action: '자문 · 히스토리 액션 수정',
     groups: { info: '액션 정보', edit: '수정 항목' },
     fields: { type: '액션 타입', move: '액션 전 → 액션 후', user: '액션 유저', at: '액션 일자', deleted: '삭제 유무', comment: '코멘트' },
