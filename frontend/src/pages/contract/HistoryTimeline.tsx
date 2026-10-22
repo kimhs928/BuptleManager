@@ -3,18 +3,34 @@ import type { ReactNode } from 'react'
 import { ArrowRightIcon, ChevronDownIcon, EditIcon, EyeIcon, UndoIcon } from '../../components/icons'
 import { cn } from '../../lib/cn'
 import { SIGN_CLS, SIGN_METHOD_CODE, STAGE_ORDER } from '../../mocks/contract'
-import type { HistoryRow } from '../../mocks/contract'
+import type { HistoryRow, SignCls, SignMethodCode } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { DeletedBadge } from './shared'
 
 const t = texts.contract.history
 
-export type Item = { type: 'node'; name: string; current: boolean } | { type: 'edge'; row: HistoryRow; back: boolean }
-export type Lane = { back: boolean; items: Item[] }
+/** 타임라인에 그릴 수 있는 이력. 계약 · 자문 이력이 모두 이 모양을 만족한다 */
+export type TimelineRow = {
+  id: string
+  action: string
+  at: string
+  deleted: boolean
+  comment: string
+  from: string
+  to: string
+  user: string
+  stageMove: boolean
+  extra?: { signCls?: SignCls; signMethod?: SignMethodCode }
+}
 
-type Handlers = {
-  onEdit: (row: HistoryRow) => void
-  onDetail: (row: HistoryRow) => void
+export type Item<R extends TimelineRow = HistoryRow> = { type: 'node'; name: string; current: boolean } | { type: 'edge'; row: R; back: boolean }
+export type Lane<R extends TimelineRow = HistoryRow> = { back: boolean; items: Item<R>[] }
+
+type Handlers<R extends TimelineRow> = {
+  /** 없으면 수정 버튼을 그리지 않는다 */
+  onEdit?: (row: R) => void
+  /** 없으면 상세 버튼을 그리지 않는다 */
+  onDetail?: (row: R) => void
 }
 
 /** 세로선 위의 한 칸. 왼쪽에 일시, 가운데에 선과 점, 오른쪽에 내용 */
@@ -39,8 +55,9 @@ function Row({ at, dot, first, last, children }: { at?: string; dot: string; fir
   )
 }
 
-function Entry({ row, back, onEdit, onDetail }: { row: HistoryRow; back: boolean } & Handlers) {
-  const { extra } = row
+function Entry<R extends TimelineRow>({ row, back, onEdit, onDetail }: { row: R; back: boolean } & Handlers<R>) {
+  const signCls = row.extra?.signCls
+  const signMethod = row.extra?.signMethod
   const move = row.stageMove
   return (
     <div
@@ -58,7 +75,7 @@ function Entry({ row, back, onEdit, onDetail }: { row: HistoryRow; back: boolean
           {back && <UndoIcon size={14} className="shrink-0 text-[#c23b22]" />}
           <span className={cn('text-sm font-bold', back && 'text-[#c23b22]', row.deleted && 'text-ink-4 line-through decoration-danger decoration-[1.5px]')}>{row.action}</span>
           {row.deleted && <DeletedBadge label={t.deleted} />}
-          <span className="text-xs text-ink-3">{row.user}</span>
+          <span className="text-[13px] font-medium text-ink-2">{row.user}</span>
           {move && (
             <span className={cn('inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11.5px] font-semibold text-ink-2', back && !row.deleted ? 'bg-white/75' : 'bg-[#f2f2f5]')}>
               {row.from}
@@ -66,23 +83,29 @@ function Entry({ row, back, onEdit, onDetail }: { row: HistoryRow; back: boolean
               {row.to}
             </span>
           )}
-          {extra.signCls !== undefined && (
+          {signCls !== undefined && (
             <span className="rounded-full bg-[#f2f2f5] px-1.5 py-px text-[10.5px] font-semibold text-ink-2">
-              {SIGN_CLS[extra.signCls].label.split(' ')[0]}
-              {extra.signMethod !== undefined && ` · ${SIGN_METHOD_CODE[extra.signMethod]}`}
+              {SIGN_CLS[signCls].label.split(' ')[0]}
+              {signMethod !== undefined && ` · ${SIGN_METHOD_CODE[signMethod]}`}
             </span>
           )}
         </span>
         <span className="text-[12.5px] leading-[1.5] text-ink-2">{row.comment}</span>
       </div>
+      {(onEdit || onDetail) && (
       <span className="ml-auto inline-flex shrink-0 items-center gap-2">
-        <button type="button" aria-label={texts.contract.historyExtra.detail} title={texts.contract.historyExtra.detail} onClick={() => onDetail(row)} className="inline-flex size-[30px] items-center justify-center rounded-ctl border-[1.5px] border-ink bg-surface text-ink hover:bg-hover">
-          <EyeIcon size={15} strokeWidth={2.2} />
-        </button>
-        <button type="button" aria-label={t.editLabel(row.action)} title={t.editLabel(row.action)} onClick={() => onEdit(row)} className="inline-flex size-[30px] items-center justify-center rounded-ctl bg-primary text-white hover:brightness-105">
-          <EditIcon size={14} />
-        </button>
+        {onDetail && (
+          <button type="button" aria-label={texts.contract.historyExtra.detail} title={texts.contract.historyExtra.detail} onClick={() => onDetail(row)} className="inline-flex size-[30px] items-center justify-center rounded-ctl border-[1.5px] border-ink bg-surface text-ink hover:bg-hover">
+            <EyeIcon size={15} strokeWidth={2.2} />
+          </button>
+        )}
+        {onEdit && (
+          <button type="button" aria-label={t.editLabel(row.action)} title={t.editLabel(row.action)} onClick={() => onEdit(row)} className="inline-flex size-[30px] items-center justify-center rounded-ctl bg-primary text-white hover:brightness-105">
+            <EditIcon size={14} />
+          </button>
+        )}
       </span>
+      )}
     </div>
   )
 }
@@ -101,10 +124,9 @@ function Stage({ name, current }: { name: string; current: boolean }) {
   )
 }
 
-const isBack = (row: HistoryRow) => (STAGE_ORDER[row.to] ?? 0) < (STAGE_ORDER[row.from] ?? 0)
 
 /** 진행 줄 하나를 세로 타임라인으로 그린다. 단계는 큰 점, 이력은 작은 점 */
-function Timeline({ items, handlers }: { items: Item[]; handlers: Handlers }) {
+function Timeline<R extends TimelineRow>({ items, handlers }: { items: Item<R>[]; handlers: Handlers<R> }) {
   return (
     <ol className="m-0 flex list-none flex-col p-0">
       {items.map((it, j) => {
@@ -128,23 +150,25 @@ function Timeline({ items, handlers }: { items: Item[]; handlers: Handlers }) {
   )
 }
 
-type Props = Handlers & {
-  lanes: Lane[]
+type Props<R extends TimelineRow> = Handlers<R> & {
+  lanes: Lane<R>[]
   /** 진행 줄 없이 이력만 시간순으로 보여 줄 때 */
-  flatRows: HistoryRow[] | null
+  flatRows?: R[] | null
+  /** 역방향 액션을 가리는 단계 순서. 기본은 계약 단계 */
+  stageOrder?: Record<string, number>
   /** 마지막 줄이 실제로 진행 중인 줄인지 */
   latestShown: boolean
 }
 
-/** 계약 진행 히스토리 (세로 타임라인) */
-export function HistoryTimeline({ lanes, flatRows, latestShown, onEdit, onDetail }: Props) {
+/** 진행 히스토리 (세로 타임라인). 계약 · 자문에서 같이 쓴다 */
+export function HistoryTimeline<R extends TimelineRow>({ lanes, flatRows, latestShown, stageOrder = STAGE_ORDER, onEdit, onDetail }: Props<R>) {
   const handlers = { onEdit, onDetail }
   // 접어 둔 진행 줄 번호
   const [folded, setFolded] = useState<number[]>([])
   const toggle = (i: number) => setFolded((f) => (f.includes(i) ? f.filter((x) => x !== i) : [...f, i]))
 
   if (flatRows) {
-    return <Timeline items={flatRows.map((row) => ({ type: 'edge', row, back: isBack(row) }))} handlers={handlers} />
+    return <Timeline items={flatRows.map((row): Item<R> => ({ type: 'edge', row, back: (stageOrder[row.to] ?? 0) < (stageOrder[row.from] ?? 0) }))} handlers={handlers} />
   }
 
   return (

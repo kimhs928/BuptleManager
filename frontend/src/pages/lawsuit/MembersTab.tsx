@@ -5,6 +5,7 @@ import { cn } from '../../lib/cn'
 import type { LawsuitMember } from '../../mocks/lawsuit'
 import { texts } from '../../texts'
 import { deletedName, deletedRow, tableTd, tableTh } from '../contract/format'
+import { DeletedBadge } from '../contract/shared'
 import { MemberAddModal } from './MemberAddModal'
 import { MemberEditModal } from './MemberEditModal'
 
@@ -50,7 +51,7 @@ export function MembersTab({ lawsuitId, members, onEdit, onAdd }: Props) {
           </label>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] border-collapse text-[13.5px]">
+          <table className="w-full min-w-[1180px] border-collapse text-[13.5px]">
             <thead>
               <tr>
                 <th scope="col" className={cn(tableTh, 'pl-5')}>{t.columns.user}</th>
@@ -58,7 +59,9 @@ export function MembersTab({ lawsuitId, members, onEdit, onAdd }: Props) {
                 <th scope="col" className={tableTh}>{t.columns.phone}</th>
                 <th scope="col" className={tableTh}>{t.columns.roles}</th>
                 <th scope="col" className={tableTh}>{t.columns.dept}</th>
-                <th scope="col" className={tableTh}>{t.columns.deleted}</th>
+                <th scope="col" className={tableTh}>{t.columns.createdAt}</th>
+                <th scope="col" className={tableTh}>{t.columns.updatedAt}</th>
+                <th scope="col" className={tableTh}>{t.columns.deletedAt}</th>
                 <th scope="col" className={cn(tableTh, 'pr-5 text-right')}>{t.columns.action}</th>
               </tr>
             </thead>
@@ -67,7 +70,10 @@ export function MembersTab({ lawsuitId, members, onEdit, onAdd }: Props) {
                 <tr key={m.id} className={cn('border-t border-line-soft', m.deleted ? deletedRow : 'bg-surface hover:bg-hover')}>
                   <td className={cn(tableTd, 'pl-5')}>
                     <span className="flex flex-col gap-0.5">
-                      <span className={cn('font-medium', m.deleted ? deletedName : 'text-ink')}>{m.name}</span>
+                      <span className="flex items-center gap-2">
+                        <span className={cn('font-medium', m.deleted ? deletedName : 'text-ink')}>{m.name}</span>
+                        {m.deleted && <DeletedBadge label={t.deletedLabel} />}
+                      </span>
                       <span className="text-xs text-ink-4">{m.email}</span>
                     </span>
                   </td>
@@ -76,23 +82,16 @@ export function MembersTab({ lawsuitId, members, onEdit, onAdd }: Props) {
                   <td className={tableTd}>
                     <span className="flex flex-wrap gap-1">
                       {m.roles.map((r) => (
-                        <span key={r} className="inline-flex h-[22px] items-center rounded-md border border-divider bg-surface px-2 text-xs font-medium leading-none text-ink-2">
+                        <span key={r} className={cn('inline-flex h-[22px] items-center rounded-md px-2 text-xs font-semibold leading-none', m.deleted ? 'bg-[#f2f2f5] text-ink-4' : 'bg-[#d6336c] text-white')}>
                           {r}
                         </span>
                       ))}
                     </span>
                   </td>
                   <td className={cn(tableTd, 'whitespace-nowrap', m.deleted ? 'text-ink-5' : 'text-ink-2')}>{m.dept}</td>
-                  <td className={cn(tableTd, 'whitespace-nowrap')}>
-                    <span
-                      className={cn(
-                        'inline-flex items-center rounded-full border px-2 py-px text-[11.5px] font-semibold',
-                        m.deleted ? 'border-danger-line bg-danger-soft text-danger-ink' : 'border-success-line bg-success-soft text-success-ink',
-                      )}
-                    >
-                      {m.deleted ? t.deletedLabel : t.active}
-                    </span>
-                  </td>
+                  <td className={cn(tableTd, 'whitespace-nowrap tabular-nums', m.deleted ? 'text-ink-5' : 'text-ink-3')}>{m.createdAt}</td>
+                  <td className={cn(tableTd, 'whitespace-nowrap tabular-nums', m.deleted ? 'text-ink-5' : 'text-ink-3')}>{m.updatedAt}</td>
+                  <td className={cn(tableTd, 'whitespace-nowrap tabular-nums', m.deleted ? 'text-danger-ink' : 'text-ink-5')}>{m.deletedAt || '-'}</td>
                   <td className={cn(tableTd, 'pr-5 text-right')}>
                     <button
                       type="button"

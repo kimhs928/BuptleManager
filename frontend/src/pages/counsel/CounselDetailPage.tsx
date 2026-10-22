@@ -3,7 +3,7 @@ import { CloseIcon, SearchIcon } from '../../components/icons'
 import { CompanyShell } from '../../components/layout/CompanyShell'
 import { Button } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import { getCounselDetail, MOCK_COUNSEL_COMMENTS, MOCK_COUNSEL_HISTORY, MOCK_COUNSEL_MEMBERS, MOCK_COUNSEL_WORKFLOW } from '../../mocks/counsel'
+import { getCounselDetail, MOCK_COUNSEL_COMMENTS, MOCK_COUNSEL_EMAILS, MOCK_COUNSEL_HISTORY, MOCK_COUNSEL_MEMBERS, MOCK_COUNSEL_WORKFLOW } from '../../mocks/counsel'
 import type { CounselComment, CounselDetail, CounselHistoryRow, CounselMember, CounselWorkflow } from '../../mocks/counsel'
 import { texts } from '../../texts'
 import { BasicTab } from './BasicTab'
@@ -157,6 +157,7 @@ export function CounselDetailPage({ counselId, initialTab = 'basic' }: Props) {
             <ProcessTab
               workflow={workflow}
               history={history}
+              emails={MOCK_COUNSEL_EMAILS}
               onSaveRow={(next, fields, ticket) => {
                 setHistory((prev) => prev.map((h) => (h.id === next.id ? next : h)))
                 setToast(t.toast.historySaved(next.action, fields.join(', '), ticket))

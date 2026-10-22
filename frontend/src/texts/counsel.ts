@@ -53,7 +53,7 @@ export const counsel = {
     managed: '관리 자문',
     deleted: '삭제됨',
     tabsLabel: '자문 탭',
-    tabs: { basic: '기본 정보', members: '참여 유저', process: '프로세스 · 히스토리', comments: '코멘트' },
+    tabs: { basic: '기본 정보', members: '참여 유저', process: '프로세스 · 히스토리 · 이메일 내역', comments: '코멘트' },
   },
 
   /** 기본 정보 탭 */
@@ -101,11 +101,11 @@ export const counsel = {
     summary: (total: number, internal: number, external: number) => `${total}명 · 내부 ${internal} · 외부 ${external}`,
     addLabel: '자문 참여 유저 추가',
     add: '추가',
-    columns: { user: '유저', company: '회사명', phone: '번호', roles: '역할', dept: '부서', deleted: '삭제 유무', action: '작업' },
+    columns: { user: '유저', company: '회사명', phone: '번호', roles: '역할', dept: '부서', deleted: '삭제 유무', createdAt: '생성일', updatedAt: '수정일', deletedAt: '삭제일', action: '작업' },
     deleted: '삭제',
     active: '사용',
     edit: '수정',
-    footer: '모든 변경은 티켓 번호와 사유와 함께 변경 히스토리에 기록됩니다.',
+    footer: '',
   },
 
   memberEdit: {
@@ -120,7 +120,7 @@ export const counsel = {
 
   memberAdd: {
     title: '자문 참여 유저 추가',
-    description: '에이스테크놀로지(주) 유저의 이름 · 이메일 · user_id가 모두 일치해야 추가됩니다. 추가 내역이 히스토리에 기록됩니다.',
+    description: '',
     action: '자문 · 참여 유저 추가',
     save: '실행',
     groups: { info: '유저 정보', setting: '참여 설정' },
@@ -146,8 +146,7 @@ export const counsel = {
   process: {
     workflowTitle: '자문 워크플로우',
     readOnly: '수정 불가',
-    settingTitle: '01. 워크플로우 설정',
-    processTitle: '02. 자문 프로세스',
+    processTitle: '01. 자문 프로세스',
     stateLabel: { done: '완료', current: '진행 중', pending: '대기' },
     empty: '없음',
     historyTitle: '자문 진행 히스토리',
@@ -173,14 +172,17 @@ export const counsel = {
   /** 코멘트 탭 */
   comments: {
     title: '자문 코멘트',
-    description: '코멘트 내용과 삭제 유무만 수정할 수 있습니다. 작성자, 타입, 일자는 변경할 수 없습니다.',
+    description: '',
     total: (n: number, deleted: number) => `총 ${n}건 · 삭제 ${deleted}건`,
     columns: { text: '자문 코멘트', type: '코멘트 타입', author: '작성 유저', at: '코멘트 일자', updatedAt: '수정일', deleted: '삭제 유무', deletedAt: '삭제일', action: '작업' },
+    includeDeleted: '삭제된 코멘트 포함',
+    filter: { label: '코멘트 타입', all: '전체' },
+    emptyFiltered: '조건에 맞는 코멘트가 없습니다.',
     more: '자세히 보기',
     deleted: '삭제',
     active: '사용',
     edit: '수정',
-    footer: '모든 변경은 티켓 번호와 사유와 함께 변경 히스토리에 기록됩니다.',
+    footer: '',
   },
 
   commentView: {

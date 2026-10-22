@@ -52,6 +52,7 @@ export function MemberAddModal({ members, onClose, onSave }: Props) {
 
   const save = () => {
     if (!selected) return
+    const now = formatDateTime()
     onSave(
       {
         id: selected.userId,
@@ -63,6 +64,9 @@ export function MemberAddModal({ members, onClose, onSave }: Props) {
         roles,
         dept: selected.dept,
         deleted: false,
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: '',
       },
       ticket.trim(),
     )

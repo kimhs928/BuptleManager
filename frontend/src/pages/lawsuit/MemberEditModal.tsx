@@ -6,6 +6,7 @@ import { LAWSUIT_ROLES } from '../../mocks/lawsuit'
 import type { LawsuitMember } from '../../mocks/lawsuit'
 import { texts } from '../../texts'
 import { makeAudit } from '../contract/audit'
+import { stamp } from '../contract/memberStamp'
 import { joinList } from '../contract/format'
 
 const t = texts.lawsuit.memberEdit
@@ -44,7 +45,7 @@ export function MemberEditModal({ lawsuitId, member, onClose, onSave }: Props) {
       reason={reason}
       onReasonChange={setReason}
       onClose={onClose}
-      onSave={() => onSave({ ...member, roles, deleted }, ticket.trim())}
+      onSave={() => onSave({ ...member, roles, deleted, ...stamp(member, deleted) }, ticket.trim())}
     >
       <FieldGroup title={t.groups.info}>
         <Field label={t.fields.name} readOnlyHint>

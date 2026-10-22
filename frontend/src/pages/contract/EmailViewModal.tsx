@@ -1,12 +1,12 @@
 import { CopyIcon } from '../../components/icons'
 import { Button, ViewModal } from '../../components/ui'
-import type { ContractEmail } from '../../mocks/contract'
+import type { CaseEmail } from '../../mocks/contract'
 import { texts } from '../../texts'
 
 const t = texts.contract.emailView
 
 type Props = {
-  email: ContractEmail
+  email: CaseEmail & { contractId?: string }
   copied: boolean
   onCopy: () => void
   onClose: () => void
@@ -19,7 +19,7 @@ export function EmailViewModal({ email, copied, onCopy, onClose }: Props) {
     [t.fields.receiver, `${email.receiver} · ${email.receiverMail}`],
     [t.fields.createdAt, email.createdAt],
     [t.fields.updatedAt, email.updatedAt],
-    [t.fields.contractId, email.contractId],
+    ...(email.contractId ? ([[t.fields.contractId, email.contractId]] as [string, string][]) : []),
     [t.fields.link, email.link],
   ]
 

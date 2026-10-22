@@ -106,7 +106,7 @@ export const MOCK_TRANSFER_DOCS: Record<TransferType, TransferDoc[]> = {
   ],
   소송: [
     { id: 'LW-2024-0087', title: '임금 청구 소송 (원고 3인)', roles: ['담당자'], status: '진행중', grade: '일반', createdAt: '2024-02-08' },
-    { id: 'LW-2024-0142', title: '상표권 침해 금지 청구', roles: ['참조'], status: '진행중', grade: '일반', createdAt: '2024-03-21' },
+    { id: 'LW-2024-0142', title: '상표권 침해 금지 청구', roles: ['관련인'], status: '진행중', grade: '일반', createdAt: '2024-03-21' },
   ],
 }
 
@@ -114,5 +114,5 @@ export const MOCK_TRANSFER_DOCS: Record<TransferType, TransferDoc[]> = {
 export const TRANSFER_ROLE_SETS: Record<TransferType, string[]> = {
   계약: ['기안자', '검토자', '최종승인자', '부서장', '관련인', '서명인', '기타'],
   자문: ['요청자', '담당 변호사', '검토자', '참조'],
-  소송: ['담당자', '참조'],
+  소송: ['소송 생성자', '담당자', '담당 변호사', '외부 변호사', '관련인'],
 }

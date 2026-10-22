@@ -1,10 +1,13 @@
 import { useState } from 'react'
-import { ArrowRightIcon, ChevronRightIcon, EditIcon, LockIcon, UndoIcon } from '../../components/icons'
+import { ChevronRightIcon, LockIcon } from '../../components/icons'
 import { cn } from '../../lib/cn'
 import { COUNSEL_GUIDE, MOCK_COUNSEL_HISTORY_USERS } from '../../mocks/counsel'
 import type { CounselHistoryRow, CounselWorkflow } from '../../mocks/counsel'
+import type { CaseEmail } from '../../mocks/contract'
 import { texts } from '../../texts'
-import { DeletedBadge } from '../contract/shared'
+import { EmailHistory } from '../contract/EmailHistory'
+import { HistoryTimeline } from '../contract/HistoryTimeline'
+import type { Lane } from '../contract/HistoryTimeline'
 import { HistoryEditModal } from './HistoryEditModal'
 
 const t = texts.counsel.process
@@ -26,14 +29,11 @@ function stagesFor(workflow: CounselWorkflow) {
   return COUNSEL_GUIDE.filter((g) => !g.opt || on(g.opt))
 }
 
-type Item = { type: 'node'; name: string; current: boolean } | { type: 'edge'; row: CounselHistoryRow; back: boolean }
-type Lane = { back: boolean; items: Item[] }
-
 /** 시간순 히스토리를 진행 줄로 나눈다. 단계가 되돌아가면 새 줄에서 다시 시작한다 */
-function buildLanes(history: CounselHistoryRow[], order: Record<string, number>): Lane[] {
+function buildLanes(history: CounselHistoryRow[], order: Record<string, number>): Lane<CounselHistoryRow>[] {
   const sorted = [...history].sort((a, b) => (a.at < b.at ? -1 : a.at > b.at ? 1 : 0))
-  const lanes: Lane[] = []
-  let lane: Lane | null = null
+  const lanes: Lane<CounselHistoryRow>[] = []
+  let lane: Lane<CounselHistoryRow> | null = null
   for (const row of sorted) {
     const back = (order[row.to] ?? 0) < (order[row.from] ?? 0)
     if (!lane || back) {
@@ -42,10 +42,11 @@ function buildLanes(history: CounselHistoryRow[], order: Record<string, number>)
       if (!back) lane.items.push({ type: 'node', name: row.from, current: false })
     }
     lane.items.push({ type: 'edge', row, back })
-    lane.items.push({ type: 'node', name: row.to, current: false })
+    // 단계 이동 여부는 서버가 내려준 stageMove 로 구분한다
+    if (row.stageMove) lane.items.push({ type: 'node', name: row.to, current: false })
   }
-  const last = lanes.at(-1)?.items.at(-1)
-  if (last?.type === 'node') last.current = true
+  const lastNode = lanes.at(-1)?.items.findLast((it) => it.type === 'node')
+  if (lastNode?.type === 'node') lastNode.current = true
   return lanes
 }
 
@@ -58,52 +59,15 @@ function Legend({ className, label }: { className: string; label: string }) {
   )
 }
 
-function HistoryCard({ row, back, onEdit }: { row: CounselHistoryRow; back: boolean; onEdit: () => void }) {
-  return (
-    <span className="inline-flex shrink-0 items-center gap-1">
-      <ArrowRightIcon size={16} className="shrink-0 text-ink-5" />
-      <span
-        className={cn(
-          'flex w-[200px] shrink-0 flex-col gap-1.5 rounded-[10px] px-3 py-2.5',
-          row.deleted ? 'border border-danger-line bg-[#fafafb] shadow-[inset_3px_0_0_var(--color-danger)]' : back ? 'border border-[#ffd3c4] bg-[#ffe6de]' : 'border border-divider bg-surface shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
-        )}
-      >
-        <span className="flex items-center justify-between gap-1.5">
-          <span className={cn('flex min-w-0 items-center gap-[5px] text-xs font-semibold', back ? 'text-[#c23b22]' : 'text-ink')}>
-            {back && <UndoIcon size={13} className="shrink-0" />}
-            <span className={cn('truncate', row.deleted && 'text-ink-4 line-through decoration-danger decoration-[1.5px]')}>{row.action}</span>
-            {row.deleted && <DeletedBadge label={t.deleted} />}
-          </span>
-          <button type="button" aria-label={t.editLabel(row.action)} title={t.editLabel(row.action)} onClick={onEdit} className="inline-flex size-[30px] shrink-0 items-center justify-center rounded-ctl bg-primary text-white hover:brightness-105">
-            <EditIcon size={14} />
-          </button>
-        </span>
-        <span className="whitespace-nowrap text-[11px] tabular-nums text-ink-3">
-          {row.user} · {row.at}
-        </span>
-        <span className={cn('flex min-w-0 items-center gap-[5px] rounded-md px-2 py-1 text-[11.5px] font-semibold text-ink-2', back && !row.deleted ? 'bg-white/75' : 'bg-[#f2f2f5]')}>
-          <span className="truncate">{row.from}</span>
-          <ArrowRightIcon size={12} strokeWidth={2.6} className="shrink-0" />
-          <span className="truncate">{row.to}</span>
-        </span>
-        <span className="flex flex-col gap-0.5 border-t border-line-soft pt-1.5">
-          <span className="text-[10px] font-semibold text-ink-4">{t.comment}</span>
-          <span className="text-[11px] leading-[1.45] text-ink-2">{row.comment}</span>
-        </span>
-      </span>
-      <ArrowRightIcon size={16} className="shrink-0 text-ink-5" />
-    </span>
-  )
-}
-
 type Props = {
   workflow: CounselWorkflow
   history: CounselHistoryRow[]
+  emails: CaseEmail[]
   onSaveRow: (next: CounselHistoryRow, changedFields: string[], ticket: string) => void
 }
 
 /** 프로세스 · 히스토리 탭 (자문 워크플로우 + 진행 히스토리) */
-export function ProcessTab({ workflow, history, onSaveRow }: Props) {
+export function ProcessTab({ workflow, history, emails, onSaveRow }: Props) {
   const [editingRow, setEditingRow] = useState<CounselHistoryRow | null>(null)
 
   const guide = stagesFor(workflow)
@@ -142,27 +106,6 @@ export function ProcessTab({ workflow, history, onSaveRow }: Props) {
         </div>
 
         <div className={cn(box, 'flex flex-col gap-[22px] px-[22px] py-5')}>
-          <div className="flex flex-col gap-2.5">
-            <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <h3 className="m-0 text-[13px] font-semibold">{t.settingTitle}</h3>
-            </div>
-            <dl className="m-0 grid grid-cols-[repeat(auto-fill,minmax(min(100%,340px),1fr))] gap-px overflow-hidden rounded-xl border border-line-soft bg-line-soft">
-              {workflow.attrs.map((a) => (
-                <div key={a.key} className="grid grid-cols-[148px_minmax(0,1fr)] bg-surface">
-                  <dt className="flex items-center bg-[#fafafb] px-3.5 py-2.5 text-[12.5px] font-medium text-ink-3">{a.label}</dt>
-                  <dd className="m-0 flex flex-wrap items-center gap-1 px-3 py-2">
-                    {a.value.map((v) => (
-                      <span key={v} className="inline-flex h-6 items-center rounded-md bg-[#f2f2f5] px-[9px] text-xs font-medium text-ink">
-                        {v}
-                      </span>
-                    ))}
-                    {a.value.length === 0 && <span className="text-xs text-ink-5">{t.empty}</span>}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-
           <div className="flex flex-col gap-2.5">
             <h3 className="m-0 text-[13px] font-semibold">{t.processTitle}</h3>
             <ol className="m-0 flex list-none items-stretch gap-1.5 overflow-x-auto p-0">
@@ -209,36 +152,11 @@ export function ProcessTab({ workflow, history, onSaveRow }: Props) {
             <Legend className="rounded-full border-2 border-[#e5a800] bg-[#fff8db]" label={t.legend.current} />
           </div>
 
-          <ol className="m-0 flex list-none flex-col gap-2.5 p-0">
-            {lanes.map((lane, i) => {
-              const last = i === lanes.length - 1
-              return (
-                <li key={i} className={cn('flex min-w-0 flex-col gap-2.5 rounded-xl px-3.5 py-3', last ? 'border-[1.5px] border-[#e5a800] bg-surface shadow-[0_0_0_3px_rgba(254,198,1,0.16)]' : 'border border-line-soft bg-[#fafafb]')}>
-                  <span className={cn('text-[11.5px] font-semibold', last ? 'text-[#9a6b00]' : 'text-ink-3')}>{t.laneLabel(i + 1, last)}</span>
-                  <div className="flex min-w-0 flex-nowrap items-center gap-1 overflow-x-auto pb-1.5">
-                    {lane.items.map((it, j) =>
-                      it.type === 'node' ? (
-                        <span
-                          key={j}
-                          className={cn(
-                            'box-border inline-flex h-[30px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-semibold',
-                            it.current ? 'border-2 border-[#e5a800] bg-[#fff8db] shadow-[0_0_0_3px_rgba(254,198,1,0.22)]' : 'border border-divider bg-[#f2f2f5] text-ink',
-                          )}
-                        >
-                          {it.name}
-                          {it.current && <span className="rounded-full bg-[#fec601] px-1.5 py-px text-[10px] font-bold text-[#3a2e00]">{t.current}</span>}
-                        </span>
-                      ) : (
-                        <HistoryCard key={j} row={it.row} back={it.back} onEdit={() => setEditingRow(it.row)} />
-                      ),
-                    )}
-                  </div>
-                </li>
-              )
-            })}
-          </ol>
+          <HistoryTimeline lanes={lanes} latestShown stageOrder={order} onEdit={setEditingRow} />
         </div>
       </section>
+
+      <EmailHistory emails={emails} />
 
       {editingRow && (
         <HistoryEditModal

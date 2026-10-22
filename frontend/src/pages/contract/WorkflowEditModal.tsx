@@ -24,7 +24,6 @@ export function WorkflowEditModal({ workflow, onClose, onSave }: Props) {
 
   const none = texts.contract.empty
   const changes: Change[] = []
-  if (form.name !== workflow.name) changes.push({ field: t.fields.name, before: workflow.name, after: form.name })
   form.attrs.forEach((a, i) => {
     const before = workflow.attrs[i]
     if (joinList(a.value, none) !== joinList(before.value, none)) changes.push({ field: a.label, before: joinList(before.value, none), after: joinList(a.value, none) })
@@ -38,7 +37,7 @@ export function WorkflowEditModal({ workflow, onClose, onSave }: Props) {
       description={t.description('CT-2024-0315')}
       saveLabel="실행"
       changes={changes}
-      canSubmit={form.name.trim() !== ''}
+      canSubmit
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}
       onTicketChange={setTicket}
@@ -48,8 +47,8 @@ export function WorkflowEditModal({ workflow, onClose, onSave }: Props) {
       onSave={() => onSave(form, changes.length, ticket.trim())}
     >
       <FieldGroup title={t.groups.workflow}>
-        <Field label={t.fields.name} required>
-          {(id) => <TextInput id={id} value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />}
+        <Field label={t.fields.name} readOnlyHint>
+          {(id) => <TextInput id={id} readOnly value={form.name} />}
         </Field>
         <Field label={t.fields.rev} readOnlyHint>
           {(id) => <TextInput id={id} readOnly value={form.rev} />}

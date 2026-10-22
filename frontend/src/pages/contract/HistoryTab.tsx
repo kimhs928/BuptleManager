@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { Select } from '../../components/ui'
-import { CheckIcon, EyeIcon, LinkIcon } from '../../components/icons'
 import { cn } from '../../lib/cn'
 import { STAGE_ORDER } from '../../mocks/contract'
 import type { ContractEmail, HistoryRow } from '../../mocks/contract'
 import { texts } from '../../texts'
-import { EmailViewModal } from './EmailViewModal'
+import { EmailHistory } from './EmailHistory'
 import { HistoryExtraModal } from './HistoryExtraModal'
 import { HistoryEditModal } from './HistoryEditModal'
 import { HistoryTimeline } from './HistoryTimeline'
@@ -47,10 +46,6 @@ function Legend({ className, label }: { className: string; label: string }) {
   )
 }
 
-const th = 'whitespace-nowrap border-b border-line-soft px-3.5 py-2.5 text-left text-xs font-medium text-ink-4'
-const td = 'px-3.5 py-[11px] whitespace-nowrap'
-const smallBtn = 'inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-[7px] border px-3 text-xs font-medium'
-
 type Props = {
   history: HistoryRow[]
   emails: ContractEmail[]
@@ -61,13 +56,7 @@ type Props = {
 /** 계약 진행 히스토리 · 이메일 발송 내역 */
 export function HistoryTab({ history, emails, members, onSaveRow }: Props) {
   const [editing, setEditing] = useState<HistoryRow | null>(null)
-  const [viewing, setViewing] = useState<ContractEmail | null>(null)
   const [detail, setDetail] = useState<HistoryRow | null>(null)
-  const [copiedId, setCopiedId] = useState('')
-  const timer = useRef<number | undefined>(undefined)
-
-  useEffect(() => () => window.clearTimeout(timer.current), [])
-
   // 검색 조건. 삭제된 히스토리는 기본으로 포함한다
   const [includeDeleted, setIncludeDeleted] = useState(true)
   const [docOnly, setDocOnly] = useState(false)
@@ -91,18 +80,6 @@ export function HistoryTab({ history, emails, members, onSaveRow }: Props) {
     setDocOnly(false)
     setUserFilter('')
     setActionFilter('')
-  }
-
-  const copy = async (e: ContractEmail) => {
-    try {
-      await navigator.clipboard.writeText(e.link)
-    } catch {
-      // 클립보드 권한이 없으면 복사됨 표시를 하지 않는다
-      return
-    }
-    setCopiedId(e.id)
-    window.clearTimeout(timer.current)
-    timer.current = window.setTimeout(() => setCopiedId(''), 1600)
   }
 
   return (
@@ -166,73 +143,7 @@ export function HistoryTab({ history, emails, members, onSaveRow }: Props) {
         </div>
       </section>
 
-      <section aria-labelledby="email-title" className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-center justify-between gap-3 px-3">
-          <h2 id="email-title" className="m-0 text-[13px] font-semibold">
-            {t.emailTitle}
-          </h2>
-          <span className="text-xs text-ink-4">{t.emailCount(emails.length)}</span>
-        </div>
-        <div className={cn(box, 'overflow-hidden')}>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1180px] border-collapse text-[13px]">
-              <thead>
-                <tr>
-                  <th scope="col" className={cn(th, 'pl-5')}>{t.emailColumns.createdAt}</th>
-                  <th scope="col" className={th}>{t.emailColumns.updatedAt}</th>
-                  <th scope="col" className={th}>{t.emailColumns.sender}</th>
-                  <th scope="col" className={th}>{t.emailColumns.receiver}</th>
-                  <th scope="col" className={th}>{t.emailColumns.subject}</th>
-                  <th scope="col" className={th}>{t.emailColumns.link}</th>
-                  <th scope="col" className={th}>{t.emailColumns.body}</th>
-                  <th scope="col" className={cn(th, 'pr-5')}>{t.emailColumns.contractId}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {emails.map((m) => (
-                  <tr key={m.id} className="border-t border-line-soft bg-surface hover:bg-hover">
-                    <td className={cn(td, 'pl-5 tabular-nums text-ink-2')}>{m.createdAt}</td>
-                    <td className={cn(td, 'tabular-nums text-ink-2')}>{m.updatedAt}</td>
-                    <td className={td}>
-                      <span className="flex flex-col gap-0.5 leading-tight">
-                        <span className="font-medium">{m.sender}</span>
-                        <span className="text-[11.5px] text-ink-4">{m.senderMail}</span>
-                      </span>
-                    </td>
-                    <td className={td}>
-                      <span className="flex flex-col gap-0.5 leading-tight">
-                        <span className="font-medium">{m.receiver}</span>
-                        <span className="text-[11.5px] text-ink-4">{m.receiverMail}</span>
-                      </span>
-                    </td>
-                    <td className={cn(td, 'min-w-[240px] whitespace-normal font-medium')}>{m.subject}</td>
-                    <td className={td}>
-                      <button
-                        type="button"
-                        title={m.link}
-                        onClick={() => void copy(m)}
-                        className={cn(smallBtn, copiedId === m.id ? 'border-success-line bg-success-soft text-success-ink' : 'border-line-strong bg-surface text-ink')}
-                      >
-                        {copiedId === m.id ? <CheckIcon size={13} /> : <LinkIcon size={13} />}
-                        {copiedId === m.id ? t.copied : t.copyLink}
-                      </button>
-                    </td>
-                    <td className={td}>
-                      <button type="button" onClick={() => setViewing(m)} className={cn(smallBtn, 'border-line-strong bg-surface text-ink hover:bg-hover')}>
-                        <EyeIcon size={13} />
-                        {t.viewBody}
-                      </button>
-                    </td>
-                    <td className={cn(td, 'pr-5')}>
-                      <code className="rounded-md bg-[#ebebf0] px-[7px] py-0.5 font-mono text-xs text-ink-2">{m.contractId}</code>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+      <EmailHistory emails={emails} />
 
       {editing && (
         <HistoryEditModal
@@ -246,7 +157,6 @@ export function HistoryTab({ history, emails, members, onSaveRow }: Props) {
         />
       )}
       {detail && <HistoryExtraModal row={detail} onClose={() => setDetail(null)} />}
-      {viewing && <EmailViewModal email={viewing} copied={copiedId === viewing.id} onCopy={() => void copy(viewing)} onClose={() => setViewing(null)} />}
     </div>
   )
 }

@@ -11,6 +11,7 @@ export const lawsuit = {
     close: '닫기',
     basicSaved: (n: number, ticket: string) => `소송 ${n}개 항목이 수정되었습니다. ${ticket} 티켓으로 변경 전/후 값이 히스토리에 기록되었습니다.`,
     memberSaved: (name: string, ticket: string) => `${name} 참여 정보가 수정되었습니다. ${ticket} 티켓으로 변경 전/후 값이 히스토리에 기록되었습니다.`,
+    historySaved: (action: string, ticket: string) => `${action} 히스토리의 삭제 유무가 수정되었습니다. ${ticket} 티켓으로 변경 전/후 값이 히스토리에 기록되었습니다.`,
     memberAdded: (name: string, ticket: string) => `"${name}" 님을 참여 유저로 추가했습니다. ${ticket} 티켓으로 히스토리에 기록되었습니다.`,
   },
 
@@ -54,7 +55,29 @@ export const lawsuit = {
     migrated: '마이그레이션',
     deleted: '삭제됨',
     tabsLabel: '소송 탭',
-    tabs: { basic: '기본 정보', members: '참여 유저' },
+    tabs: { basic: '기본 정보', members: '참여 유저', emails: '히스토리·이메일 발송 내역' },
+  },
+
+  historyEdit: {
+    title: '히스토리 수정',
+    description: '삭제 유무만 수정할 수 있습니다.',
+    action: '소송 · 히스토리 수정',
+    groups: { info: '히스토리 정보', edit: '수정 항목' },
+    fields: { type: '액션 타입', at: '액션 일자', sender: '발신자', subject: '메일 제목', deleted: '삭제 유무' },
+    deletedOptions: { N: 'N (사용)', Y: 'Y (삭제)' },
+  },
+
+  /** 이메일 발송 내역 탭의 소송 히스토리 */
+  history: {
+    title: '소송 히스토리',
+    count: (n: number) => `총 ${n}건`,
+    columns: { at: '일시', action: '액션', name: '발신자', subject: '메일 제목', comment: '코멘트', files: '첨부', deletedAt: '삭제일' },
+    includeDeleted: '삭제된 히스토리 포함',
+    system: '시스템 (자동 수신)',
+    sender: '발신',
+    deleted: '삭제',
+    files: (n: number) => `${n}건`,
+    empty: '히스토리가 없습니다.',
   },
 
   /** 기본 정보 탭 */
@@ -67,6 +90,10 @@ export const lawsuit = {
       name: '소송명',
       desc: '소송 설명',
       amount: '소송 금액',
+      suitType: '소송 구분',
+      kind: '소송 타입',
+      startDate: '개시일',
+      endDate: '종료일',
       migrated: '마이그레이션',
       deleted: '삭제 유무',
       updatedAt: '수정일',
@@ -82,7 +109,9 @@ export const lawsuit = {
     readOnly: '읽기 전용',
     courtNote: '기일 · 결과는 대법원 사건 정보와 매일 자동 동기화됩니다.',
     courtLink: '대법원 사건 검색에서 보기',
-    recentTitle: '이 소송의 최근 작업',
+    recentTitle: '최근 히스토리',
+    recentAll: (n: number) => `전체 ${n}건`,
+    recentEmpty: '히스토리가 없습니다.',
   },
 
   basicEdit: {
@@ -101,9 +130,9 @@ export const lawsuit = {
     description: '유저 역할과 삭제 유무만 수정할 수 있습니다. 삭제된 참여자도 함께 표시됩니다.',
     includeDeleted: '삭제된 유저 포함',
     summary: (total: number, internal: number, external: number) => `${total}명 · 내부 ${internal} · 외부 ${external}`,
-    footer: '모든 변경은 티켓 번호와 사유와 함께 변경 히스토리에 기록됩니다.',
+    footer: '',
     add: '추가',
-    columns: { user: '유저', company: '회사명', dept: '부서', phone: '번호', roles: '역할', deleted: '삭제 유무', action: '작업' },
+    columns: { user: '유저', company: '회사명', dept: '부서', phone: '번호', roles: '역할', deleted: '삭제 유무', createdAt: '생성일', updatedAt: '수정일', deletedAt: '삭제일', action: '작업' },
     deleted: '삭제됨',
     deletedLabel: '삭제',
     active: '사용',
@@ -123,7 +152,7 @@ export const lawsuit = {
 
   memberAdd: {
     title: '소송 참여 유저 추가',
-    description: '에이스테크놀로지(주) 유저의 이름 · 이메일 · user_id가 모두 일치해야 추가됩니다. 추가 내역이 히스토리에 기록됩니다.',
+    description: '',
     action: '소송 · 참여 유저 추가',
     save: '실행',
     groups: { info: '유저 정보', setting: '참여 설정' },

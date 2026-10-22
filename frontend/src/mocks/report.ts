@@ -36,3 +36,18 @@ export const MOCK_ERROR_REPORTS: Record<ReportKind, ErrorReport[]> = {
     { id: 'ER-N-0521', docId: 'CN-2024-0318', kind: '알림 발송 실패', message: '요청자에게 답변 완료 알림이 발송되지 않았습니다.', at: '2024-05-21 16:05', status: '해결' },
   ],
 }
+
+/** 기본 추출 쿼리. :report_type · :from_date · :to_date 자리에 화면에서 고른 값이 들어간다 */
+export const REPORT_DEFAULT_QUERY = `SELECT
+  r.id,
+  r.doc_id,
+  r.error_kind,
+  r.message,
+  r.created_at,
+  r.status
+FROM error_report r
+WHERE r.report_type = :report_type
+  AND r.created_at >= :from_date::date
+  AND r.created_at < (:to_date::date + INTERVAL '1 day')
+  AND r.isdeleted = FALSE
+ORDER BY r.created_at DESC;`

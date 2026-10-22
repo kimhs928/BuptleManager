@@ -45,7 +45,7 @@ export function WorkflowTab({ workflow, history, onSave }: Props) {
       <div className="flex flex-col gap-[22px] rounded-card border border-line bg-surface px-[22px] py-5 shadow-card">
         <div className="flex flex-col gap-2.5">
           <h3 className="m-0 text-[13px] font-semibold">{t.shapeTitle}</h3>
-          <dl className="m-0 grid grid-cols-[repeat(auto-fill,minmax(min(100%,340px),1fr))] gap-px overflow-hidden rounded-xl border border-line-soft bg-line-soft">
+          <dl className="m-0 grid grid-cols-[repeat(auto-fill,minmax(min(100%,340px),1fr))] gap-px overflow-hidden rounded-xl border border-line-soft bg-line-soft shadow-card">
             {[
               { label: texts.contract.workflowEdit.fields.name, value: <span className="text-[13px] font-medium">{workflow.name}</span> },
               { label: texts.contract.workflowEdit.fields.rev, value: <code className="rounded-[5px] bg-[#ebebf0] px-1.5 py-px font-mono text-[11.5px] text-ink-2">{workflow.rev}</code> },

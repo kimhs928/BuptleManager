@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { EditModal, Field, FieldGroup, Select, TextInput } from '../../components/ui'
 import type { Change } from '../../components/ui'
 import { formatDateTime } from '../../lib/date'
-import { COUNSEL_STATUSES } from '../../mocks/counsel'
+import { COUNSEL_STATUS_INFO, COUNSEL_STATUSES } from '../../mocks/counsel'
 import type { CounselDetail, CounselStatus } from '../../mocks/counsel'
 import { texts } from '../../texts'
 import { makeAudit } from '../contract/audit'
@@ -26,7 +26,7 @@ export function BasicEditModal({ counsel, onClose, onSave }: Props) {
   const deletedText = (v: boolean) => t.deletedOptions[String(v) as 'true' | 'false']
 
   const changes: Change[] = []
-  if (form.status !== counsel.status) changes.push({ field: t.fields.status, before: counsel.status, after: form.status })
+  if (form.status !== counsel.status) changes.push({ field: t.fields.status, before: COUNSEL_STATUS_INFO[counsel.status].label, after: COUNSEL_STATUS_INFO[form.status].label })
   if (form.name !== counsel.name) changes.push({ field: t.fields.name, before: counsel.name, after: form.name })
   if (form.createdAt !== counsel.createdAt) changes.push({ field: t.fields.createdAt, before: counsel.createdAt, after: form.createdAt })
   if (form.updatedAt !== counsel.updatedAt) changes.push({ field: t.fields.updatedAt, before: counsel.updatedAt, after: form.updatedAt })
@@ -67,7 +67,7 @@ export function BasicEditModal({ counsel, onClose, onSave }: Props) {
             <Select id={id} value={form.status} onChange={(e) => set('status', e.target.value as CounselStatus)}>
               {COUNSEL_STATUSES.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {COUNSEL_STATUS_INFO[s].label}
                 </option>
               ))}
             </Select>

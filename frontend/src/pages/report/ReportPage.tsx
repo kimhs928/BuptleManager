@@ -4,9 +4,10 @@ import { CompanyShell } from '../../components/layout/CompanyShell'
 import { Alert, Card, TextInput } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { MOCK_COMPANY_DETAIL } from '../../mocks/companyDetail'
-import { MOCK_ERROR_REPORTS, MOCK_REPORT_TODAY } from '../../mocks/report'
+import { MOCK_ERROR_REPORTS, MOCK_REPORT_TODAY, REPORT_DEFAULT_QUERY } from '../../mocks/report'
 import type { ReportKind } from '../../mocks/report'
 import { texts } from '../../texts'
+import { QueryPanel } from './QueryPanel'
 import { ReportConfirmModal } from './ReportConfirmModal'
 
 const t = texts.report
@@ -30,13 +31,16 @@ export function ReportPage() {
   const [to, setTo] = useState('')
   const [confirming, setConfirming] = useState(false)
   const [done, setDone] = useState<Done | null>(null)
+  const [query, setQuery] = useState(REPORT_DEFAULT_QUERY)
 
   const company = MOCK_COMPANY_DETAIL.name
   const invalid = from !== '' && to !== '' && from > to
   const periodReady = from !== '' && to !== '' && !invalid
   const ready = kind !== null && periodReady
   const rows = ready ? MOCK_ERROR_REPORTS[kind].filter((r) => r.at.slice(0, 10) >= from && r.at.slice(0, 10) <= to) : []
-  const canExtract = ready && rows.length > 0
+  // 쿼리는 읽기 전용(SELECT)만 허용한다. 서버에서도 같은 검사를 해야 한다
+  const queryError = query.trim() === '' ? t.query.empty : /^\s*select\b/i.test(query) ? null : t.query.notSelect
+  const canExtract = ready && rows.length > 0 && queryError === null
 
   const today = MOCK_REPORT_TODAY
   const monthStart = `${today.slice(0, 8)}01`
@@ -87,6 +91,21 @@ export function ReportPage() {
         <h1 className="m-0 text-[26px] font-bold tracking-[-0.02em]">{t.title}</h1>
         <p className="m-0 text-sm text-ink-3">{t.description(company)}</p>
       </div>
+
+      <QueryPanel
+        query={query}
+        defaultQuery={REPORT_DEFAULT_QUERY}
+        params={[
+          { name: 'report_type', value: kind ?? '' },
+          { name: 'from_date', value: from },
+          { name: 'to_date', value: to },
+        ]}
+        error={queryError}
+        onChange={(next) => {
+          setQuery(next)
+          setDone(null)
+        }}
+      />
 
       <section aria-label={t.step1.title} className="flex flex-col gap-2">
         <span className="px-3 text-[13px] font-semibold">{t.step1.title}</span>
@@ -215,6 +234,7 @@ export function ReportPage() {
             { label: t.confirm.labels.period, value: period },
             { label: t.confirm.labels.count, value: t.step3.unit(rows.length) },
             { label: t.confirm.labels.file, value: fileName },
+            { label: t.confirm.labels.query, value: query === REPORT_DEFAULT_QUERY ? t.confirm.queryValue.default : t.confirm.queryValue.edited },
           ]}
           onClose={() => setConfirming(false)}
           onRun={(ticket) => {

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { EditModal, Field, FieldGroup, Select, Textarea, TextInput } from '../../components/ui'
 import type { Change } from '../../components/ui'
 import { formatDateTime } from '../../lib/date'
-import { LAWSUIT_STATUSES } from '../../mocks/lawsuit'
+import { LAWSUIT_STATUS_INFO, LAWSUIT_STATUSES } from '../../mocks/lawsuit'
 import type { LawsuitDetail, LawsuitStatus } from '../../mocks/lawsuit'
 import { texts } from '../../texts'
 import { makeAudit } from '../contract/audit'
@@ -30,7 +30,7 @@ export function BasicEditModal({ lawsuit, onClose, onSave }: Props) {
   if (form.name !== lawsuit.name) changes.push({ field: l.name, before: lawsuit.name, after: form.name })
   if (form.desc !== lawsuit.desc) changes.push({ field: l.desc, before: lawsuit.desc || '-', after: form.desc || '-' })
   if (form.amount !== lawsuit.amount) changes.push({ field: l.amount, before: texts.lawsuit.won(lawsuit.amount), after: texts.lawsuit.won(form.amount) })
-  if (form.status !== lawsuit.status) changes.push({ field: l.status, before: lawsuit.status, after: form.status })
+  if (form.status !== lawsuit.status) changes.push({ field: l.status, before: LAWSUIT_STATUS_INFO[lawsuit.status].label, after: LAWSUIT_STATUS_INFO[form.status].label })
   if (form.deleted !== lawsuit.deleted) changes.push({ field: l.deleted, before: deletedText(lawsuit.deleted), after: deletedText(form.deleted) })
 
   return (
@@ -68,7 +68,7 @@ export function BasicEditModal({ lawsuit, onClose, onSave }: Props) {
             <Select id={id} value={form.status} onChange={(e) => set('status', e.target.value as LawsuitStatus)}>
               {LAWSUIT_STATUSES.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {LAWSUIT_STATUS_INFO[s].label}
                 </option>
               ))}
             </Select>

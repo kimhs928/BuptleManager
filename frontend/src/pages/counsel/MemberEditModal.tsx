@@ -6,6 +6,7 @@ import { COUNSEL_ROLES } from '../../mocks/counsel'
 import type { CounselMember } from '../../mocks/counsel'
 import { texts } from '../../texts'
 import { makeAudit } from '../contract/audit'
+import { stamp } from '../contract/memberStamp'
 import { joinList } from '../contract/format'
 
 const t = texts.counsel.memberEdit
@@ -48,7 +49,7 @@ export function MemberEditModal({ counselId, member, onClose, onSave }: Props) {
       reason={reason}
       onReasonChange={setReason}
       onClose={onClose}
-      onSave={() => onSave(form, ticket.trim())}
+      onSave={() => onSave({ ...form, ...stamp(member, form.deleted) }, ticket.trim())}
     >
       <FieldGroup title={t.groups.info}>
         <Field label={t.fields.name} readOnlyHint>

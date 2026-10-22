@@ -43,7 +43,6 @@ export function HistoryExtraModal({ row, onClose }: Props) {
   const { extra } = row
   const info = HTML_TYPE_INFO[extra.htmlType]
   const button = docButtonState(row)
-  const variables = Object.entries(extra.textVariable ?? {})
 
   return (
     <ViewModal wide title={t.title} description={`${row.action} · ${row.at}`} onClose={onClose}>
@@ -63,7 +62,7 @@ export function HistoryExtraModal({ row, onClose }: Props) {
       <Section title={t.htmlType}>
         <Rows
           rows={[
-            [t.fields.htmlType, <span key="ht" className="inline-flex items-center gap-2"><span className={chip}>html_type {extra.htmlType}</span>{info.label}</span>],
+            [t.fields.htmlType, <span key="ht" className="inline-flex items-center gap-2"><span className={chip}>{extra.htmlType}</span>{info.label}</span>],
             [t.fields.actions, info.actions],
             [t.fields.screen, info.screen],
           ]}
@@ -106,7 +105,7 @@ export function HistoryExtraModal({ row, onClose }: Props) {
                 t.fields.signCls,
                 extra.signCls !== undefined ? (
                   <span key="sc" className="inline-flex flex-wrap items-center gap-2">
-                    <span className={chip}>sign_cls {extra.signCls}</span>
+                    <span className={chip}>{extra.signCls}</span>
                     {SIGN_CLS[extra.signCls].label}
                     <code className="font-mono text-[11px] font-normal text-ink-4">{SIGN_CLS[extra.signCls].constant}</code>
                   </span>
@@ -186,24 +185,6 @@ export function HistoryExtraModal({ row, onClose }: Props) {
           <Rows rows={[[t.fields.transferKind, extra.transfer.kind], [t.fields.transferMove, `${extra.transfer.from} → ${extra.transfer.to}`]]} />
         </Section>
       )}
-
-      <Section title={t.variables}>
-        {variables.length > 0 ? (
-          <>
-            <dl className="m-0 grid grid-cols-[150px_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-[12.5px]">
-              {variables.map(([k, v]) => (
-                <div key={k} className="contents">
-                  <dt className="font-mono text-ink-4">{k}</dt>
-                  <dd className="m-0 break-words">{v}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className="m-0 mt-2.5 text-[11.5px] leading-normal text-ink-4">{t.variablesNote}</p>
-          </>
-        ) : (
-          <span className="text-[13px] text-ink-5">{t.none}</span>
-        )}
-      </Section>
     </ViewModal>
   )
 }

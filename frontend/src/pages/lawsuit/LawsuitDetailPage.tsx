@@ -3,19 +3,21 @@ import { CloseIcon, SearchIcon } from '../../components/icons'
 import { CompanyShell } from '../../components/layout/CompanyShell'
 import { Button } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import { getLawsuitDetail, MOCK_LAWSUIT_MEMBERS } from '../../mocks/lawsuit'
-import type { LawsuitDetail, LawsuitMember } from '../../mocks/lawsuit'
+import { getLawsuitDetail, MOCK_LAWSUIT_EMAILS, MOCK_LAWSUIT_HISTORY, MOCK_LAWSUIT_MEMBERS } from '../../mocks/lawsuit'
+import type { LawsuitDetail, LawsuitHistoryRow, LawsuitMember } from '../../mocks/lawsuit'
 import { texts } from '../../texts'
 import { BasicTab } from './BasicTab'
+import { EmailHistory } from '../contract/EmailHistory'
+import { LawsuitHistory } from './LawsuitHistory'
 import { MembersTab } from './MembersTab'
 import { StatusDot } from './shared'
 
 const t = texts.lawsuit
 
 /** 기본 정보 · 참여 유저 */
-export type LawsuitTab = 'basic' | 'members'
+export type LawsuitTab = 'basic' | 'members' | 'emails'
 
-const tabKeys: LawsuitTab[] = ['basic', 'members']
+const tabKeys: LawsuitTab[] = ['basic', 'members', 'emails']
 
 type Props = {
   /** 보여 줄 소송 ID */
@@ -31,6 +33,7 @@ export function LawsuitDetailPage({ lawsuitId, initialTab = 'basic' }: Props) {
   const [lawsuit, setLawsuit] = useState<LawsuitDetail>(() => getLawsuitDetail(lawsuitId))
   const [members, setMembers] = useState<LawsuitMember[]>(MOCK_LAWSUIT_MEMBERS)
   const [toast, setToast] = useState('')
+  const [history, setHistory] = useState<LawsuitHistoryRow[]>(MOCK_LAWSUIT_HISTORY)
   const [query, setQuery] = useState(lawsuitId)
 
   const changeTab = (next: LawsuitTab) => {
@@ -145,6 +148,18 @@ export function LawsuitDetailPage({ lawsuitId, initialTab = 'basic' }: Props) {
                 setToast(t.toast.memberAdded(member.name, ticket))
               }}
             />
+          )}
+          {tab === 'emails' && (
+            <div className="flex flex-col gap-6">
+              <LawsuitHistory
+                rows={history}
+                onSave={(next, ticket) => {
+                  setHistory((prev) => prev.map((h) => (h.id === next.id ? next : h)))
+                  setToast(t.toast.historySaved(next.actionText, ticket))
+                }}
+              />
+              <EmailHistory emails={MOCK_LAWSUIT_EMAILS} />
+            </div>
           )}
         </div>
       </div>

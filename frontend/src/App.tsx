@@ -26,7 +26,7 @@ const companyTabs: CompanyTab[] = ['basic', 'config', 'users']
 const contractTabs: ContractTab[] = ['basic', 'members', 'workflow']
 
 const counselTabs: CounselTab[] = ['basic', 'members', 'process', 'comments']
-const lawsuitTabs: LawsuitTab[] = ['basic', 'members']
+const lawsuitTabs: LawsuitTab[] = ['basic', 'members', 'emails']
 
 const loginViews: LoginView[] = ['login', 'network', 'denied']
 

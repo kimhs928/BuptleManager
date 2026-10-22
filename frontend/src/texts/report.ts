@@ -4,13 +4,27 @@ export const report = {
 
   title: '오류 리포트 추출',
   description: (company: string) =>
-    `${company}의 오류 리포트를 종류와 기간으로 선택해 엑셀 파일로 추출합니다. 1, 2를 선택하면 추출 요약이 나타납니다. 추출 작업은 변경 히스토리에 기록됩니다.`,
+    `${company}의 오류 리포트를 종류와 기간으로 선택해 엑셀 파일로 추출합니다.`,
 
   done: {
     title: '추출이 완료되었습니다',
     detail: (name: string, count: number, ticket: string) => `${name} · ${count}건 · ${ticket} 티켓으로 변경 히스토리에 기록되었습니다`,
     download: '다시 다운로드',
     close: '닫기',
+  },
+
+  query: {
+    title: '추출 쿼리',
+    hint: '',
+    show: '쿼리 보기',
+    hide: '쿼리 접기',
+    edited: '수정됨',
+    reset: '기본 쿼리로 되돌리기',
+    params: '치환 값',
+    unset: '(선택 전)',
+    empty: '쿼리를 입력해 주세요.',
+    notSelect: 'SELECT 문만 실행할 수 있습니다.',
+    editLabel: '추출 쿼리 편집',
   },
 
   step1: {
@@ -47,7 +61,8 @@ export const report = {
     action: '오류 리포트 · 추출',
     run: '실행',
     conditions: '추출 조건',
-    labels: { kind: '리포트 종류', period: '기간', count: '추출 건수', file: '파일' },
+    labels: { kind: '리포트 종류', period: '기간', count: '추출 건수', file: '파일', query: '추출 쿼리' },
+    queryValue: { default: '기본 쿼리', edited: '수정한 쿼리' },
     privacy: '추출 파일은 개인정보가 포함될 수 있습니다. 업무 목적 외에는 사용하지 말고 사용 후 폐기해 주세요. 추출 작업자와 일시, 조건이 변경 히스토리에 기록됩니다.',
   },
 } as const

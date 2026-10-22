@@ -42,11 +42,11 @@ export function BasicTab({ counsel, onSave }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-end gap-3">
-        <span className="text-xs text-ink-4">{t.editHint}</span>
+      <div className="flex items-center justify-start gap-3">
         <Button size="md" icon={<EditIcon size={14} />} onClick={() => setEditing(true)} className="h-9 rounded-ctl px-[18px] font-semibold">
           {t.edit}
         </Button>
+        <span className="text-xs text-ink-4">{t.editHint}</span>
       </div>
 
       <div className="grid grid-cols-1 items-start gap-7 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">

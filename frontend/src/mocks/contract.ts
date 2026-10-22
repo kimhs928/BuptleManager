@@ -336,7 +336,8 @@ export const MOCK_HISTORY: HistoryRow[] = [
 /** 히스토리 액션 유저로 선택할 수 있는 계약 참여 유저 */
 export const MOCK_HISTORY_USERS = ['김효선', '박부장', '장변호사', '이법무', '김날인', '한도윤', '김회수']
 
-export type ContractEmail = {
+/** 이메일 발송 내역 한 건 (계약 · 자문 · 소송 공통) */
+export type CaseEmail = {
   id: string
   createdAt: string
   updatedAt: string
@@ -346,9 +347,10 @@ export type ContractEmail = {
   receiverMail: string
   subject: string
   link: string
-  contractId: string
   body: string
 }
+
+export type ContractEmail = CaseEmail & { contractId: string }
 
 export const MOCK_EMAILS: ContractEmail[] = [
   {

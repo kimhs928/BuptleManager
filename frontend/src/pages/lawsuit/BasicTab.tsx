@@ -3,12 +3,16 @@ import type { ReactNode } from 'react'
 import { ArrowRightIcon, EditIcon, LockIcon } from '../../components/icons'
 import { Button } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import { MOCK_COURT_INFO, MOCK_RECENT_JOBS } from '../../mocks/lawsuit'
+import { MOCK_COURT_INFO } from '../../mocks/lawsuit'
 import type { LawsuitDetail } from '../../mocks/lawsuit'
+import { historyHref, historyOf } from '../../mocks/history'
 import { texts } from '../../texts'
 import { SectionHead } from '../contract/shared'
 import { BasicEditModal } from './BasicEditModal'
 import { StatusDot } from './shared'
+
+/** 최근 히스토리에 보여 주는 최대 건수 */
+const RECENT_LIMIT = 10
 
 const t = texts.lawsuit.basic
 
@@ -34,6 +38,10 @@ export function BasicTab({ lawsuit, onSave }: Props) {
   const [editing, setEditing] = useState(false)
   const court = MOCK_COURT_INFO
 
+  // 이 소송의 처리 내역(변경 히스토리). 전체 보기는 검색 조건이 걸린 처리 내역 히스토리 화면으로 연다
+  const changes = historyOf('소송', lawsuit.id)
+  const recentHistory = changes.slice(0, RECENT_LIMIT)
+
   return (
     <div className="grid grid-cols-1 items-start gap-7 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
       <div className="flex flex-col gap-6">
@@ -56,11 +64,19 @@ export function BasicTab({ lawsuit, onSave }: Props) {
               <Row label={t.fields.name}>
                 <span className="font-medium">{lawsuit.name}</span>
               </Row>
+              <Row label={t.fields.suitType}>{lawsuit.suitType}</Row>
+              <Row label={t.fields.kind}>{lawsuit.kind}</Row>
               <Row label={t.fields.desc}>
                 <span className="whitespace-pre-wrap leading-[1.6] text-ink-2">{lawsuit.desc || t.emptyDesc}</span>
               </Row>
               <Row label={t.fields.amount}>
                 <span className="tabular-nums">{texts.lawsuit.won(lawsuit.amount)}</span>
+              </Row>
+              <Row label={t.fields.startDate}>
+                <span className="tabular-nums">{lawsuit.startDate || t.emptyDesc}</span>
+              </Row>
+              <Row label={t.fields.endDate}>
+                <span className="tabular-nums">{lawsuit.endDate || t.emptyDesc}</span>
               </Row>
               <Row label={t.fields.migrated}>{t.migrated[String(lawsuit.migrated) as 'true' | 'false']}</Row>
               <Row label={t.fields.deleted}>{lawsuit.deleted ? t.deletedYes : t.deletedNo}</Row>
@@ -112,18 +128,31 @@ export function BasicTab({ lawsuit, onSave }: Props) {
         </section>
       </div>
 
-      <section aria-labelledby="lawsuit-recent" className="flex flex-col gap-2">
-        <SectionHead id="lawsuit-recent" title={t.recentTitle} />
-        <div className={box}>
-          <ul className="m-0 flex list-none flex-col divide-y divide-line-soft px-[18px] py-1">
-            {MOCK_RECENT_JOBS.map((j) => (
-              <li key={j.id} className="flex flex-col gap-[3px] py-2.5">
-                <span className="text-[13px] leading-[1.45]">{j.title}</span>
-                <span className="text-xs text-ink-4">{j.meta}</span>
-              </li>
-            ))}
-          </ul>
+      <section aria-labelledby="lawsuit-recent" className="flex flex-col gap-1.5">
+        <div className="flex items-baseline justify-between px-3">
+          <h2 id="lawsuit-recent" className="m-0 text-[13px] font-semibold">
+            {t.recentTitle}
+          </h2>
+          <a href={historyHref('소송', lawsuit.id)} className="text-xs text-link hover:underline">
+            {t.recentAll(changes.length)}
+          </a>
         </div>
+        <ol className={cn(box, 'm-0 list-none p-0')}>
+          {recentHistory.map((h) => (
+            <li key={h.id} className="flex gap-2.5 border-t border-line-soft px-3.5 py-2.5 first:border-t-0">
+              <span aria-hidden="true" className="mt-[5px] size-2 shrink-0 rounded-full bg-primary" />
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <span className="text-[13px]">
+                  {h.type} · {h.target}
+                </span>
+                <span className="text-xs text-ink-4">
+                  {h.user} · {h.at}
+                </span>
+              </span>
+            </li>
+          ))}
+          {recentHistory.length === 0 && <li className="px-3.5 py-5 text-center text-[13px] text-ink-4">{t.recentEmpty}</li>}
+        </ol>
       </section>
 
       {editing && (
