@@ -36,6 +36,13 @@ docker compose up -d db     # PostgreSQL 17
 - 스키마 변경은 Flyway 마이그레이션으로만 한다: `infra/src/main/resources/db/migration/V{번호}__{설명}.sql`
 - Hibernate 는 `ddl-auto: validate` 로 엔티티와 스키마 일치만 검증한다.
 - 이미 적용된 마이그레이션 파일은 수정하지 않고 새 버전을 추가한다.
+- 현재 스키마: `V1__init_schema.sql`(ERD 전체 테이블), `V2__seed_roles.sql`(권한 4종 기초 데이터). 엔티티는 `infra` 모듈의 `app.buptle.infra.{user,company,config,operation,batch}`.
+- enum 은 PostgreSQL enum 타입 대신 `varchar` + `CHECK` 로 저장한다.
+- ERD 문서와 달라진 점 (프론트 화면 기준)
+  - `configs.config_scope`: `MODULE` → `MODULES`, `PUBLIC` 추가 / 컨피그명은 단독이 아니라 (이름, 타입) 조합이 유일
+  - `companies.service_platform` 추가 (Biz/Nova 구분)
+  - `operation_logs.zendesk_ticket_id` 추가 (티켓 번호와 별개인 Zendesk 티켓 ID)
+  - `batch_runs.service_platform` 추가
 - 로컬 DB 에 Flyway 도입 전에 만든 테이블이 남아 있으면 기동이 실패한다. 아래로 초기화한다.
   ```bash
   docker compose exec db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "drop schema public cascade; create schema public;"'
