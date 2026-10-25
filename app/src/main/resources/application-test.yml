@@ -1,0 +1,4 @@
+# 데이터소스는 Testcontainers(@ServiceConnection)가 제공
+spring:
+  jpa:
+    show-sql: false

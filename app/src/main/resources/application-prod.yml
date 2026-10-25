@@ -1,0 +1,11 @@
+server:
+  # nginx 뒤에서 실제 클라이언트 정보(X-Forwarded-*) 사용
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        secure: true
+
+logging:
+  level:
+    root: info
