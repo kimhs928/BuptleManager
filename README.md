@@ -18,6 +18,7 @@ docker compose up -d db     # PostgreSQL 17
 - 프로파일은 `SPRING_PROFILES_ACTIVE` 로 정한다. 지정하지 않으면 `local`, 운영은 `prod`.
 - 헬스체크: `GET /actuator/health` (공개). 그 외 Actuator 엔드포인트는 노출하지 않는다.
 - API 문서(local 전용): `/swagger-ui/index.html`
+- local 프로파일은 기동 시 개발용 데이터를 채운다: 작업 유저 1개(`dev@buptle.local`, 운영개발자)와 고객사 샘플 8곳. 이미 있으면 건너뛴다. (`application-local.yml` 의 `buptle.dev-seed`, `buptle.dev-user`)
 
 ### 3. 테스트
 ```bash
@@ -56,3 +57,4 @@ docker compose up -d db     # PostgreSQL 17
   ```
 - 업무 규칙 위반은 `BusinessException(ErrorCode)` 를 던진다 (`core` 모듈). 예상하지 못한 오류는 내부 정보를 숨기고 500 으로 응답한다.
 - 인증이 필요 없는 경로는 `SecurityConfig` 에 명시한 것뿐이다. 새 공개 경로는 반드시 거기에 추가한다.
+- 로그인 구현 전까지 `local` 프로파일은 인증 없이 모든 요청을 허용한다(CSRF 포함). `prod` 에서는 적용되지 않으므로 운영에는 반드시 `SPRING_PROFILES_ACTIVE=prod` 를 지정한다.

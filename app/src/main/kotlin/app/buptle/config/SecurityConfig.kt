@@ -1,5 +1,6 @@
 package app.buptle.config
 
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -21,6 +22,8 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler
 @EnableWebSecurity
 class SecurityConfig {
 
+	private val log = LoggerFactory.getLogger(javaClass)
+
 	@Bean
 	fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
 		http
@@ -37,13 +40,18 @@ class SecurityConfig {
 		return http.build()
 	}
 
-	/** API 문서는 local 프로파일에서만 공개 */
+	/**
+	 * 로그인 구현 전 개발용: local 프로파일에서는 인증 없이 모든 요청을 허용한다. (CSRF 도 끈다)
+	 * prod 프로파일에서는 이 체인이 만들어지지 않아 위의 기본 규칙(인증 필요)이 적용된다.
+	 * TODO: 로그인 구현 시 제거
+	 */
 	@Bean
 	@Order(0)
 	@Profile("local")
-	fun apiDocsFilterChain(http: HttpSecurity): SecurityFilterChain {
+	fun localOpenFilterChain(http: HttpSecurity): SecurityFilterChain {
+		log.warn("local 프로파일: 인증 없이 모든 요청을 허용합니다. (로그인 구현 전 개발용)")
 		http
-			.securityMatcher("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
+			.securityMatcher("/**")
 			.authorizeHttpRequests { it.anyRequest().permitAll() }
 			.csrf { it.disable() }
 		return http.build()
