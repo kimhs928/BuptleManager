@@ -15,3 +15,11 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+
+buptle:
+  # 로그인 구현 전 개발용. 시드 데이터(작업 유저, 고객사 샘플)를 기동 시 채운다.
+  dev-seed:
+    enabled: true
+  dev-user:
+    email: dev@buptle.local
+    name: 홍길동
