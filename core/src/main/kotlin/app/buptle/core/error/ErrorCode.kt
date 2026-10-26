@@ -15,6 +15,7 @@ enum class CommonErrorCode(override val status: Int, override val message: Strin
 	METHOD_NOT_ALLOWED(405, "허용되지 않는 요청 방식입니다."),
 	CONFLICT(409, "이미 처리된 요청이거나 충돌이 발생했습니다."),
 	INTERNAL_ERROR(500, "서버 오류가 발생했습니다."),
+	NOT_IMPLEMENTED(501, "아직 구현되지 않은 API 입니다."),
 	;
 
 	override val code: String get() = name
