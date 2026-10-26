@@ -129,23 +129,37 @@ class CompanyApiTest(
 	fun `스키마명으로 기본 정보를 조회한다`() {
 		givenCompanies()
 
-		mockMvc.get("/api/companies/acetech").andExpect {
+		mockMvc.get("/api/biz/companies/acetech").andExpect {
 			status { isOk() }
 			jsonPath("$.name") { value("에이스테크놀로지(주)") }
 			jsonPath("$.platform") { value("BUPTLE_BIZ") }
 			jsonPath("$.representative") { value("김민수") }
-			jsonPath("$.businessNumber") { value("123-45-67890") }
-			jsonPath("$.telephoneNumber") { value("02-1234-5678") }
+			jsonPath("$.schema") { value("acetech") }
+			jsonPath("$.businessNo") { value("123-45-67890") }
+			jsonPath("$.phone") { value("02-1234-5678") }
 			jsonPath("$.address") { value("서울특별시 강남구") }
-			jsonPath("$.userCount") { value(128) }
+			jsonPath("$.users") { value(128) }
 			jsonPath("$.userLimit") { value(200) }
-			jsonPath("$.createdAt") { value("2024-03-15T00:00:00Z") }
+			jsonPath("$.createdAt") { value("2024-03-15") }
+		}
+	}
+
+	@Test
+	fun `값이 없는 문자열 항목은 빈 문자열로 내려간다`() {
+		givenCompanies()
+
+		mockMvc.get("/api/biz/companies/hanil_ind").andExpect {
+			status { isOk() }
+			jsonPath("$.representative") { value("") }
+			jsonPath("$.businessNo") { value("") }
+			jsonPath("$.phone") { value("") }
+			jsonPath("$.address") { value("") }
 		}
 	}
 
 	@Test
 	fun `없는 고객사는 404 이다`() {
-		mockMvc.get("/api/companies/none").andExpect {
+		mockMvc.get("/api/biz/companies/none").andExpect {
 			status { isNotFound() }
 			jsonPath("$.code") { value("NOT_FOUND") }
 			jsonPath("$.detail") { value("고객사를 찾을 수 없습니다.") }
