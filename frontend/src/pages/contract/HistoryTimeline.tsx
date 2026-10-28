@@ -31,6 +31,8 @@ type Handlers<R extends TimelineRow> = {
   onEdit?: (row: R) => void
   /** 없으면 상세 버튼을 그리지 않는다 */
   onDetail?: (row: R) => void
+  /** 있으면 이력의 기본 코멘트 줄 대신 이 내용을 그린다 (본문 · 코멘트 토글 등) */
+  renderBody?: (row: R) => ReactNode
 }
 
 /** 세로선 위의 한 칸. 왼쪽에 일시, 가운데에 선과 점, 오른쪽에 내용 */
@@ -55,7 +57,7 @@ function Row({ at, dot, first, last, children }: { at?: string; dot: string; fir
   )
 }
 
-function Entry<R extends TimelineRow>({ row, back, onEdit, onDetail }: { row: R; back: boolean } & Handlers<R>) {
+function Entry<R extends TimelineRow>({ row, back, onEdit, onDetail, renderBody }: { row: R; back: boolean } & Handlers<R>) {
   const signCls = row.extra?.signCls
   const signMethod = row.extra?.signMethod
   const move = row.stageMove
@@ -90,7 +92,7 @@ function Entry<R extends TimelineRow>({ row, back, onEdit, onDetail }: { row: R;
             </span>
           )}
         </span>
-        <span className="text-[12.5px] leading-[1.5] text-ink-2">{row.comment}</span>
+        {renderBody ? renderBody(row) : <span className="text-[12.5px] leading-[1.5] text-ink-2">{row.comment}</span>}
       </div>
       {(onEdit || onDetail) && (
       <span className="ml-auto inline-flex shrink-0 items-center gap-2">
@@ -161,8 +163,8 @@ type Props<R extends TimelineRow> = Handlers<R> & {
 }
 
 /** 진행 히스토리 (세로 타임라인). 계약 · 자문에서 같이 쓴다 */
-export function HistoryTimeline<R extends TimelineRow>({ lanes, flatRows, latestShown, stageOrder = STAGE_ORDER, onEdit, onDetail }: Props<R>) {
-  const handlers = { onEdit, onDetail }
+export function HistoryTimeline<R extends TimelineRow>({ lanes, flatRows, latestShown, stageOrder = STAGE_ORDER, onEdit, onDetail, renderBody }: Props<R>) {
+  const handlers = { onEdit, onDetail, renderBody }
   // 접어 둔 진행 줄 번호
   const [folded, setFolded] = useState<number[]>([])
   const toggle = (i: number) => setFolded((f) => (f.includes(i) ? f.filter((x) => x !== i) : [...f, i]))

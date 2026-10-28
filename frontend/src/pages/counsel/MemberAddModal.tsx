@@ -4,7 +4,7 @@ import { CheckGroup, EditModal, Field, FieldGroup, GroupField, TextInput } from 
 import type { Change } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { formatDateTime } from '../../lib/date'
-import { COUNSEL_ROLES, MOCK_DIRECTORY_USERS } from '../../mocks/counsel'
+import { INTERNAL_COUNSEL_ROLES, MOCK_DIRECTORY_USERS } from '../../mocks/counsel'
 import type { CounselMember } from '../../mocks/counsel'
 import { texts } from '../../texts'
 import { makeAudit } from '../contract/audit'
@@ -63,6 +63,9 @@ export function MemberAddModal({ members, onClose, onSave }: Props) {
         phone: selected.phone,
         roles,
         dept: selected.dept,
+        sysRoles: ['일반유저'],
+        approvalType: '',
+        approvalStatus: '',
         deleted: false,
         createdAt: now,
         updatedAt: now,
@@ -120,7 +123,7 @@ export function MemberAddModal({ members, onClose, onSave }: Props) {
 
       <FieldGroup title={t.groups.setting} columns={1}>
         <GroupField label={t.rolesLabel} hint={t.rolesNote} required>
-          <CheckGroup label={t.rolesLabel} options={COUNSEL_ROLES} value={roles} onChange={setRoles} />
+          <CheckGroup label={t.rolesLabel} options={INTERNAL_COUNSEL_ROLES} value={roles} onChange={setRoles} />
         </GroupField>
         <span className="text-xs text-ink-4">{t.activeNote}</span>
       </FieldGroup>

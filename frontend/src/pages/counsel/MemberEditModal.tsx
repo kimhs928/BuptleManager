@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { CheckGroup, EditModal, Field, FieldGroup, GroupField, Select, TextInput } from '../../components/ui'
 import type { Change } from '../../components/ui'
 import { formatDateTime } from '../../lib/date'
-import { COUNSEL_ROLES } from '../../mocks/counsel'
+import { COUNSEL_ROLES, INTERNAL_COUNSEL_ROLES } from '../../mocks/counsel'
 import type { CounselMember } from '../../mocks/counsel'
 import { texts } from '../../texts'
 import { makeAudit } from '../contract/audit'
@@ -58,6 +58,18 @@ export function MemberEditModal({ counselId, member, onClose, onSave }: Props) {
         <Field label={t.fields.email} readOnlyHint>
           {(id) => <TextInput id={id} readOnly value={member.email} />}
         </Field>
+        <Field label={t.fields.kind} readOnlyHint>
+          {(id) => <TextInput id={id} readOnly value={texts.counsel.members.kind[member.userId ? 'internal' : 'external']} />}
+        </Field>
+        <Field label={t.fields.sysRoles} readOnlyHint>
+          {(id) => <TextInput id={id} readOnly value={member.userId && member.sysRoles.length > 0 ? member.sysRoles.join(', ') : '-'} />}
+        </Field>
+        <Field label={t.fields.approvalType} readOnlyHint>
+          {(id) => <TextInput id={id} readOnly value={member.approvalType || '-'} />}
+        </Field>
+        <Field label={t.fields.approvalStatus} readOnlyHint>
+          {(id) => <TextInput id={id} readOnly value={member.approvalStatus || '-'} />}
+        </Field>
         <Field label={t.fields.company}>{(id) => <TextInput id={id} value={form.company} onChange={(e) => set('company', e.target.value)} />}</Field>
         <Field label={t.fields.phone}>{(id) => <TextInput id={id} type="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} />}</Field>
         <Field label={t.fields.dept}>{(id) => <TextInput id={id} value={form.dept} onChange={(e) => set('dept', e.target.value)} />}</Field>
@@ -65,7 +77,7 @@ export function MemberEditModal({ counselId, member, onClose, onSave }: Props) {
 
       <FieldGroup title={t.groups.roles} columns={1}>
         <GroupField label={t.fields.roles} hint={t.rolesNote}>
-          <CheckGroup label={t.fields.roles} options={COUNSEL_ROLES} value={form.roles} onChange={(v) => set('roles', v)} />
+          <CheckGroup label={t.fields.roles} options={member.userId ? INTERNAL_COUNSEL_ROLES : COUNSEL_ROLES} value={form.roles} onChange={(v) => set('roles', v)} />
         </GroupField>
       </FieldGroup>
 

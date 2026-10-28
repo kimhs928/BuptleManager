@@ -54,13 +54,19 @@ export type CounselSummary = {
 }
 
 export const MOCK_COUNSELS: CounselSummary[] = [
-  { id: 'CN-2024-0112', name: '개인정보 처리방침 개정 관련 법률 자문', status: 'COMPLETE', requester: '박지훈', lawyer: '이민수', members: 4, createdAt: '2024-01-12', deleted: false, recent: true },
+  { id: 'CN-2024-0112', name: '개인정보 처리방침 개정 관련 법률 자문', status: 'COMPLETE', requester: '박지훈', lawyer: '장변호사', members: 4, createdAt: '2024-01-12', deleted: false, recent: true },
   { id: 'CN-2024-0205', name: '해외 고객 데이터 이전 적법성 검토', status: 'REVIEW', requester: '한도윤', lawyer: '장변호사', members: 3, createdAt: '2024-02-05', deleted: false, recent: true },
   { id: 'CN-2024-0318', name: '임직원 겸업 금지 조항 해석', status: 'DRAFT', requester: '최지우', lawyer: '-', members: 2, createdAt: '2024-03-18', deleted: false, recent: true },
-  { id: 'CN-2023-1120', name: '파트너사 계약 해지 통지 절차', status: 'COMPLETE', requester: '정하늘', lawyer: '이민수', members: 3, createdAt: '2023-11-20', deleted: false, recent: false },
+  { id: 'CN-2023-1120', name: '파트너사 계약 해지 통지 절차', status: 'COMPLETE', requester: '정하늘', lawyer: '장변호사', members: 3, createdAt: '2023-11-20', deleted: false, recent: false },
   { id: 'CN-2024-0127', name: '상표권 침해 경고장 대응 (초안)', status: 'DRAFT', requester: '김민수', lawyer: '-', members: 1, createdAt: '2024-01-27', deleted: true, recent: false },
   { id: 'CN-2024-0229', name: '근로계약서 표준안 검토', status: 'COMPLETE', requester: '박지훈', lawyer: '장변호사', members: 2, createdAt: '2024-02-29', deleted: true, recent: false },
 ]
+
+/** 자문 종류 (counsel_type) */
+export type CounselType = 'PUBLIC' | 'PRIVATE'
+
+/** 자문 공개 범위 (show_range_type) */
+export type ShowRangeType = 'PRIVATE' | 'INNER' | 'OUTER' | 'DEPARTMENT'
 
 export type CounselDetail = {
   id: string
@@ -76,6 +82,16 @@ export type CounselDetail = {
   deletedAt: string
   /** 관리 자문 여부 (ismanaged) */
   managed: boolean
+  counselType: CounselType
+  showRangeType: ShowRangeType
+  /** 관련 프로젝트 이름. 여러 개 가능, 없으면 빈 배열 */
+  projects: string[]
+  /** 마이그레이션 데이터 여부 (migrated) */
+  migrated: boolean
+  /** 상위 카테고리 */
+  categoryParent: string
+  /** 카테고리 */
+  category: string
 }
 
 export const MOCK_COUNSEL_DETAIL: CounselDetail = {
@@ -88,6 +104,12 @@ export const MOCK_COUNSEL_DETAIL: CounselDetail = {
   deleted: false,
   deletedAt: '',
   managed: true,
+  counselType: 'PUBLIC',
+  showRangeType: 'INNER',
+  projects: ['개인정보 보호 체계 개선', '2024 컴플라이언스 점검', '신규 서비스 약관 정비'],
+  migrated: false,
+  categoryParent: '개인정보 보호',
+  category: '처리방침 개정',
 }
 
 /** 자문 ID로 상세를 만든다. 목 데이터는 CN-2024-0112 한 건뿐이라 ID, 이름, 상태, 삭제 여부만 바꾼다 */
@@ -107,6 +129,12 @@ export function getCounselDetail(id: string): CounselDetail {
   }
 }
 
+/** 자문 승인 타입 (BApproval.approval_type: DEPT / REVIEW / FINAL) */
+export type CounselApprovalType = '부서장' | '검토자' | '최종승인자'
+
+/** 자문 승인 내역 */
+export type CounselApprovalStatus = '등록' | '요청' | '승인' | '부결/반려' | '자문 중단'
+
 export type CounselMember = {
   id: string
   /** 사내 유저만 가진다 */
@@ -117,6 +145,12 @@ export type CounselMember = {
   phone: string
   roles: string[]
   dept: string
+  /** 시스템 내 역할. 외부 유저는 빈 배열 (유저 관리에서 변경) */
+  sysRoles: string[]
+  /** 승인 타입. 승인 절차에 없는 유저는 빈 문자열 */
+  approvalType: CounselApprovalType | ''
+  /** 승인 내역. 승인 절차에 없는 유저는 빈 문자열 */
+  approvalStatus: CounselApprovalStatus | ''
   deleted: boolean
   /** YYYY-MM-DD HH:mm. 삭제되지 않았으면 deletedAt 은 빈 문자열 */
   createdAt: string
@@ -124,13 +158,16 @@ export type CounselMember = {
   deletedAt: string
 }
 
-export const COUNSEL_ROLES = ['요청자', '담당 변호사', '검토자', '참조']
+export const COUNSEL_ROLES = ['요청자', '외부 변호사', '검토자', '참조']
+
+/** 외부 변호사는 외부 유저만 가질 수 있어서 내부 유저의 역할 목록에서는 뺀다 */
+export const INTERNAL_COUNSEL_ROLES = COUNSEL_ROLES.filter((r) => r !== '외부 변호사')
 
 export const MOCK_COUNSEL_MEMBERS: CounselMember[] = [
-  { id: 'u1', userId: 'A00112', name: '박지훈', email: 'jihoon.park@acetech.co.kr', company: '에이스테크놀로지(주)', phone: '010-2345-6789', roles: ['요청자'], dept: '구매팀', deleted: false, createdAt: '2024-01-12 10:20', updatedAt: '2024-01-12 10:20', deletedAt: '' },
-  { id: 'u2', userId: 'A00145', name: '이민수', email: 'minsu.lee@acetech.co.kr', company: '에이스테크놀로지(주)', phone: '010-3456-7890', roles: ['담당 변호사'], dept: '법무팀', deleted: false, createdAt: '2024-01-29 11:00', updatedAt: '2024-02-02 15:40', deletedAt: '' },
-  { id: 'u3', name: '장변호사', email: 'lawyer.jang@hankyul.co.kr', company: '법무법인 한결', phone: '010-5555-0182', roles: ['담당 변호사'], dept: '송무팀', deleted: false, createdAt: '2024-01-30 09:30', updatedAt: '2024-01-30 09:30', deletedAt: '' },
-  { id: 'u4', userId: 'A00187', name: '한도윤', email: 'doyoon.han@acetech.co.kr', company: '에이스테크놀로지(주)', phone: '010-1122-3344', roles: ['참조'], dept: '경영지원실', deleted: true, createdAt: '2024-01-12 10:20', updatedAt: '2024-03-04 14:10', deletedAt: '2024-03-04 14:10' },
+  { id: 'u1', userId: 'A00112', name: '박지훈', email: 'jihoon.park@acetech.co.kr', company: '에이스테크놀로지(주)', phone: '010-2345-6789', roles: ['요청자'], dept: '구매팀', sysRoles: ['일반유저'], approvalType: '부서장', approvalStatus: '승인', deleted: false, createdAt: '2024-01-12 10:20', updatedAt: '2024-01-12 10:20', deletedAt: '' },
+  { id: 'u2', userId: 'A00145', name: '이민수', email: 'minsu.lee@acetech.co.kr', company: '에이스테크놀로지(주)', phone: '010-3456-7890', roles: ['검토자'], dept: '법무팀', sysRoles: ['법무검토자'], approvalType: '검토자', approvalStatus: '승인', deleted: false, createdAt: '2024-01-29 11:00', updatedAt: '2024-02-02 15:40', deletedAt: '' },
+  { id: 'u3', name: '장변호사', email: 'lawyer.jang@hankyul.co.kr', company: '법무법인 한결', phone: '010-5555-0182', roles: ['외부 변호사'], dept: '송무팀', sysRoles: [], approvalType: '', approvalStatus: '', deleted: false, createdAt: '2024-01-30 09:30', updatedAt: '2024-01-30 09:30', deletedAt: '' },
+  { id: 'u4', userId: 'A00187', name: '한도윤', email: 'doyoon.han@acetech.co.kr', company: '에이스테크놀로지(주)', phone: '010-1122-3344', roles: ['참조'], dept: '경영지원실', sysRoles: ['일반유저'], approvalType: '최종승인자', approvalStatus: '요청', deleted: true, createdAt: '2024-01-12 10:20', updatedAt: '2024-03-04 14:10', deletedAt: '2024-03-04 14:10' },
 ]
 
 export type DirectoryUser = { userId: string; name: string; email: string; company: string; phone: string; dept: string }
@@ -174,7 +211,7 @@ export const COUNSEL_GUIDE: CounselGuideStage[] = [
   { name: '초안', people: [{ name: '김효선', dept: '구매팀 · 요청자' }] },
   { name: '부서장 승인', opt: 'deptApproval', people: [{ name: '박부장', dept: '구매팀 · 부서장' }] },
   { name: '검토자 배정 대기', people: [{ name: '이법무', dept: '법무팀 · 배정 담당' }] },
-  { name: '검토 중', people: [{ name: '장변호사', dept: '법무팀 · 담당 변호사' }] },
+  { name: '검토 중', people: [{ name: '장변호사', dept: '법무팀 · 외부 변호사' }] },
   { name: '최종 승인', opt: 'finalApproval', people: [{ name: '최법무', dept: '법무팀장 · 최종 승인자' }] },
   {
     name: '회람',
@@ -216,9 +253,20 @@ export const MOCK_COUNSEL_HISTORY: CounselHistoryRow[] = [
 /** 히스토리 액션 유저로 선택할 수 있는 이름 */
 export const MOCK_COUNSEL_HISTORY_USERS = ['김효선', '박부장', '이법무', '장변호사', '최법무', '오재무', '한보안']
 
-export type CommentType = '질문' | '답변' | '자문 전체'
+/** 코멘트 종류는 질문과 답변 두 가지다 */
+export type CommentType = '질문' | '답변'
 
-export const COMMENT_TYPES: CommentType[] = ['질문', '답변', '자문 전체']
+export const COMMENT_TYPES: CommentType[] = ['질문', '답변']
+
+/** 질문 · 답변에 달린 댓글 */
+export type CounselReply = {
+  id: string
+  author: string
+  text: string
+  /** YYYY-MM-DD HH:mm */
+  at: string
+  deleted: boolean
+}
 
 export type CounselComment = {
   id: string
@@ -231,23 +279,80 @@ export type CounselComment = {
   deleted: boolean
   /** 삭제되지 않았으면 빈 문자열 */
   deletedAt: string
+  /** 이 코멘트가 연결된 진행 히스토리 ID. 프로세스 탭의 해당 히스토리에 노출된다 */
+  historyId: string
+  /** 이 코멘트에 달린 댓글. 없으면 빈 배열 */
+  replies: CounselReply[]
 }
 
 export const MOCK_COUNSEL_COMMENTS: CounselComment[] = [
-  { id: 'k1', text: '자문 요청드립니다. 개정된 개인정보 보호법에 맞춰 처리방침을 갱신하려고 합니다.', type: '질문', author: '박지훈', at: '2024-01-12 10:25', updatedAt: '2024-01-12 10:25', deleted: false, deletedAt: '' },
+  {
+    id: 'k1',
+    text: '자문 요청드립니다. 개정된 개인정보 보호법에 맞춰 처리방침을 갱신하려고 합니다.',
+    type: '질문',
+    author: '김효선',
+    at: '2024-05-02 09:20',
+    updatedAt: '2024-05-02 09:20',
+    deleted: false,
+    deletedAt: '',
+    historyId: 'h1',
+    replies: [
+      { id: 'r1', author: '박부장', text: '요청 내용 확인했습니다. 수탁사 목록도 함께 검토 부탁드립니다.', at: '2024-05-02 13:40', deleted: false },
+      { id: 'r2', author: '김효선', text: '네, 별도 첨부로 전달드리겠습니다.', at: '2024-05-02 13:55', deleted: false },
+    ],
+  },
   {
     id: 'k2',
     text: "처리방침 제3조 위탁 항목을 구체적으로 기재하시길 권고드립니다. 현재 '업무 위탁'으로만 포괄 기재되어 있어 수탁자명, 위탁 업무 내용, 위탁 기간을 각각 명시해야 하며, 재위탁이 발생하는 경우 재수탁자까지 공개 범위에 포함하는 것이 안전합니다.\n\n또한 제5조 보유 기간은 전자상거래법상 계약·청약철회 기록 5년, 대금결제 기록 5년, 소비자 불만·분쟁처리 기록 3년 기준과 맞지 않으므로 항목별로 분리 기재를 권고드립니다. 국외 이전이 있는 경우 이전 국가, 이전 일시·방법, 이전받는 자의 연락처를 별도 조항으로 추가해 주시기 바랍니다.",
     type: '답변',
-    author: '이민수',
-    at: '2024-02-02 15:40',
-    updatedAt: '2024-02-02 15:40',
+    author: '장변호사',
+    at: '2024-05-14 17:20',
+    updatedAt: '2024-05-14 17:20',
     deleted: false,
     deletedAt: '',
+    historyId: 'h9',
+    replies: [
+      { id: 'r3', author: '김효선', text: '상세한 의견 감사합니다. 제3조와 제5조는 이번 주 안에 반영하겠습니다.', at: '2024-05-15 09:30', deleted: false },
+      { id: 'r4', author: '한보안', text: '국외 이전 조항은 정보보호팀에서 문구를 같이 확인하겠습니다.', at: '2024-05-15 11:02', deleted: false },
+      { id: 'r5', author: '오재무', text: '확인 중 잘못 남긴 댓글입니다.', at: '2024-05-15 11:10', deleted: true },
+    ],
   },
-  { id: 'k3', text: '보유 기간 문구가 현행 법령과 일치하는지 확인 부탁드립니다.', type: '질문', author: '박지훈', at: '2024-01-30 11:12', updatedAt: '2024-01-30 11:20', deleted: false, deletedAt: '' },
-  { id: 'k4', text: '수탁사 목록은 별도 첨부 예정. 법무법인 한결 의견 필요.', type: '자문 전체', author: '이민수', at: '2024-01-18 10:10', updatedAt: '2024-01-18 10:10', deleted: false, deletedAt: '' },
-  { id: 'k5', text: '테스트 코멘트입니다. 삭제 요청.', type: '답변', author: '장변호사', at: '2024-01-20 09:00', updatedAt: '2024-01-20 09:05', deleted: true, deletedAt: '2024-01-20 09:30' },
+  {
+    id: 'k3',
+    text: '보유 기간 문구가 현행 법령과 일치하는지 확인 부탁드립니다.',
+    type: '질문',
+    author: '김효선',
+    at: '2024-05-09 11:15',
+    updatedAt: '2024-05-09 11:20',
+    deleted: false,
+    deletedAt: '',
+    historyId: 'h6',
+    replies: [],
+  },
+  {
+    id: 'k4',
+    text: '수탁사 목록과 국외 이전 항목이 누락되어 있어 보완 후 재상신해 주세요. 법무법인 한결 의견도 필요합니다.',
+    type: '답변',
+    author: '장변호사',
+    at: '2024-05-07 16:30',
+    updatedAt: '2024-05-07 16:30',
+    deleted: false,
+    deletedAt: '',
+    historyId: 'h5',
+    replies: [{ id: 'r6', author: '김효선', text: '보완 후 다시 올리겠습니다.', at: '2024-05-08 10:10', deleted: false }],
+  },
+  {
+    id: 'k5',
+    text: '테스트 코멘트입니다. 삭제 요청.',
+    type: '답변',
+    author: '장변호사',
+    at: '2024-05-14 17:25',
+    updatedAt: '2024-05-14 17:30',
+    deleted: true,
+    deletedAt: '2024-05-14 17:40',
+    historyId: 'h9',
+    replies: [],
+  },
 ]
 
 /** 이 자문에서 발송된 이메일 */

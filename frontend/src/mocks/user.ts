@@ -113,6 +113,6 @@ export const MOCK_TRANSFER_DOCS: Record<TransferType, TransferDoc[]> = {
 /** 이관 유형별 내 역할 필터 */
 export const TRANSFER_ROLE_SETS: Record<TransferType, string[]> = {
   계약: ['기안자', '검토자', '최종승인자', '부서장', '관련인', '서명인', '기타'],
-  자문: ['요청자', '담당 변호사', '검토자', '참조'],
+  자문: ['요청자', '외부 변호사', '검토자', '참조'],
   소송: ['소송 생성자', '담당자', '담당 변호사', '외부 변호사', '관련인'],
 }

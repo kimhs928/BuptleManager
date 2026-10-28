@@ -155,8 +155,10 @@ export function CounselDetailPage({ counselId, initialTab = 'basic' }: Props) {
           )}
           {tab === 'process' && (
             <ProcessTab
+              counselId={counsel.id}
               workflow={workflow}
               history={history}
+              comments={comments}
               emails={MOCK_COUNSEL_EMAILS}
               onSaveRow={(next, fields, ticket) => {
                 setHistory((prev) => prev.map((h) => (h.id === next.id ? next : h)))
@@ -171,6 +173,10 @@ export function CounselDetailPage({ counselId, initialTab = 'basic' }: Props) {
               onEdit={(next, ticket) => {
                 setComments((prev) => prev.map((c) => (c.id === next.id ? next : c)))
                 setToast(t.toast.commentSaved(ticket))
+              }}
+              onEditReply={(commentId, next, ticket) => {
+                setComments((prev) => prev.map((c) => (c.id === commentId ? { ...c, replies: c.replies.map((r) => (r.id === next.id ? next : r)) } : c)))
+                setToast(t.toast.replySaved(ticket))
               }}
             />
           )}

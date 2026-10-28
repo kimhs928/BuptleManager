@@ -1,53 +1,51 @@
-import { useState } from 'react'
-import { ChevronRightIcon, EditIcon } from '../../components/icons'
-import { Button, SegmentedControl, ViewModal } from '../../components/ui'
+import { useEffect, useRef, useState } from 'react'
+import { ChevronDownIcon, ChevronRightIcon, EditIcon } from '../../components/icons'
+import { Button, SegmentedControl } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { COMMENT_TYPES } from '../../mocks/counsel'
-import type { CommentType, CounselComment } from '../../mocks/counsel'
+import type { CommentType, CounselComment, CounselReply } from '../../mocks/counsel'
 import { texts } from '../../texts'
 import { deletedRow, tableTd } from '../contract/format'
 import { DeletedBadge } from '../contract/shared'
+import { CommentDetailModal, ReplyList, TypeChip } from './CommentParts'
 import { CommentEditModal } from './CommentEditModal'
+import { ReplyEditModal } from './ReplyEditModal'
 
 const t = texts.counsel.comments
-
-const typeTone: Record<CommentType, string> = {
-  질문: 'border border-transparent bg-[#fec601] text-[#3a2e00]',
-  답변: 'border border-transparent bg-[#2fa24f] text-white',
-  '자문 전체': 'border border-line-strong bg-[#f2f2f5] text-ink',
-}
 
 const LONG = 60
 
 /** 머리글: 본문보다 진한 글씨로 구분한다 */
 const tableTh = 'whitespace-nowrap px-3 py-2.5 text-left text-xs font-semibold text-ink-3'
 
-function TypeChip({ type }: { type: CommentType }) {
-  return <span className={cn('inline-flex h-6 w-[76px] items-center justify-center rounded-md text-[12px] font-semibold', typeTone[type])}>{type}</span>
-}
-
-function DeletedChip({ deleted }: { deleted: boolean }) {
-  return (
-    <span className={cn('inline-flex items-center rounded-full border px-2 py-px text-[11.5px] font-semibold', deleted ? 'border-danger-line bg-danger-soft text-danger-ink' : 'border-success-line bg-success-soft text-success-ink')}>
-      {deleted ? t.deleted : t.active}
-    </span>
-  )
-}
-
 type Props = {
   counselId: string
   comments: CounselComment[]
   onEdit: (next: CounselComment, ticket: string) => void
+  /** 댓글 수정. 댓글이 달린 코멘트 ID와 수정된 댓글을 넘긴다 */
+  onEditReply: (commentId: string, next: CounselReply, ticket: string) => void
 }
 
 /** 코멘트 탭 */
-export function CommentsTab({ counselId, comments, onEdit }: Props) {
+export function CommentsTab({ counselId, comments, onEdit, onEditReply }: Props) {
   const [editing, setEditing] = useState<CounselComment | null>(null)
   const [viewing, setViewing] = useState<CounselComment | null>(null)
+  // 수정 중인 댓글과 그 댓글이 달린 코멘트
+  const [editingReply, setEditingReply] = useState<{ comment: CounselComment; reply: CounselReply } | null>(null)
 
   // 삭제된 코멘트 포함 여부, 코멘트 타입 필터(빈 문자열이면 전체)
   const [includeDeleted, setIncludeDeleted] = useState(true)
   const [typeFilter, setTypeFilter] = useState<'' | CommentType>('')
+  // 프로세스 탭의 히스토리에서 넘어오면 해당 코멘트를 강조하고 그 자리로 이동한다 (?comment=ID)
+  const targetId = new URLSearchParams(window.location.search).get('comment')
+  const targetRef = useRef<HTMLTableRowElement>(null)
+  useEffect(() => {
+    if (targetId) targetRef.current?.scrollIntoView({ block: 'center' })
+  }, [targetId])
+
+  // 댓글을 펼친 코멘트 ID. 이동해 온 코멘트는 댓글도 펼쳐 둔다
+  const [openReplies, setOpenReplies] = useState<string[]>(() => (targetId ? [targetId] : []))
+  const toggleReplies = (id: string) => setOpenReplies((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]))
 
   const visible = comments.filter((c) => includeDeleted || !c.deleted)
   const shown = visible.filter((c) => !typeFilter || c.type === typeFilter)
@@ -100,7 +98,12 @@ export function CommentsTab({ counselId, comments, onEdit }: Props) {
             </thead>
             <tbody>
               {shown.map((c) => (
-                <tr key={c.id} className={cn('border-t border-line-soft', c.deleted ? deletedRow : 'bg-surface hover:bg-hover')}>
+                <tr
+                  key={c.id}
+                  ref={c.id === targetId ? targetRef : undefined}
+                  aria-current={c.id === targetId ? 'true' : undefined}
+                  className={cn('border-t border-line-soft', c.deleted ? deletedRow : 'bg-surface hover:bg-hover', c.id === targetId && 'bg-[#fff8db] shadow-[inset_3px_0_0_#e5a800]')}
+                >
                   <td className={cn(tableTd, 'whitespace-nowrap pl-5')}>
                     <TypeChip type={c.type} />
                   </td>
@@ -111,12 +114,26 @@ export function CommentsTab({ counselId, comments, onEdit }: Props) {
                         {c.deleted && <DeletedBadge label={t.deleted} />}
                         <span className={cn('line-clamp-2 leading-[1.5]', c.deleted && 'text-ink-4')}>{c.text}</span>
                       </span>
-                      {c.text.length > LONG && (
-                        <button type="button" onClick={() => setViewing(c)} className="inline-flex items-center gap-0.5 border-0 bg-transparent p-0 text-xs font-medium text-link hover:underline">
-                          {t.more}
-                          <ChevronRightIcon size={10} />
-                        </button>
-                      )}
+                      <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        {c.text.length > LONG && (
+                          <button type="button" onClick={() => setViewing(c)} className="inline-flex items-center gap-0.5 border-0 bg-transparent p-0 text-xs font-medium text-link hover:underline">
+                            {t.more}
+                            <ChevronRightIcon size={10} />
+                          </button>
+                        )}
+                        {c.replies.length > 0 && (
+                          <button
+                            type="button"
+                            aria-expanded={openReplies.includes(c.id)}
+                            onClick={() => toggleReplies(c.id)}
+                            className="inline-flex items-center gap-0.5 border-0 bg-transparent p-0 text-xs font-medium text-ink-2 hover:underline"
+                          >
+                            <ChevronDownIcon size={11} strokeWidth={2.4} className={cn('transition-transform', !openReplies.includes(c.id) && '-rotate-90')} />
+                            {openReplies.includes(c.id) ? t.repliesHide : t.replies(c.replies.length)}
+                          </button>
+                        )}
+                      </span>
+                      {openReplies.includes(c.id) && c.replies.length > 0 && <ReplyList replies={c.replies} className="mt-1 w-full" onEdit={(reply) => setEditingReply({ comment: c, reply })} />}
                     </span>
                   </td>
                   <td className={cn(tableTd, 'whitespace-nowrap tabular-nums', c.deleted ? 'text-ink-5' : 'text-ink-3')}>{c.at}</td>
@@ -149,9 +166,13 @@ export function CommentsTab({ counselId, comments, onEdit }: Props) {
       </div>
 
       {viewing && !editing && (
-        <ViewModal
-          title={texts.counsel.commentView.title}
+        <CommentDetailModal
+          comment={viewing}
           onClose={() => setViewing(null)}
+          onEditReply={(reply) => {
+            setEditingReply({ comment: viewing, reply })
+            setViewing(null)
+          }}
           actions={
             <Button
               icon={<EditIcon size={14} />}
@@ -164,18 +185,19 @@ export function CommentsTab({ counselId, comments, onEdit }: Props) {
               {t.edit}
             </Button>
           }
-        >
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
-            <TypeChip type={viewing.type} />
-            <span className="font-medium text-ink">{viewing.author}</span>
-            <span aria-hidden="true">·</span>
-            <span className="tabular-nums">{texts.counsel.commentView.written(viewing.at)}</span>
-            <span aria-hidden="true">·</span>
-            <span className="tabular-nums">{texts.counsel.commentView.modified(viewing.updatedAt)}</span>
-            <DeletedChip deleted={viewing.deleted} />
-          </div>
-          <div className="whitespace-pre-wrap rounded-xl border border-line bg-[#f2f2f5] px-4 py-3.5 text-[13px] leading-relaxed">{viewing.text}</div>
-        </ViewModal>
+        />
+      )}
+      {editingReply && (
+        <ReplyEditModal
+          counselId={counselId}
+          comment={editingReply.comment}
+          reply={editingReply.reply}
+          onClose={() => setEditingReply(null)}
+          onSave={(next, ticket) => {
+            onEditReply(editingReply.comment.id, next, ticket)
+            setEditingReply(null)
+          }}
+        />
       )}
       {editing && (
         <CommentEditModal

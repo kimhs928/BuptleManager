@@ -2,13 +2,14 @@ import { useState } from 'react'
 import { ChevronRightIcon, LockIcon } from '../../components/icons'
 import { cn } from '../../lib/cn'
 import { COUNSEL_GUIDE, MOCK_COUNSEL_HISTORY_USERS } from '../../mocks/counsel'
-import type { CounselHistoryRow, CounselWorkflow } from '../../mocks/counsel'
+import type { CounselComment, CounselHistoryRow, CounselWorkflow } from '../../mocks/counsel'
 import type { CaseEmail } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { EmailHistory } from '../contract/EmailHistory'
 import { HistoryTimeline } from '../contract/HistoryTimeline'
 import type { Lane } from '../contract/HistoryTimeline'
 import { HistoryEditModal } from './HistoryEditModal'
+import { HistoryNotes } from './HistoryNotes'
 
 const t = texts.counsel.process
 
@@ -60,14 +61,17 @@ function Legend({ className, label }: { className: string; label: string }) {
 }
 
 type Props = {
+  counselId: string
   workflow: CounselWorkflow
   history: CounselHistoryRow[]
+  /** 히스토리에 연결된 코멘트 (본문 · 코멘트 토글에서 보여 준다) */
+  comments: CounselComment[]
   emails: CaseEmail[]
   onSaveRow: (next: CounselHistoryRow, changedFields: string[], ticket: string) => void
 }
 
 /** 프로세스 · 히스토리 탭 (자문 워크플로우 + 진행 히스토리) */
-export function ProcessTab({ workflow, history, emails, onSaveRow }: Props) {
+export function ProcessTab({ counselId, workflow, history, comments, emails, onSaveRow }: Props) {
   const [editingRow, setEditingRow] = useState<CounselHistoryRow | null>(null)
 
   const guide = stagesFor(workflow)
@@ -152,7 +156,7 @@ export function ProcessTab({ workflow, history, emails, onSaveRow }: Props) {
             <Legend className="rounded-full border-2 border-[#e5a800] bg-[#fff8db]" label={t.legend.current} />
           </div>
 
-          <HistoryTimeline lanes={lanes} latestShown stageOrder={order} onEdit={setEditingRow} />
+          <HistoryTimeline lanes={lanes} latestShown stageOrder={order} onEdit={setEditingRow} renderBody={(row) => <HistoryNotes row={row} counselId={counselId} comments={comments} />} />
         </div>
       </section>
 

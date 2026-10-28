@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { EditIcon } from '../../components/icons'
+import { EditIcon, LockIcon } from '../../components/icons'
 import { Button } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import type { CounselDetail } from '../../mocks/counsel'
@@ -78,11 +78,50 @@ export function BasicTab({ counsel, onSave }: Props) {
             <Row label={t.fields.managed}>
               {counsel.managed ? t.managedYes : t.managedNo} <span className="text-xs text-ink-4">(ismanaged)</span>
             </Row>
+            <Row label={t.fields.counselType}>{t.counselTypes[counsel.counselType]}</Row>
+            <Row label={t.fields.showRange}>{t.showRanges[counsel.showRangeType]}</Row>
+            <Row label={t.fields.migrated}>
+              <span className={cn(!counsel.migrated && 'text-ink-4')}>{counsel.migrated ? t.migratedYes : t.migratedNo}</span>
+            </Row>
+            <Row label={t.fields.projects} wide>
+              {counsel.projects.length > 0 ? (
+                <span className="flex flex-wrap gap-1.5">
+                  {counsel.projects.map((p) => (
+                    <span key={p} className="inline-flex h-[22px] items-center rounded-md bg-[#f2f2f5] px-2 text-xs font-medium leading-none text-ink-2">
+                      {p}
+                    </span>
+                  ))}
+                </span>
+              ) : (
+                <span className="text-ink-4">-</span>
+              )}
+            </Row>
           </dl>
         </div>
       </section>
 
       <div className="flex flex-col gap-6">
+        <section aria-labelledby="counsel-category" className="flex flex-col gap-1.5">
+          <SectionHead id="counsel-category" title={t.categoryTitle}>
+            <span className="inline-flex items-center gap-[5px] text-xs text-ink-4">
+              <LockIcon size={12} />
+              <span>{t.readOnly}</span>
+            </span>
+          </SectionHead>
+          <dl className={cn(box, 'm-0')}>
+            <div className="flex flex-col gap-0.5 px-3.5 py-2.5">
+              <dt className="text-xs text-ink-4">{t.category}</dt>
+              <dd className="m-0 text-[13px]">
+                <span className="text-ink-3">{counsel.categoryParent}</span>{' '}
+                <span aria-label={t.subCategory} className="text-ink-5">
+                  ›
+                </span>{' '}
+                {counsel.category}
+              </dd>
+            </div>
+          </dl>
+        </section>
+
         <section aria-labelledby="counsel-recent" className="flex flex-col gap-1.5">
           <div className="flex items-baseline justify-between px-3">
             <h2 id="counsel-recent" className="m-0 text-[13px] font-semibold">
