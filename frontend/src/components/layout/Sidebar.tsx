@@ -5,7 +5,7 @@ import { Logo } from '../ui/Logo'
 import { texts } from '../../texts'
 import { readLogo, saveLogo } from '../../lib/brandLogo'
 import { MOCK_ACCOUNT } from '../../mocks/auth'
-import { BuildingIcon, ChevronDownIcon, ChevronRightIcon, HistoryIcon, SlidersIcon } from '../icons'
+import { BuildingIcon, ChevronDownIcon, ChevronRightIcon, HistoryIcon, SlidersIcon, UsersIcon } from '../icons'
 
 const t = texts.company.sidebar
 /** 사이드바 상태를 저장해 두어 화면을 옮겨도 같은 모습을 유지한다 */
@@ -82,7 +82,7 @@ type Props = {
   /** 현재 화면이 속한 메뉴 */
   /** 고객사를 고르지 않은 상태. 고객사 정보와 주요 기능을 감춘다 */
   noCompany?: boolean
-  active?: 'company' | 'config' | 'contract' | 'counsel' | 'lawsuit' | 'user' | 'errorReport' | 'history'
+  active?: 'company' | 'config' | 'contract' | 'counsel' | 'lawsuit' | 'user' | 'errorReport' | 'history' | 'admin'
 }
 
 /** 고객사 선택 후 화면의 좌측 메뉴 */
@@ -150,6 +150,9 @@ export function Sidebar({ mainHref, noCompany, active = 'company' }: Props) {
       </NavLink>
       <NavLink href={noCompany ? '?history&all' : '?history'} current={active === 'history'} icon={<HistoryIcon size={16} />} trailing={<ChevronRightIcon size={14} className="text-ink-5" />}>
         {t.history}
+      </NavLink>
+      <NavLink href="?admin" current={active === 'admin'} icon={<UsersIcon size={16} />} trailing={<ChevronRightIcon size={14} className="text-ink-5" />}>
+        {t.admin}
       </NavLink>
 
       <span className="flex-1" />

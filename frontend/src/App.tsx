@@ -9,6 +9,7 @@ import { ContractSearchPage } from './pages/contract/ContractSearchPage'
 import { CounselDetailPage } from './pages/counsel/CounselDetailPage'
 import type { CounselTab } from './pages/counsel/CounselDetailPage'
 import { CounselSearchPage } from './pages/counsel/CounselSearchPage'
+import { AdminPage } from './pages/admin/AdminPage'
 import { HistoryPage } from './pages/history/HistoryPage'
 import { LawsuitDetailPage } from './pages/lawsuit/LawsuitDetailPage'
 import type { LawsuitTab } from './pages/lawsuit/LawsuitDetailPage'
@@ -30,7 +31,7 @@ const lawsuitTabs: LawsuitTab[] = ['basic', 'members', 'emails']
 
 const loginViews: LoginView[] = ['login', 'network', 'denied']
 
-/** 임시 진입점: /, /?view=network, /?view=denied, /?main, /?main&notice, /?company, /?company&tab=config, /?company&tab=users, /?contract, /?contract=CT-2024-0315&tab=members, /?counsel, /?counsel=CN-2024-0112&tab=members, /?lawsuit, /?lawsuit=LT-2024-0101, /?config, /?config&all, /?history, /?report, /?user, /?user=transfer, /?gallery */
+/** 임시 진입점: /, /?view=network, /?view=denied, /?main, /?main&notice, /?company, /?company&tab=config, /?company&tab=users, /?contract, /?contract=CT-2024-0315&tab=members, /?counsel, /?counsel=CN-2024-0112&tab=members, /?lawsuit, /?lawsuit=LT-2024-0101, /?config, /?config&all, /?history, /?admin, /?report, /?user, /?user=transfer, /?gallery */
 export default function App() {
   const params = new URLSearchParams(window.location.search)
   if (ComponentGallery && params.has('gallery')) {
@@ -73,6 +74,7 @@ export default function App() {
   }
   if (params.has('config')) return <ConfigManagePage global={params.has('all')} />
   if (params.has('history')) return <HistoryPage />
+  if (params.has('admin')) return <AdminPage />
   if (params.has('report')) return <ReportPage />
   if (params.has('user')) {
     return params.get('user') === 'transfer' ? <UserTransferPage /> : <UserListPage />

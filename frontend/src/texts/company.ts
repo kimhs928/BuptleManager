@@ -19,6 +19,7 @@ export const company = {
     },
     config: '컨피그 관리',
     history: '변경 히스토리',
+    admin: '관리자',
   },
 
   breadcrumb: {

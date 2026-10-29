@@ -7,7 +7,7 @@ import { Sidebar } from './Sidebar'
 export const MAIN_HREF = '?main'
 
 type Props = {
-  active: 'company' | 'config' | 'contract' | 'counsel' | 'lawsuit' | 'user' | 'errorReport' | 'history'
+  active: 'company' | 'config' | 'contract' | 'counsel' | 'lawsuit' | 'user' | 'errorReport' | 'history' | 'admin'
   trail: { label: string; href?: string }[]
   /** 고객사를 고르지 않고 들어온 화면. 고객사에 속한 메뉴를 감춘다 */
   noCompany?: boolean
