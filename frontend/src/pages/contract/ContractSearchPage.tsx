@@ -5,6 +5,7 @@ import { Button, Card, Lines } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { MOCK_CONTRACTS } from '../../mocks/contract'
 import { texts } from '../../texts'
+import { RecentContractsCard } from './RecentContractsCard'
 import { deletedName, deletedRow, tableTd, tableTh } from './format'
 import { DeletedBadge, StatusDot } from './shared'
 
@@ -23,7 +24,7 @@ export function ContractSearchPage({ initialQuery = '' }: Props) {
   const q = query.trim().toLowerCase()
   const qPlain = q.replace(/-/g, '')
   const results = MOCK_CONTRACTS.filter((c) => includeDeleted || !c.deleted).filter((c) =>
-    q ? c.id.toLowerCase().replace(/-/g, '').includes(qPlain) || c.name.toLowerCase().includes(q) : c.recent,
+    q && (c.id.toLowerCase().replace(/-/g, '').includes(qPlain) || c.name.toLowerCase().includes(q)),
   )
 
   return (
@@ -67,10 +68,13 @@ export function ContractSearchPage({ initialQuery = '' }: Props) {
           </div>
         </section>
 
-        <section aria-label={q ? t.resultTitle : t.recentTitle}>
+        {!q && <RecentContractsCard />}
+
+        {q && (
+        <section aria-label={t.resultTitle}>
           <Card className="overflow-hidden">
             <div className="flex items-baseline gap-2 border-b border-line-soft px-5 py-4">
-              <span className="text-[15px] font-semibold">{q ? t.resultTitle : t.recentTitle}</span>
+              <span className="text-[15px] font-semibold">{t.resultTitle}</span>
               <span className="text-[13px] text-ink-4" aria-live="polite">
                 {t.count(results.length, includeDeleted)}
               </span>
@@ -138,6 +142,7 @@ export function ContractSearchPage({ initialQuery = '' }: Props) {
             )}
           </Card>
         </section>
+        )}
       </div>
     </CompanyShell>
   )
