@@ -15,9 +15,11 @@ export const main = {
     title: (platform: string) => `${platform} 고객사`,
     users: (n: number) => `유저 ${n}명`,
     empty: '검색 결과가 없습니다. 스키마명을 다시 확인해 주세요.',
+    loading: '검색 중입니다.',
+    error: '고객사 목록을 불러오지 못했습니다. 서버 연결을 확인해 주세요.',
   },
 
-  recent: '최근 검색',
+  recent: '최근 작업',
   enter: '고객사로 이동',
 
   /** 고객사 선택 없이 쓰는 기능 */

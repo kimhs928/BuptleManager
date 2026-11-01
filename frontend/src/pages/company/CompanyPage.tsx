@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { CompanyShell } from '../../components/layout/CompanyShell'
 import { CloseIcon } from '../../components/icons'
+import { useCompanyDetail } from '../../hooks/useCompanyDetail'
 import { cn } from '../../lib/cn'
-import { MOCK_COMPANY_DETAIL, MOCK_CONFIGS, MOCK_LIVE_USERS } from '../../mocks/companyDetail'
-import type { LiveUser } from '../../mocks/companyDetail'
+import type { ServicePlatform } from '../../lib/platform'
+import { MOCK_CONFIGS, MOCK_LIVE_USERS } from '../../mocks/companyDetail'
+import type { CompanyDetail, LiveUser } from '../../mocks/companyDetail'
+import { MOCK_COMPANY_DETAIL } from '../../mocks/companyDetail'
 import { texts } from '../../texts'
 import { BasicInfoTab } from './BasicInfoTab'
 import { ConfigTab } from './ConfigTab'
@@ -17,25 +20,46 @@ const tabKeys: Record<CompanyTab, string> = { basic: 'basic', config: 'config', 
 
 type Props = {
   initialTab?: CompanyTab
+  /** 선택한 고객사. 없으면 임시 mock 고객사를 보여 준다 */
+  selected?: { platform: ServicePlatform; schema: string }
 }
 
 function Dot({ className }: { className?: string }) {
   return <span aria-hidden="true" className={cn('inline-block size-2 shrink-0 rounded-full', className)} />
 }
 
+/** 선택한 고객사를 서버에서 가져온 뒤 고객사 정보 화면을 보여 준다 */
+export function CompanyPage({ initialTab = 'basic', selected }: Props) {
+  if (!selected) return <CompanyView company={MOCK_COMPANY_DETAIL} initialTab={initialTab} />
+  return <SelectedCompany initialTab={initialTab} platform={selected.platform} schema={selected.schema} />
+}
+
+function SelectedCompany({ initialTab, platform, schema }: { initialTab: CompanyTab; platform: ServicePlatform; schema: string }) {
+  const { company, loading, error } = useCompanyDetail(platform, schema)
+  if (company) return <CompanyView company={company} initialTab={initialTab} />
+  return (
+    <CompanyShell active="company" trail={[{ label: t.breadcrumb.companyInfo }]} company={{ platform, schema, name: schema }}>
+      <p role={error ? 'alert' : 'status'} className="m-0 text-[13px] text-ink-3">
+        {loading ? t.load.loading : t.load.error}
+      </p>
+    </CompanyShell>
+  )
+}
+
 /** 고객사 정보 화면 (기본 정보 · 컨피그 · 실시간 접속 유저) */
-export function CompanyPage({ initialTab = 'basic' }: Props) {
-  const company = MOCK_COMPANY_DETAIL
+function CompanyView({ company, initialTab }: { company: CompanyDetail; initialTab: CompanyTab }) {
   const [tab, setTab] = useState<CompanyTab>(initialTab)
   const [users, setUsers] = useState<LiveUser[]>(MOCK_LIVE_USERS)
   const [toast, setToast] = useState('')
+  // 고객사를 가리키는 주소. 새로고침해도 같은 고객사가 열린다
+  const base = `?company=${encodeURIComponent(company.schema)}&platform=${company.platform}`
 
   const counts: Record<CompanyTab, number | undefined> = { basic: undefined, config: MOCK_CONFIGS.length, users: users.length }
 
   const changeTab = (next: CompanyTab) => {
     setTab(next)
     // 새로고침해도 같은 탭이 열리도록 주소만 갱신한다
-    window.history.replaceState(null, '', next === 'basic' ? '?company' : `?company&tab=${next}`)
+    window.history.replaceState(null, '', `${base}${next === 'basic' ? '' : `&tab=${next}`}`)
   }
 
   const forceLogout = (ids: string[], ticket: string) => {
@@ -47,7 +71,7 @@ export function CompanyPage({ initialTab = 'basic' }: Props) {
   const tabLabel = t.tabs[tabKeys[tab] as keyof typeof t.tabs]
 
   return (
-    <CompanyShell active="company" trail={[{ label: t.breadcrumb.companyInfo, href: '?company' }, { label: tabLabel }]}>
+    <CompanyShell active="company" company={company} trail={[{ label: t.breadcrumb.companyInfo, href: base }, { label: tabLabel }]}>
           <div className="flex flex-col gap-[18px]">
             {toast && (
               <div role="status" className="flex items-center gap-2.5 rounded-xl border border-success-line bg-success-soft px-3.5 py-2.5 text-[13px] text-success-ink">

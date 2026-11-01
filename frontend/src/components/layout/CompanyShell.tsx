@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { CompanyDetail } from '../../mocks/companyDetail'
 import { MOCK_COMPANY_DETAIL } from '../../mocks/companyDetail'
 import { CompanyTopBar } from './CompanyTopBar'
 import { Sidebar } from './Sidebar'
@@ -11,12 +12,13 @@ type Props = {
   trail: { label: string; href?: string }[]
   /** 고객사를 고르지 않고 들어온 화면. 고객사에 속한 메뉴를 감춘다 */
   noCompany?: boolean
+  /** 선택한 고객사. 없으면 임시 mock 고객사를 쓴다 */
+  company?: Pick<CompanyDetail, 'platform' | 'name' | 'schema'>
   children: ReactNode
 }
 
 /** 고객사 선택 후 화면의 공통 틀 (사이드바 + 상단 바 + 본문) */
-export function CompanyShell({ active, trail, noCompany, children }: Props) {
-  const company = MOCK_COMPANY_DETAIL
+export function CompanyShell({ active, trail, noCompany, company = MOCK_COMPANY_DETAIL, children }: Props) {
   return (
     <div className="flex min-h-screen w-full bg-bg">
       <Sidebar mainHref={MAIN_HREF} active={active} noCompany={noCompany} />

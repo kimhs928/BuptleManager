@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
+import { useCompanySearch } from '../../hooks/useCompanySearch'
 import { Header } from '../../components/layout/Header'
 import { Button, Card, NoticeBanner, OptionList, PlatformDot, SearchInput, SegmentedControl } from '../../components/ui'
 import { platformLabel } from '../../lib/platform'
 import type { ServicePlatform } from '../../lib/platform'
 import { MOCK_ACCOUNT } from '../../mocks/auth'
-import { MOCK_COMPANIES, MOCK_CONFIG_MISMATCH, MOCK_RECENT } from '../../mocks/companies'
+import { MOCK_CONFIG_MISMATCH, MOCK_RECENT } from '../../mocks/companies'
 import { texts } from '../../texts'
 
 const t = texts.main
@@ -61,7 +62,7 @@ type Props = {
   /** 컨피그 불일치 알림 노출 */
   configMismatch?: boolean
   /** 고객사 선택 후 이동 */
-  onEnter?: (schema: string) => void
+  onEnter?: (schema: string, platform: ServicePlatform) => void
 }
 
 /** 메인 화면 (고객사 선택) */
@@ -71,8 +72,8 @@ export function MainPage({ configMismatch = false, onEnter }: Props) {
   const [selected, setSelected] = useState<string | null>(null)
 
   const q = query.trim().toLowerCase()
-  const filtered = MOCK_COMPANIES[platform].filter((c) => !q || c.schema.toLowerCase().includes(q) || c.name.toLowerCase().includes(q))
-  const hasSelection = q !== '' && filtered.some((c) => c.schema === selected)
+  const { companies: filtered, loading, error } = useCompanySearch(platform, query)
+  const hasSelection = q !== '' && filtered.some((c) => c.schemaName === selected)
 
   const changePlatform = (next: ServicePlatform) => {
     setPlatform(next)
@@ -148,21 +149,21 @@ export function MainPage({ configMismatch = false, onEnter }: Props) {
                     bare
                     label={t.list.label}
                     options={filtered.map((c) => ({
-                      id: c.schema,
+                      id: c.schemaName,
                       title: c.name,
-                      subtitle: `${c.schema} · ${c.domain}`,
-                      trailing: t.list.users(c.users),
+                      subtitle: `${c.schemaName} · ${c.domain}`,
+                      trailing: c.userCount == null ? undefined : t.list.users(c.userCount),
                     }))}
                     selectedId={selected}
                     onSelect={setSelected}
-                    emptyMessage={t.list.empty}
+                    emptyMessage={loading ? t.list.loading : error ? t.list.error : t.list.empty}
                   />
                 </div>
               )}
             </div>
 
             <div className="flex justify-end">
-              <Button disabled={!hasSelection} onClick={() => selected && onEnter?.(selected)} className="text-[13px]">
+              <Button disabled={!hasSelection} onClick={() => selected && onEnter?.(selected, platform)} className="text-[13px]">
                 {t.enter}
               </Button>
             </div>
