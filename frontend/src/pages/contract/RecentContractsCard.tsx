@@ -1,9 +1,10 @@
 import { ChevronRightIcon } from '../../components/icons'
+import { MAIN_HREF } from '../../components/layout/CompanyShell'
 import { Card } from '../../components/ui'
 import { useRecentContracts } from '../../hooks/useRecentContracts'
 import { cn } from '../../lib/cn'
 import { formatDateTime } from '../../lib/date'
-import { currentCompany } from '../../lib/selectedCompany'
+import { loadSelectedCompany } from '../../lib/selectedCompany'
 import { texts } from '../../texts'
 import { tableTd, tableTh } from './format'
 
@@ -12,14 +13,16 @@ const r = t.recent
 
 /** 최근 작업한 계약. 선택한 고객사의 작업 이력(BuptleManager DB)에서 가져온다 */
 export function RecentContractsCard() {
-  const { items, loading, error } = useRecentContracts(currentCompany().schema)
+  // 고객사를 고르지 않았으면 다른 고객사를 보여 주지 않고 선택을 안내한다
+  const selected = loadSelectedCompany()
+  const { items, loading, error } = useRecentContracts(selected?.schema ?? null)
 
   return (
     <section aria-label={t.recentTitle}>
       <Card className="overflow-hidden">
         <div className="flex items-baseline gap-2 border-b border-line-soft px-5 py-4">
           <span className="text-[15px] font-semibold">{t.recentTitle}</span>
-          {!loading && !error && (
+          {selected && !loading && !error && (
             <span className="text-[13px] text-ink-4" aria-live="polite">
               {r.count(items.length)}
             </span>
@@ -63,8 +66,13 @@ export function RecentContractsCard() {
         ) : (
           <div className="flex flex-col items-center gap-1.5 px-6 py-14 text-center">
             <p role={error ? 'alert' : 'status'} className="m-0 text-[15px] font-semibold text-ink-2">
-              {loading ? r.loading : error ? r.error : r.empty}
+              {!selected ? r.noCompany : loading ? r.loading : error ? r.error : r.empty}
             </p>
+            {!selected && (
+              <a href={MAIN_HREF} className="text-[13px] font-medium text-link hover:underline">
+                {r.goMain}
+              </a>
+            )}
           </div>
         )}
       </Card>

@@ -38,6 +38,8 @@ export const contract = {
       loading: '최근 작업 계약을 불러오는 중입니다.',
       error: '최근 작업 계약을 불러오지 못했습니다. 서버 연결을 확인해 주세요.',
       empty: '최근 작업한 계약이 없습니다.',
+      noCompany: '고객사를 먼저 선택해 주세요.',
+      goMain: '메인으로 이동',
       columns: { operation: '최근 작업', operatedAt: '작업 시각', operator: '작업자' },
       operations: {
         SEARCH: '검색',

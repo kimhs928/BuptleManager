@@ -16,7 +16,7 @@ import type { LawsuitTab } from './pages/lawsuit/LawsuitDetailPage'
 import { LawsuitSearchPage } from './pages/lawsuit/LawsuitSearchPage'
 import { ReportPage } from './pages/report/ReportPage'
 import type { CompanyTab } from './pages/company/CompanyPage'
-import { loadSelectedCompany } from './lib/selectedCompany'
+import { loadSelectedCompany, syncCompanyToUrl } from './lib/selectedCompany'
 import { MainPage } from './pages/main/MainPage'
 import { UserListPage } from './pages/user/UserListPage'
 import { UserTransferPage } from './pages/user/UserTransferPage'
@@ -42,6 +42,11 @@ export default function App() {
       </Suspense>
     )
   }
+  // 고객사에 속한 화면은 주소에 선택한 고객사(schema)를 싣는다. 고객사 없이 쓰는 화면(?config&all 등)은 제외
+  const companyScoped =
+    ['contract', 'counsel', 'lawsuit', 'user', 'report'].some((k) => params.has(k)) ||
+    (['config', 'history'].some((k) => params.has(k)) && !params.has('all'))
+  if (companyScoped) syncCompanyToUrl()
   if (params.has('company')) {
     const tab = companyTabs.find((t) => t === params.get('tab')) ?? 'basic'
     // ?company=스키마명&platform=BUPTLE_BIZ. 스키마명이 없으면 임시 mock 고객사

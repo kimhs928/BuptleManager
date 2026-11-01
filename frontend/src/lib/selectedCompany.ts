@@ -37,3 +37,35 @@ export function companyHref(): string {
   const c = loadSelectedCompany()
   return c ? `?company=${encodeURIComponent(c.schema)}&platform=${c.platform}` : '?company'
 }
+
+/**
+ * 고객사에 속한 화면의 주소에 선택한 고객사를 싣는다 (?contract → ?contract&schema=acetech&platform=BUPTLE_BIZ).
+ * 주소에 이미 스키마가 있으면 그것을 따른다. 기억한 고객사와 다르면 기억을 그 고객사로 바꾼다.
+ */
+export function syncCompanyToUrl() {
+  const { search, hash, pathname } = window.location
+  const params = new URLSearchParams(search)
+  const saved = loadSelectedCompany()
+  const schema = params.get('schema')
+
+  if (schema) {
+    if (saved?.schema === schema) return
+    const platform: ServicePlatform = params.get('platform') === 'BUPTLE_NOVA' ? 'BUPTLE_NOVA' : 'BUPTLE_BIZ'
+    saveSelectedCompany({ platform, schema, name: schema })
+    // 이름을 모르므로 서버에서 받아 채운 뒤 다시 그린다. 실패하면 스키마명을 이름 대신 쓴다
+    fetch(`/api/${platform === 'BUPTLE_NOVA' ? 'nova' : 'biz'}/companies/${encodeURIComponent(schema)}`)
+      .then((res) => (res.ok ? (res.json() as Promise<{ name: string }>) : null))
+      .then((c) => {
+        if (!c) return
+        saveSelectedCompany({ platform, schema, name: c.name })
+        window.location.reload()
+      })
+      .catch(() => undefined)
+    return
+  }
+  if (!saved) return
+
+  const sep = search ? '&' : '?'
+  const next = `${pathname}${search}${sep}schema=${encodeURIComponent(saved.schema)}&platform=${saved.platform}${hash}`
+  window.history.replaceState(null, '', next)
+}
