@@ -16,6 +16,7 @@ import type { LawsuitTab } from './pages/lawsuit/LawsuitDetailPage'
 import { LawsuitSearchPage } from './pages/lawsuit/LawsuitSearchPage'
 import { ReportPage } from './pages/report/ReportPage'
 import type { CompanyTab } from './pages/company/CompanyPage'
+import { loadSelectedCompany } from './lib/selectedCompany'
 import { MainPage } from './pages/main/MainPage'
 import { UserListPage } from './pages/user/UserListPage'
 import { UserTransferPage } from './pages/user/UserTransferPage'
@@ -43,7 +44,12 @@ export default function App() {
   }
   if (params.has('company')) {
     const tab = companyTabs.find((t) => t === params.get('tab')) ?? 'basic'
-    return <CompanyPage initialTab={tab} />
+    // ?company=스키마명&platform=BUPTLE_BIZ. 스키마명이 없으면 임시 mock 고객사
+    // 주소에 없으면 메인에서 고른(기억한) 고객사를 쓴다
+    const saved = loadSelectedCompany()
+    const schema = params.get('company') || saved?.schema
+    const platform = params.has('platform') ? (params.get('platform') === 'BUPTLE_NOVA' ? 'BUPTLE_NOVA' : 'BUPTLE_BIZ') : (saved?.platform ?? 'BUPTLE_BIZ')
+    return <CompanyPage initialTab={tab} selected={schema ? { platform, schema } : undefined} />
   }
   if (params.has('contract')) {
     // 계약 ID가 있으면 상세, 없으면 검색
@@ -80,8 +86,13 @@ export default function App() {
     return params.get('user') === 'transfer' ? <UserTransferPage /> : <UserListPage />
   }
   if (params.has('main')) {
-    // TODO: 라우터 도입 시 선택한 고객사(schema)를 경로로 전달
-    return <MainPage configMismatch={params.has('notice')} onEnter={() => window.location.assign('?company')} />
+    // TODO: 라우터 도입 시 선택한 고객사를 경로로 전달
+    return (
+      <MainPage
+        configMismatch={params.has('notice')}
+        onEnter={(schema, platform) => window.location.assign(`?company=${encodeURIComponent(schema)}&platform=${platform}`)}
+      />
+    )
   }
   const view = params.get('view')
   const initialView = loginViews.find((v) => v === view) ?? 'login'

@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CompanyShell } from '../../components/layout/CompanyShell'
 import { CloseIcon } from '../../components/icons'
 import { useCompanyDetail } from '../../hooks/useCompanyDetail'
 import { cn } from '../../lib/cn'
 import type { ServicePlatform } from '../../lib/platform'
+import { saveSelectedCompany } from '../../lib/selectedCompany'
 import { MOCK_CONFIGS, MOCK_LIVE_USERS } from '../../mocks/companyDetail'
 import type { CompanyDetail, LiveUser } from '../../mocks/companyDetail'
 import { MOCK_COMPANY_DETAIL } from '../../mocks/companyDetail'
@@ -51,6 +52,10 @@ function CompanyView({ company, initialTab }: { company: CompanyDetail; initialT
   const [tab, setTab] = useState<CompanyTab>(initialTab)
   const [users, setUsers] = useState<LiveUser[]>(MOCK_LIVE_USERS)
   const [toast, setToast] = useState('')
+  // 주소로 바로 들어온 경우에도 다른 화면이 같은 고객사를 쓰도록 기억한다
+  useEffect(() => {
+    if (company !== MOCK_COMPANY_DETAIL) saveSelectedCompany({ platform: company.platform, schema: company.schema, name: company.name })
+  }, [company])
   // 고객사를 가리키는 주소. 새로고침해도 같은 고객사가 열린다
   const base = `?company=${encodeURIComponent(company.schema)}&platform=${company.platform}`
 

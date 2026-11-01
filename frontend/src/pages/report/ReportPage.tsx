@@ -3,7 +3,7 @@ import { CheckIcon, CloseIcon, DownloadIcon } from '../../components/icons'
 import { CompanyShell } from '../../components/layout/CompanyShell'
 import { Alert, Card, TextInput } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import { MOCK_COMPANY_DETAIL } from '../../mocks/companyDetail'
+import { currentCompany } from '../../lib/selectedCompany'
 import { MOCK_ERROR_REPORTS, MOCK_REPORT_TODAY, REPORT_DEFAULT_QUERY } from '../../mocks/report'
 import type { ReportKind } from '../../mocks/report'
 import { texts } from '../../texts'
@@ -33,7 +33,7 @@ export function ReportPage() {
   const [done, setDone] = useState<Done | null>(null)
   const [query, setQuery] = useState(REPORT_DEFAULT_QUERY)
 
-  const company = MOCK_COMPANY_DETAIL.name
+  const company = currentCompany().name
   const invalid = from !== '' && to !== '' && from > to
   const periodReady = from !== '' && to !== '' && !invalid
   const ready = kind !== null && periodReady

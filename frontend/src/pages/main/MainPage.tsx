@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useCompanySearch } from '../../hooks/useCompanySearch'
 import { Header } from '../../components/layout/Header'
 import { Button, Card, NoticeBanner, OptionList, PlatformDot, SearchInput, SegmentedControl } from '../../components/ui'
+import { saveSelectedCompany } from '../../lib/selectedCompany'
 import { platformLabel } from '../../lib/platform'
 import type { ServicePlatform } from '../../lib/platform'
 import { MOCK_ACCOUNT } from '../../mocks/auth'
@@ -74,6 +75,14 @@ export function MainPage({ configMismatch = false, onEnter }: Props) {
   const q = query.trim().toLowerCase()
   const { companies: filtered, loading, error } = useCompanySearch(platform, query)
   const hasSelection = q !== '' && filtered.some((c) => c.schemaName === selected)
+
+  // 고른 고객사를 기억한 뒤 이동한다. 다른 화면에서도 같은 고객사로 보인다
+  const enter = () => {
+    const company = filtered.find((c) => c.schemaName === selected)
+    if (!company) return
+    saveSelectedCompany({ platform, schema: company.schemaName, name: company.name })
+    onEnter?.(company.schemaName, platform)
+  }
 
   const changePlatform = (next: ServicePlatform) => {
     setPlatform(next)
@@ -163,7 +172,7 @@ export function MainPage({ configMismatch = false, onEnter }: Props) {
             </div>
 
             <div className="flex justify-end">
-              <Button disabled={!hasSelection} onClick={() => selected && onEnter?.(selected, platform)} className="text-[13px]">
+              <Button disabled={!hasSelection} onClick={() => enter()} className="text-[13px]">
                 {t.enter}
               </Button>
             </div>
