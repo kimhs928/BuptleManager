@@ -31,7 +31,27 @@ export const contract = {
     clear: '검색어 지우기',
     submit: '검색',
     includeDeleted: '삭제된 계약 포함',
-    recentTitle: '최근 조회 계약',
+    recentTitle: '최근 작업 계약',
+    /** 최근 작업한 계약 (BuptleManager 작업 이력) */
+    recent: {
+      count: (n: number) => `${n}건`,
+      loading: '최근 작업 계약을 불러오는 중입니다.',
+      error: '최근 작업 계약을 불러오지 못했습니다. 서버 연결을 확인해 주세요.',
+      empty: '최근 작업한 계약이 없습니다.',
+      noCompany: '고객사를 먼저 선택해 주세요.',
+      goMain: '메인으로 이동',
+      columns: { operation: '최근 작업', operatedAt: '작업 시각', operator: '작업자' },
+      operations: {
+        SEARCH: '검색',
+        VIEW: '조회',
+        UPDATE: '수정',
+        ADD: '추가',
+        DELETE: '삭제',
+        TRANSFER: '이관',
+        EXPORT: '추출',
+        FORCE_LOGOUT: '강제 로그아웃',
+      },
+    },
     resultTitle: '검색 결과',
     count: (n: number, includeDeleted: boolean) => `${n}건${includeDeleted ? ' · 삭제 포함' : ''}`,
     columns: {

@@ -5,7 +5,7 @@ import { CompanyShell } from '../../components/layout/CompanyShell'
 import { Button, Select, TextInput } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { formatDateTime } from '../../lib/date'
-import { MOCK_COMPANY_DETAIL } from '../../mocks/companyDetail'
+import { currentCompany } from '../../lib/selectedCompany'
 import { MOCK_USERS, SYSTEM_ROLES } from '../../mocks/user'
 import type { CompanyUser, DocKind } from '../../mocks/user'
 import { texts } from '../../texts'
@@ -112,7 +112,7 @@ export function UserListPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1.5">
           <h1 className="m-0 text-[26px] font-bold tracking-[-0.02em]">{t.title}</h1>
-          <p className="m-0 text-sm text-ink-3">{t.description(MOCK_COMPANY_DETAIL.name)}</p>
+          <p className="m-0 text-sm text-ink-3">{t.description(currentCompany().name)}</p>
         </div>
         <a href="?user=transfer" className="inline-flex h-[34px] items-center gap-[7px] rounded-ctl border border-line-strong bg-surface px-3.5 text-[13px] font-medium text-ink hover:bg-hover">
           <SwapIcon size={14} />

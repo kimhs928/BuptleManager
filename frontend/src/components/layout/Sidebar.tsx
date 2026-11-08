@@ -4,6 +4,7 @@ import { cn } from '../../lib/cn'
 import { Logo } from '../ui/Logo'
 import { texts } from '../../texts'
 import { readLogo, saveLogo } from '../../lib/brandLogo'
+import { companyHref } from '../../lib/selectedCompany'
 import { MOCK_ACCOUNT } from '../../mocks/auth'
 import { BuildingIcon, ChevronDownIcon, ChevronRightIcon, HistoryIcon, SlidersIcon, UsersIcon } from '../icons'
 
@@ -118,7 +119,7 @@ export function Sidebar({ mainHref, noCompany, active = 'company' }: Props) {
       </div>
 
       {!noCompany && (
-        <NavLink href="?company" current={active === 'company'} icon={<BuildingIcon size={16} />}>
+        <NavLink href={companyHref()} current={active === 'company'} icon={<BuildingIcon size={16} />}>
           {t.companyInfo}
         </NavLink>
       )}

@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/biz/companies/{schemaName}/contracts")
 class ContractStubController {
 
-	@Operation(summary = "계약 검색", description = "q 가 비어 있으면 recent=true 항목을 '최근 조회한 계약'으로 쓴다.")
+	@Operation(summary = "계약 검색", description = "계약 ID 또는 계약명 검색. 최근 작업한 계약은 GET /recent 로 따로 조회한다.")
 	@GetMapping
 	fun search(
 		@PathVariable schemaName: String,

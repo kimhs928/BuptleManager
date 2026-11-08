@@ -4,7 +4,7 @@ import type { Change } from '../../components/ui'
 import { CheckIcon, CloseIcon } from '../../components/icons'
 import { cn } from '../../lib/cn'
 import { formatDateTime } from '../../lib/date'
-import { MOCK_COMPANY_DETAIL } from '../../mocks/companyDetail'
+import { currentCompany } from '../../lib/selectedCompany'
 import { MOCK_DIRECTORY } from '../../mocks/contract'
 import type { ContractMember, MemberKind } from '../../mocks/contract'
 import { texts } from '../../texts'
@@ -122,7 +122,7 @@ export function MemberAddModal({ kind, members, onClose, onSave }: Props) {
       roles: internal ? form.roles : [opt.externalRole],
       name,
       email,
-      company: internal ? MOCK_COMPANY_DETAIL.name : form.company.trim() || '-',
+      company: internal ? currentCompany().name : form.company.trim() || '-',
       dept: form.dept.trim() || '-',
       phone: form.phone.trim() || '-',
       perm: internal ? form.perm : [],
@@ -183,7 +183,7 @@ export function MemberAddModal({ kind, members, onClose, onSave }: Props) {
         </Field>
         <Field label={f.company} readOnlyHint={internal}>
           {(id) =>
-            internal ? <TextInput id={id} readOnly value={MOCK_COMPANY_DETAIL.name} /> : <TextInput id={id} value={form.company} onChange={(e) => set('company', e.target.value)} />
+            internal ? <TextInput id={id} readOnly value={currentCompany().name} /> : <TextInput id={id} value={form.company} onChange={(e) => set('company', e.target.value)} />
           }
         </Field>
         <Field label={f.dept}>{(id) => <TextInput id={id} value={form.dept} onChange={(e) => set('dept', e.target.value)} />}</Field>

@@ -1,5 +1,10 @@
 /** 고객사 정보 화면 문구 */
 export const company = {
+  load: {
+    loading: '고객사 정보를 불러오는 중입니다.',
+    error: '고객사 정보를 불러오지 못했습니다. 서버 연결과 스키마명을 확인해 주세요.',
+  },
+
   sidebar: {
     collapse: '사이드바 접기',
     expand: '사이드바 펴기',
