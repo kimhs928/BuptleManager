@@ -10,7 +10,19 @@ import jakarta.validation.constraints.Size
 import java.time.Instant
 import java.time.LocalDate
 
-/** 계약 상태. TBD: buptlebiz 실제 상태 코드와 대응 */
+/** 계약 상태 한 값. 코드는 contract_bcontract.status_on_workflow, 라벨과 분류는 enum 표(BIZ_CONTRACT_STATUS)에서 온다. */
+data class ContractStatusInfo(
+	@Schema(description = "상태 코드", example = "100")
+	val code: Int,
+	@Schema(description = "표시 이름", example = "서명 진행중")
+	val label: String,
+	@Schema(description = "분류 코드 (CONT_GRP_STS_*)", example = "SIGN")
+	val groupCode: String?,
+	@Schema(description = "분류 이름", example = "서명")
+	val groupName: String?,
+)
+
+/** 수정 요청에서 쓰는 단순 상태. 수정 API 를 구현할 때 상태 코드로 바꾼다. */
 enum class ContractStatus(val label: String) {
 	DRAFTING("작성중"),
 	REVIEWING("검토중"),
@@ -36,7 +48,7 @@ data class ContractSummaryResponse(
 	val id: String,
 	@Schema(example = "2024 클라우드 서비스 이용계약 (갱신)")
 	val name: String,
-	val status: ContractStatus,
+	val status: ContractStatusInfo,
 	@Schema(description = "계약 종류 표시 문구", example = "전자 · 전자서명")
 	val kind: String,
 	@Schema(description = "기안자 이름", example = "홍길동")
@@ -77,7 +89,7 @@ data class ContractInfoResponse(
 	val amount: Long,
 	@Schema(allowableValues = ["ko", "en", "ja"], example = "ko")
 	val lang: String,
-	val status: ContractStatus,
+	val status: ContractStatusInfo,
 	val deleted: Boolean,
 	val createdAt: Instant,
 	val updatedAt: Instant,

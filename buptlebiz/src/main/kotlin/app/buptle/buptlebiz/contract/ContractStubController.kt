@@ -1,10 +1,14 @@
 package app.buptle.buptlebiz.contract
 
+import app.buptle.company.domain.CompanyRepository
+import app.buptle.company.domain.ServicePlatform
 import app.buptle.core.api.ChangeResponse
 import app.buptle.core.api.CreatedResponse
 import app.buptle.core.api.ListResponse
 import app.buptle.core.api.PageResponse
 import app.buptle.core.api.notImplemented
+import app.buptle.core.error.BusinessException
+import app.buptle.core.error.CommonErrorCode
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -29,7 +33,16 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "특정 고객사 > 계약서 정보")
 @RestController
 @RequestMapping("/api/biz/companies/{schemaName}/contracts")
-class ContractStubController {
+class ContractStubController(
+	private val companies: CompanyRepository,
+	private val reader: BizContractReader,
+) {
+
+	/** BuptleManager 에 등록된 Biz 고객사인지 확인한다. 아니면 404 */
+	private fun requireBizCompany(schemaName: String) {
+		companies.findBySchemaName(schemaName)?.takeIf { it.platform == ServicePlatform.BUPTLE_BIZ }
+			?: throw BusinessException(CommonErrorCode.NOT_FOUND, "고객사를 찾을 수 없습니다.")
+	}
 
 	@Operation(summary = "계약 검색", description = "계약 ID 또는 계약명 검색. 최근 작업한 계약은 GET /recent 로 따로 조회한다.")
 	@GetMapping
@@ -39,14 +52,20 @@ class ContractStubController {
 		@Parameter(description = "삭제된 계약 포함") @RequestParam(defaultValue = "false") includeDeleted: Boolean,
 		@RequestParam(defaultValue = "1") @Min(1) page: Int,
 		@RequestParam(defaultValue = "10") @Min(1) @Max(100) size: Int,
-	): PageResponse<ContractSummaryResponse> = notImplemented()
+	): PageResponse<ContractSummaryResponse> {
+		requireBizCompany(schemaName)
+		return reader.search(schemaName, q, includeDeleted, page, size)
+	}
 
 	@Operation(
 		summary = "계약 기본 정보",
 		description = "계약 정보, 템플릿/카테고리, 최근 히스토리 3묶음. 조회하면 서버가 '최근 조회한 계약'에도 기록한다.",
 	)
 	@GetMapping("/{id}")
-	fun detail(@PathVariable schemaName: String, @PathVariable id: String): ContractDetailResponse = notImplemented()
+	fun detail(@PathVariable schemaName: String, @PathVariable id: String): ContractDetailResponse {
+		requireBizCompany(schemaName)
+		return reader.detail(schemaName, id) ?: throw BusinessException(CommonErrorCode.NOT_FOUND, "계약을 찾을 수 없습니다.")
+	}
 
 	@Operation(
 		summary = "계약 기본 정보 수정",
