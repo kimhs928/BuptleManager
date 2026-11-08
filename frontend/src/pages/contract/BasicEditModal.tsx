@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Alert, EditModal, Field, FieldGroup, Select, TextInput, Textarea } from '../../components/ui'
 import type { Change } from '../../components/ui'
 import { formatDateTime } from '../../lib/date'
-import type { ContractDetail, ContractStatus } from '../../mocks/contract'
+import type { EnumValue } from '../../lib/enums'
+import type { ContractDetail } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { makeAudit } from './audit'
+import { ContractStatusSelect } from './ContractStatusSelect'
+import { mockStatusOf, statusCodeOf } from './statusMap'
 
 const t = texts.contract.basicEdit
-const statuses: ContractStatus[] = ['작성중', '검토중', '서명 진행중', '체결 완료', '반려']
 
 type EditKey = keyof typeof t.labels
 
@@ -44,15 +46,20 @@ type Props = {
 /** 계약 기본 정보 수정 */
 export function BasicEditModal({ contract, onClose, onSave, onGoWorkflow }: Props) {
   const [form, setForm] = useState<ContractDetail>(contract)
+  // 상태는 상태 코드로 고른다. 고른 상태의 이름은 변경 내용 표시에 쓴다
+  const [statusCode, setStatusCode] = useState(() => statusCodeOf(contract.status))
+  const [statusValue, setStatusValue] = useState<EnumValue | undefined>()
+  const statusChanged = statusCode !== statusCodeOf(contract.status)
   const [ticket, setTicket] = useState('')
   const [reason, setReason] = useState('')
   const [openedAt] = useState(() => formatDateTime())
 
   const set = <K extends keyof ContractDetail>(key: K, value: ContractDetail[K]) => setForm((f) => ({ ...f, [key]: value }))
 
+  const shown = (k: EditKey, c: ContractDetail) => (k === 'status' && c === form && statusChanged && statusValue ? `${statusValue.label} (${statusValue.code})` : show(k, c))
   const changes: Change[] = keys
-    .filter((k) => show(k, form) !== show(k, contract))
-    .map((k) => ({ field: t.labels[k], before: show(k, contract), after: show(k, form) }))
+    .filter((k) => shown(k, form) !== shown(k, contract))
+    .map((k) => ({ field: t.labels[k], before: shown(k, contract), after: shown(k, form) }))
 
   return (
     <EditModal
@@ -73,13 +80,16 @@ export function BasicEditModal({ contract, onClose, onSave, onGoWorkflow }: Prop
         </Field>
         <Field label={t.fields.status}>
           {(id) => (
-            <Select id={id} value={form.status} onChange={(e) => set('status', e.target.value as ContractStatus)}>
-              {statuses.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </Select>
+            <ContractStatusSelect
+              id={id}
+              value={statusCode}
+              onChange={(v) => {
+                if (!v) return
+                setStatusCode(v.code)
+                setStatusValue(v)
+                set('status', mockStatusOf(v))
+              }}
+            />
           )}
         </Field>
         <Field label={t.fields.name} className="col-span-2">

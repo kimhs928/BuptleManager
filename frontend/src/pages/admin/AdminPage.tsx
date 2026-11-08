@@ -7,6 +7,7 @@ import { formatDateTime } from '../../lib/date'
 import { MOCK_BIZ_SYNC_RUNS, MOCK_SYNC_DELAY_MS, MOCK_SYNC_RESULT } from '../../mocks/admin'
 import type { SyncRun, SyncStatus } from '../../mocks/admin'
 import { texts } from '../../texts'
+import { EnumManager } from './EnumManager'
 
 const t = texts.admin
 
@@ -138,6 +139,8 @@ export function AdminPage() {
           </div>
         </Card>
       </section>
+
+      <EnumManager />
     </CompanyShell>
   )
 }

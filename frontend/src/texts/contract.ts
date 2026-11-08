@@ -114,6 +114,15 @@ export const contract = {
   },
 
   /** 기본 정보 수정 모달 */
+  statusSelect: {
+    placeholder: '상태 선택',
+    loading: '불러오는 중…',
+    loadFailed: '상태 목록을 불러오지 못했습니다.',
+    groupTitle: '분류',
+    optionTitle: '단계',
+    other: '기타',
+  },
+
   basicEdit: {
     title: '계약 기본 정보 수정',
     action: '계약 · 기본 정보 수정',
