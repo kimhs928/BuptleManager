@@ -3,9 +3,12 @@ import { ChevronRightIcon, CloseIcon, SearchIcon, TrashIcon } from '../../compon
 import { CompanyShell } from '../../components/layout/CompanyShell'
 import { Button, Card, Lines } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import { MOCK_CONTRACTS } from '../../mocks/contract'
+import { useContractSearch } from '../../hooks/useContractSearch'
+import { formatDateTime } from '../../lib/date'
+import { currentCompany } from '../../lib/selectedCompany'
 import { texts } from '../../texts'
 import { RecentContractsCard } from './RecentContractsCard'
+import { mockStatusOf } from './statusMap'
 import { deletedName, deletedRow, tableTd, tableTh } from './format'
 import { DeletedBadge, StatusDot } from './shared'
 
@@ -21,11 +24,8 @@ export function ContractSearchPage({ initialQuery = '' }: Props) {
   const [query, setQuery] = useState(initialQuery)
   const [includeDeleted, setIncludeDeleted] = useState(true)
 
-  const q = query.trim().toLowerCase()
-  const qPlain = q.replace(/-/g, '')
-  const results = MOCK_CONTRACTS.filter((c) => includeDeleted || !c.deleted).filter((c) =>
-    q && (c.id.toLowerCase().replace(/-/g, '').includes(qPlain) || c.name.toLowerCase().includes(q)),
-  )
+  const q = query.trim()
+  const { items: results, total, loading, error } = useContractSearch(currentCompany().schema, q, includeDeleted)
 
   return (
     <CompanyShell active="contract" trail={[{ label: texts.contract.breadcrumb.features }, { label: texts.contract.breadcrumb.contract }]}>
@@ -76,11 +76,13 @@ export function ContractSearchPage({ initialQuery = '' }: Props) {
             <div className="flex items-baseline gap-2 border-b border-line-soft px-5 py-4">
               <span className="text-[15px] font-semibold">{t.resultTitle}</span>
               <span className="text-[13px] text-ink-4" aria-live="polite">
-                {t.count(results.length, includeDeleted)}
+                {loading ? t.loading : t.count(total, includeDeleted)}
               </span>
             </div>
 
-            {results.length > 0 ? (
+            {error ? (
+              <p role="alert" className="m-0 px-6 py-10 text-center text-[13px] text-danger-ink">{t.error(error)}</p>
+            ) : results.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[860px] border-collapse text-[13.5px]">
                   <thead>
@@ -110,16 +112,16 @@ export function ContractSearchPage({ initialQuery = '' }: Props) {
                             {c.deleted && c.deletedAt && c.deletedBy && (
                               <span className="inline-flex items-center gap-[5px] text-xs tabular-nums text-danger-ink">
                                 <TrashIcon size={11} strokeWidth={2.2} />
-                                {t.deletedInfo(c.deletedAt, c.deletedBy)}
+                                {t.deletedInfo(formatDateTime(new Date(c.deletedAt)), c.deletedBy)}
                               </span>
                             )}
                           </span>
                         </td>
                         <td className={cn(tableTd, 'whitespace-nowrap')}>
-                          <StatusDot status={c.status} muted={c.deleted} className="gap-[7px] text-ink" />
+                          <StatusDot status={c.status.label} tone={mockStatusOf({ code: String(c.status.code), groupCode: c.status.groupCode })} muted={c.deleted} className="gap-[7px] text-ink" />
                         </td>
                         <td className={cn(tableTd, 'whitespace-nowrap tabular-nums', c.deleted ? 'text-ink-5' : 'text-ink-3')}>{c.kind}</td>
-                        <td className={cn(tableTd, 'whitespace-nowrap tabular-nums', c.deleted ? 'text-ink-5' : 'text-ink-3')}>{c.drafter}</td>
+                        <td className={cn(tableTd, 'whitespace-nowrap tabular-nums', c.deleted ? 'text-ink-5' : 'text-ink-3')}>{c.creatorName}</td>
                         <td className={cn(tableTd, 'whitespace-nowrap text-right tabular-nums', c.deleted ? 'text-ink-5' : 'text-ink-2')}>{t.members(c.members)}</td>
                         <td className={cn(tableTd, 'whitespace-nowrap pr-5 text-right')}>
                           <a href={`?contract=${c.id}`} className="inline-flex h-7 items-center gap-1 rounded-ctl border border-line-strong bg-surface px-2.5 text-[12.5px] font-medium text-ink hover:bg-hover">

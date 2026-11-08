@@ -63,6 +63,8 @@ export const contract = {
       members: '참여',
     },
     members: (n: number) => `${n}명`,
+    loading: '검색 중…',
+    error: (m: string) => `검색하지 못했습니다. (${m})`,
     created: (d: string) => `생성 ${d}`,
     deleted: '삭제됨',
     deletedInfo: (at: string, by: string) => `삭제 ${at} · ${by}`,

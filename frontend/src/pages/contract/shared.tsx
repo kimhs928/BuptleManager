@@ -25,10 +25,11 @@ export function StatusChip({ status }: { status: ContractStatus }) {
 }
 
 /** 계약 진행 상태 점 + 글자. 글자색은 기본 진하게, 삭제된 계약은 흐리게 */
-export function StatusDot({ status, muted, className }: { status: ContractStatus; muted?: boolean; className?: string }) {
+export function StatusDot({ status, tone, muted, className }: { status: string; tone?: ContractStatus; muted?: boolean; className?: string }) {
+  const color = statusDot[tone ?? (status as ContractStatus)] ?? statusDot['검토중']
   return (
     <span className={cn('inline-flex items-center gap-1.5', muted ? 'text-ink-5' : className)}>
-      <span aria-hidden="true" className={cn('size-2 shrink-0 rounded-full', statusDot[status], muted && 'opacity-45')} />
+      <span aria-hidden="true" className={cn('size-2 shrink-0 rounded-full', color, muted && 'opacity-45')} />
       {status}
     </span>
   )
