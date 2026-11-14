@@ -321,6 +321,7 @@ export const contract = {
     usersHint: '',
     usersStage: '처리 단계',
     usersUnused: '사용 안 함',
+    usersEmpty: '지정된 워크플로우 설정 유저가 없습니다.',
     processTitle: '03. 계약 프로세스',
     stateLabel: { done: '완료', current: '진행 중', pending: '대기' },
   },

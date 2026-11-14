@@ -16,6 +16,9 @@ type Props = {
   onSave: (next: Workflow, changeCount: number, ticket: string) => void
 }
 
+/** '있음'을 뜻하는 설정 값. 회색 대신 붉은색으로 눈에 띄게 보여 준다 */
+const PRESENT_VALUES = new Set(['필요', 'on', '첨부 파일 있음'])
+
 type StageState = 'done' | 'current' | 'pending'
 
 const stageTone: Record<StageState, { card: string; no: string; badge: string }> = {
@@ -90,7 +93,7 @@ export function WorkflowTab({ workflow, guide, users, history, onSave }: Props) 
                 <dt className="flex items-center bg-[#fafafb] px-3.5 py-2.5 text-[12.5px] font-medium text-ink-3">{a.label}</dt>
                 <dd className="m-0 flex flex-wrap items-center gap-1 px-3 py-2">
                   {a.value.map((v) => (
-                    <span key={v} className="inline-flex h-6 items-center rounded-md bg-[#f2f2f5] px-[9px] text-xs font-medium text-ink">
+                    <span key={v} className={cn('inline-flex h-6 items-center rounded-md px-[9px] text-xs font-medium', PRESENT_VALUES.has(v) ? 'border border-danger-line bg-danger-soft text-danger-ink' : 'bg-[#f2f2f5] text-ink')}>
                       {v}
                     </span>
                   ))}
@@ -106,6 +109,7 @@ export function WorkflowTab({ workflow, guide, users, history, onSave }: Props) 
             <h3 className="m-0 text-[13px] font-semibold">{t.usersTitle}</h3>
             <span className="text-xs text-ink-4">{t.usersHint}</span>
           </div>
+          {users.length === 0 && <p className="m-0 rounded-xl border border-dashed border-line-strong bg-[#fafafb] px-3.5 py-4 text-center text-[13px] text-ink-4">{t.usersEmpty}</p>}
           <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,250px),1fr))] gap-2.5 p-0">
             {users.map((u, ui) => {
               // 워크플로우 항목이 '불필요'면 해당 역할은 쓰이지 않는다
