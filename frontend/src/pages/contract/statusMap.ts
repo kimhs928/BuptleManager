@@ -28,3 +28,8 @@ export function mockStatusOf(value: Pick<EnumValue, 'code' | 'groupCode'>): Cont
       return '검토중'
   }
 }
+
+/** 계약의 상태 코드. 실제 데이터는 코드를 들고 있고, 목업은 문구에서 대표 코드를 찾는다 */
+export function initialStatusCode(contract: { status: string; statusCode?: string }): string {
+  return contract.statusCode ?? MOCK_STATUS_CODE[contract.status as ContractStatus] ?? ''
+}

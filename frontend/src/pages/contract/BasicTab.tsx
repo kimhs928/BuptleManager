@@ -3,13 +3,14 @@ import type { ReactNode } from 'react'
 import { EditIcon, FileIcon, LockIcon } from '../../components/icons'
 import { Button } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import { MOCK_CONTRACT_DOCS, MOCK_CONTRACT_TEMPLATE } from '../../mocks/contract'
 import { historyHref, historyOf } from '../../mocks/history'
 import type { ContractDetail } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { BasicEditModal } from './BasicEditModal'
 import { showDateTime } from './format'
+import type { ContractDoc, ContractTemplate } from './contractAdapter'
 import { StatusDot } from './shared'
+import { mockStatusOf } from './statusMap'
 
 /** 최근 히스토리에 보여 주는 최대 건수 */
 const RECENT_LIMIT = 10
@@ -53,15 +54,16 @@ function Stack({ label, children }: { label: string; children: ReactNode }) {
 
 type Props = {
   contract: ContractDetail
+  docs: ContractDoc[]
+  /** 템플릿 없이 만든 계약이면 null */
+  template: ContractTemplate | null
   onSave: (next: ContractDetail, changeCount: number, ticket: string) => void
   onShowWorkflow: () => void
 }
 
 /** 기본 정보 탭 */
-export function BasicTab({ contract, onSave, onShowWorkflow }: Props) {
+export function BasicTab({ contract, docs, template: tpl, onSave, onShowWorkflow }: Props) {
   const [editing, setEditing] = useState(false)
-  const docs = MOCK_CONTRACT_DOCS
-  const tpl = MOCK_CONTRACT_TEMPLATE
 
   // 이 계약의 처리 내역(변경 히스토리). 전체 보기는 검색 조건이 걸린 처리 내역 히스토리 화면으로 연다
   const changes = historyOf('계약', contract.id)
@@ -84,7 +86,7 @@ export function BasicTab({ contract, onSave, onShowWorkflow }: Props) {
                 {contract.id}
               </Row>
               <Row label={t.fields.status}>
-                <StatusDot status={contract.status} />
+                <StatusDot status={contract.status} tone={contract.statusCode ? mockStatusOf({ code: contract.statusCode, groupCode: contract.statusGroup ?? null }) : undefined} />
               </Row>
               <Row label={t.fields.name}>{contract.name}</Row>
               <div className="flex flex-col gap-2 border-t border-line-soft px-3.5 pb-3 pt-2.5">
@@ -192,6 +194,7 @@ export function BasicTab({ contract, onSave, onShowWorkflow }: Props) {
               </span>
             }
           >
+            {tpl ? (
             <dl className={cn(box, 'm-0')}>
               <Stack label={t.template.name}>{tpl.name}</Stack>
               <Stack label={t.template.category}>
@@ -217,6 +220,9 @@ export function BasicTab({ contract, onSave, onShowWorkflow }: Props) {
                 </a>
               </Row>
             </dl>
+            ) : (
+              <p className={cn(box, 'm-0 px-3.5 py-4 text-[13px] text-ink-4')}>{t.template.none}</p>
+            )}
           </Block>
 
           <section aria-labelledby="contract-recent" className="flex flex-col gap-1.5">

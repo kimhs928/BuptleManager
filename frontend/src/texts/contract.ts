@@ -1,5 +1,10 @@
 /** 계약 화면 문구 */
 export const contract = {
+  detailLoad: {
+    loading: '계약을 불러오는 중…',
+    notFound: (id: string) => `"${id}" 계약을 찾을 수 없습니다.`,
+    error: (m: string) => `계약을 불러오지 못했습니다. (${m})`,
+  },
   breadcrumb: {
     features: '주요 기능',
     contract: '계약',
@@ -128,7 +133,7 @@ export const contract = {
     docView: '보기',
     templateTitle: '템플릿·카테고리',
     readOnly: '수정 불가',
-    template: { name: '템플릿명', category: '카테고리', description: '설명', draftUpload: '초안 업로드', draftFile: '초안 파일' },
+    template: { none: '템플릿 없이 만든 계약입니다.', name: '템플릿명', category: '카테고리', description: '설명', draftUpload: '초안 업로드', draftFile: '초안 파일' },
     subCategory: '하위',
     recentTitle: '최근 히스토리',
     recentEmpty: '처리 내역이 없습니다.',

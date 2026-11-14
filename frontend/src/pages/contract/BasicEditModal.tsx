@@ -7,7 +7,7 @@ import type { ContractDetail } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { makeAudit } from './audit'
 import { ContractStatusSelect } from './ContractStatusSelect'
-import { mockStatusOf, statusCodeOf } from './statusMap'
+import { initialStatusCode } from './statusMap'
 
 const t = texts.contract.basicEdit
 
@@ -47,9 +47,9 @@ type Props = {
 export function BasicEditModal({ contract, onClose, onSave, onGoWorkflow }: Props) {
   const [form, setForm] = useState<ContractDetail>(contract)
   // 상태는 상태 코드로 고른다. 고른 상태의 이름은 변경 내용 표시에 쓴다
-  const [statusCode, setStatusCode] = useState(() => statusCodeOf(contract.status))
+  const [statusCode, setStatusCode] = useState(() => initialStatusCode(contract))
   const [statusValue, setStatusValue] = useState<EnumValue | undefined>()
-  const statusChanged = statusCode !== statusCodeOf(contract.status)
+  const statusChanged = statusCode !== initialStatusCode(contract)
   const [ticket, setTicket] = useState('')
   const [reason, setReason] = useState('')
   const [openedAt] = useState(() => formatDateTime())
@@ -87,7 +87,9 @@ export function BasicEditModal({ contract, onClose, onSave, onGoWorkflow }: Prop
                 if (!v) return
                 setStatusCode(v.code)
                 setStatusValue(v)
-                set('status', mockStatusOf(v))
+                set('status', v.label)
+                set('statusCode', v.code)
+                set('statusGroup', v.groupCode)
               }}
             />
           )}

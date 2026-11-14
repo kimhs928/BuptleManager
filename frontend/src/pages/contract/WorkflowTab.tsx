@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { ChevronRightIcon, EditIcon } from '../../components/icons'
 import { Button } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import { MOCK_GUIDE, MOCK_WORKFLOW_USERS } from '../../mocks/contract'
-import type { HistoryRow, Workflow } from '../../mocks/contract'
+import type { GuideStage, HistoryRow, Workflow, WorkflowUser } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { WorkflowEditModal } from './WorkflowEditModal'
 
@@ -11,6 +10,8 @@ const t = texts.contract.workflow
 
 type Props = {
   workflow: Workflow
+  guide: GuideStage[]
+  users: WorkflowUser[]
   history: HistoryRow[]
   onSave: (next: Workflow, changeCount: number, ticket: string) => void
 }
@@ -24,12 +25,12 @@ const stageTone: Record<StageState, { card: string; no: string; badge: string }>
 }
 
 /** 계약 워크플로우 (계약 형태 · 프로세스 가이드) */
-export function WorkflowTab({ workflow, history, onSave }: Props) {
+export function WorkflowTab({ workflow, guide, users, history, onSave }: Props) {
   const [editing, setEditing] = useState(false)
 
   // 현재 단계 = 가장 최근 액션이 도착한 단계
   const latest = [...history].sort((a, b) => (a.at < b.at ? -1 : 1)).at(-1)
-  const currentIndex = MOCK_GUIDE.findIndex((g) => g.name === latest?.to || g.substages?.includes(latest?.to ?? ''))
+  const currentIndex = guide.findIndex((g) => g.name === latest?.to || g.substages?.includes(latest?.to ?? ''))
 
   return (
     <section aria-labelledby="workflow-title" className="flex flex-col gap-2">
@@ -77,11 +78,11 @@ export function WorkflowTab({ workflow, history, onSave }: Props) {
             <span className="text-xs text-ink-4">{t.usersHint}</span>
           </div>
           <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,250px),1fr))] gap-2.5 p-0">
-            {MOCK_WORKFLOW_USERS.map((u) => {
+            {users.map((u, ui) => {
               // 워크플로우 항목이 '불필요'면 해당 역할은 쓰이지 않는다
               const unused = !!u.opt && workflow.attrs.find((a) => a.key === u.opt)?.value.includes('불필요')
               return (
-                <li key={u.role} className={cn('flex min-w-0 flex-col gap-1.5 rounded-xl border px-3.5 py-3', unused ? 'border-dashed border-line-strong bg-[#fafafb] text-ink-4' : 'border-line-strong bg-surface shadow-card')}>
+                <li key={`${u.role}-${ui}`} className={cn('flex min-w-0 flex-col gap-1.5 rounded-xl border px-3.5 py-3', unused ? 'border-dashed border-line-strong bg-[#fafafb] text-ink-4' : 'border-line-strong bg-surface shadow-card')}>
                   <span className="flex items-center justify-between gap-2">
                     <span className={cn('inline-flex h-5 items-center rounded-md px-2 text-[10.5px] font-semibold leading-none', unused ? 'bg-[#f2f2f5] text-ink-4' : 'bg-[#d6336c] text-white')}>{u.role}</span>
                     {unused && <span className="rounded-full bg-[#f2f2f5] px-[7px] py-px text-[10.5px] font-semibold text-ink-4">{t.usersUnused}</span>}
@@ -100,7 +101,7 @@ export function WorkflowTab({ workflow, history, onSave }: Props) {
         <div className="flex flex-col gap-2.5">
           <h3 className="m-0 text-[13px] font-semibold">{t.processTitle}</h3>
           <ol className="m-0 flex list-none items-stretch gap-1.5 overflow-x-auto p-0">
-            {MOCK_GUIDE.map((g, i) => {
+            {guide.map((g, i) => {
               const state: StageState = currentIndex < 0 || i > currentIndex ? 'pending' : i === currentIndex ? 'current' : 'done'
               const tone = stageTone[state]
               return (
@@ -120,7 +121,7 @@ export function WorkflowTab({ workflow, history, onSave }: Props) {
                       ))}
                     </span>
                   </div>
-                  {i < MOCK_GUIDE.length - 1 && <ChevronRightIcon size={14} aria-hidden="true" className="shrink-0 text-ink-5" />}
+                  {i < guide.length - 1 && <ChevronRightIcon size={14} aria-hidden="true" className="shrink-0 text-ink-5" />}
                 </li>
               )
             })}

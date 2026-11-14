@@ -38,7 +38,11 @@ export type ContractDetail = {
   endDate: string
   amount: number
   lang: 'ko' | 'en' | 'ja'
-  status: ContractStatus
+  /** 상태 이름. 목업은 5개 문구, 실제 데이터는 BizContractStatus 의 이름 */
+  status: string
+  /** 실제 상태 코드 (BizContractStatus). 목업에는 없다 */
+  statusCode?: string
+  statusGroup?: string | null
   deleted: boolean
   createdAt: string
   updatedAt: string

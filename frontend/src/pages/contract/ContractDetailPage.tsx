@@ -2,11 +2,15 @@ import { useState } from 'react'
 import { CloseIcon, SearchIcon } from '../../components/icons'
 import { CompanyShell } from '../../components/layout/CompanyShell'
 import { Button } from '../../components/ui'
+import { useContractBundle } from '../../hooks/useContractBundle'
+import { currentCompany } from '../../lib/selectedCompany'
 import { cn } from '../../lib/cn'
-import { getContractDetail, MOCK_EMAILS, MOCK_HISTORY, MOCK_HISTORY_USERS, MOCK_MEMBERS, MOCK_WORKFLOW } from '../../mocks/contract'
-import type { ContractDetail, ContractMember, HistoryRow, Workflow } from '../../mocks/contract'
+import type { ContractDetail, ContractEmail, ContractMember, HistoryRow, Workflow } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { BasicTab } from './BasicTab'
+import { toContractDetail, toDocs, toEmail, toHistoryRow, toMember, toTemplate, toWorkflow } from './contractAdapter'
+import type { ContractDoc, ContractTemplate, WorkflowView } from './contractAdapter'
+import { mockStatusOf } from './statusMap'
 import { HistoryTab } from './HistoryTab'
 import { MembersTab } from './MembersTab'
 import { StatusDot } from './shared'
@@ -27,13 +31,62 @@ type Props = {
 
 const dot = <span aria-hidden="true" className="size-[3px] rounded-full bg-ink-5" />
 
-/** 계약 상세 */
+/** 계약 상세. 기본 정보는 Biz DB 에서 불러온다 */
 export function ContractDetailPage({ contractId, initialTab = 'basic' }: Props) {
+  const { data, loading, error } = useContractBundle(currentCompany().schema, contractId)
+  const l = t.detailLoad
+
+  if (data) {
+    return (
+      <ContractDetailView
+        key={data.detail.contract.id}
+        initial={toContractDetail(data.detail)}
+        docs={toDocs(data.detail)}
+        template={toTemplate(data.detail)}
+        initialMembers={data.members.map(toMember)}
+        initialHistory={data.history.items.map(toHistoryRow)}
+        historyUsers={data.history.users}
+        emails={data.emails.map(toEmail)}
+        workflowView={toWorkflow(data.workflow)}
+        initialTab={initialTab}
+      />
+    )
+  }
+
+  const notFound = error !== null && /찾을 수 없/.test(error)
+  return (
+    <CompanyShell active="contract" trail={[{ label: t.breadcrumb.features }, { label: t.breadcrumb.contract, href: '?contract' }, { label: contractId }]}>
+      <div className="mx-auto w-full max-w-[1100px] py-16 text-center text-[14px] text-ink-3">
+        {loading ? <p role="status">{l.loading}</p> : <p role="alert">{notFound ? l.notFound(contractId) : l.error(error ?? '')}</p>}
+        {!loading && (
+          <a href="?contract" className="mt-4 inline-block text-[13px] text-link hover:underline">
+            {t.breadcrumb.contract}
+          </a>
+        )}
+      </div>
+    </CompanyShell>
+  )
+}
+
+type ViewProps = {
+  initial: ContractDetail
+  docs: ContractDoc[]
+  template: ContractTemplate | null
+  initialMembers: ContractMember[]
+  initialHistory: HistoryRow[]
+  historyUsers: string[]
+  emails: ContractEmail[]
+  workflowView: WorkflowView
+  initialTab: ContractTab
+}
+
+function ContractDetailView({ initial, docs, template, initialMembers, initialHistory, historyUsers, emails, workflowView, initialTab }: ViewProps) {
+  const contractId = initial.id
   const [tab, setTab] = useState<ContractTab>(initialTab)
-  const [contract, setContract] = useState<ContractDetail>(() => getContractDetail(contractId))
-  const [members, setMembers] = useState<ContractMember[]>(MOCK_MEMBERS)
-  const [workflow, setWorkflow] = useState<Workflow>(MOCK_WORKFLOW)
-  const [history, setHistory] = useState<HistoryRow[]>(MOCK_HISTORY)
+  const [contract, setContract] = useState<ContractDetail>(initial)
+  const [members, setMembers] = useState<ContractMember[]>(initialMembers)
+  const [workflow, setWorkflow] = useState<Workflow>(workflowView.workflow)
+  const [history, setHistory] = useState<HistoryRow[]>(initialHistory)
   const [toast, setToast] = useState('')
   const [query, setQuery] = useState(contractId)
 
@@ -99,7 +152,7 @@ export function ContractDetailPage({ contractId, initialTab = 'basic' }: Props) 
               <span className="inline-flex items-center gap-1.5">
                 <span className="text-ink-4">{t.header.stage}</span>
                 <span className="font-medium">
-                  <StatusDot status={contract.status} className="text-ink" />
+                  <StatusDot status={contract.status} tone={contract.statusCode ? mockStatusOf({ code: contract.statusCode, groupCode: contract.statusGroup ?? null }) : undefined} className="text-ink" />
                 </span>
               </span>
               {dot}
@@ -142,6 +195,8 @@ export function ContractDetailPage({ contractId, initialTab = 'basic' }: Props) 
           {tab === 'basic' && (
             <BasicTab
               contract={contract}
+              docs={docs}
+              template={template}
               onSave={(next, count, ticket) => {
                 setContract(next)
                 setToast(t.toast.basicSaved(count, ticket))
@@ -166,6 +221,8 @@ export function ContractDetailPage({ contractId, initialTab = 'basic' }: Props) 
             <div className="flex flex-col gap-6">
               <WorkflowTab
                 workflow={workflow}
+                guide={workflowView.guide}
+                users={workflowView.users}
                 history={history}
                 onSave={(next, count, ticket) => {
                   setWorkflow(next)
@@ -174,8 +231,8 @@ export function ContractDetailPage({ contractId, initialTab = 'basic' }: Props) 
               />
               <HistoryTab
                 history={history}
-                emails={MOCK_EMAILS}
-                members={MOCK_HISTORY_USERS}
+                emails={emails}
+                members={historyUsers}
                 onSaveRow={(next, ticket) => {
                   setHistory((prev) => prev.map((h) => (h.id === next.id ? next : h)))
                   setToast(t.toast.historySaved(next.action, ticket))
