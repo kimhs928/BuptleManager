@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { DownloadIcon, EyeIcon } from '../../components/icons'
-import { ViewModal } from '../../components/ui'
+import { RichText, ViewModal } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { HTML_TYPE_INFO, SIGN_CLS, SIGN_METHOD_CODE } from '../../mocks/contract'
 import type { HistoryRow } from '../../mocks/contract'
@@ -53,7 +53,7 @@ export function HistoryExtraModal({ row, onClose }: Props) {
             [t.fields.user, row.user],
             [t.fields.at, <span key="at" className="tabular-nums">{row.at}</span>],
             [t.fields.move, `${row.from} → ${row.to}`],
-            [t.fields.comment, row.comment || t.none],
+            [t.fields.comment, row.comment ? <RichText key="cm" text={row.comment} /> : t.none],
             [t.fields.deleted, row.deleted ? t.deletedYes : t.deletedNo],
           ]}
         />

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { ArrowRightIcon, ChevronDownIcon, EditIcon, EyeIcon, UndoIcon } from '../../components/icons'
+import { RichText } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { SIGN_CLS, SIGN_METHOD_CODE, STAGE_ORDER } from '../../mocks/contract'
 import type { HistoryRow, SignCls, SignMethodCode } from '../../mocks/contract'
@@ -92,7 +93,7 @@ function Entry<R extends TimelineRow>({ row, back, onEdit, onDetail, renderBody 
             </span>
           )}
         </span>
-        {renderBody ? renderBody(row) : <span className="text-[12.5px] leading-[1.5] text-ink-2">{row.comment}</span>}
+        {renderBody ? renderBody(row) : <RichText text={row.comment} className="text-[12.5px] leading-[1.5] text-ink-2" />}
       </div>
       {(onEdit || onDetail) && (
       <span className="ml-auto inline-flex shrink-0 items-center gap-2">

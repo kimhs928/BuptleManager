@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { EditModal, Field, FieldGroup, Select, Textarea, TextInput } from '../../components/ui'
+import { EditModal, Field, FieldGroup, RichTextEditor, Select, TextInput } from '../../components/ui'
 import type { Change } from '../../components/ui'
 import { formatDateTime } from '../../lib/date'
+import { htmlToPlain } from '../../lib/safeHtml'
 import type { HistoryRow } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { makeAudit } from './audit'
@@ -31,7 +32,7 @@ export function HistoryEditModal({ row, users, onClose, onSave }: Props) {
   if (user !== row.user) changes.push({ field: f.user, before: row.user, after: user, reset: () => setUser(row.user) })
   if (at && at.replace('T', ' ') !== row.at) changes.push({ field: f.at, before: row.at, after: at.replace('T', ' '), reset: () => setAt(row.at.replace(' ', 'T')) })
   if ((deleted === 'Y') !== row.deleted) changes.push({ field: f.deleted, before: row.deleted ? 'Y' : 'N', after: deleted, reset: () => setDeleted(row.deleted ? 'Y' : 'N') })
-  if (comment !== row.comment) changes.push({ field: f.comment, before: row.comment, after: comment || t.emptyComment, reset: () => setComment(row.comment) })
+  if (comment !== row.comment) changes.push({ field: f.comment, before: htmlToPlain(row.comment), after: htmlToPlain(comment) || t.emptyComment, reset: () => setComment(row.comment) })
 
   const resetAll = () => {
     setUser(row.user)
@@ -89,7 +90,7 @@ export function HistoryEditModal({ row, users, onClose, onSave }: Props) {
           )}
         </Field>
         <Field label={f.comment} className="col-span-2">
-          {(id) => <Textarea id={id} rows={3} value={comment} onChange={(e) => setComment(e.target.value)} />}
+          {(id) => <RichTextEditor id={id} value={comment} onChange={setComment} />}
         </Field>
       </FieldGroup>
     </EditModal>
