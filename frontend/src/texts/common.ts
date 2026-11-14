@@ -53,6 +53,9 @@ export const common = {
     changes: {
       title: '변경 항목',
       empty: '아직 변경한 항목이 없습니다.',
+      resetAll: '전체 되돌리기',
+      reset: '되돌리기',
+      resetLabel: (field: string) => `${field} 되돌리기`,
     },
     ticket: {
       label: 'Zendesk 티켓 번호',

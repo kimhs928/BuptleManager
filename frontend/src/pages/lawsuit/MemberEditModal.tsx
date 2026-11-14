@@ -29,9 +29,11 @@ export function MemberEditModal({ lawsuitId, member, onClose, onSave }: Props) {
   const none = texts.lawsuit.none
   const deletedText = (v: boolean) => t.deletedOptions[String(v) as 'true' | 'false']
 
+  const resetRoles = () => setRoles(member.roles)
+  const resetDeleted = () => setDeleted(member.deleted)
   const changes: Change[] = []
-  if (joinList(roles, none) !== joinList(member.roles, none)) changes.push({ field: t.fields.roles, before: joinList(member.roles, none), after: joinList(roles, none) })
-  if (deleted !== member.deleted) changes.push({ field: t.fields.deleted, before: deletedText(member.deleted), after: deletedText(deleted) })
+  if (joinList(roles, none) !== joinList(member.roles, none)) changes.push({ field: t.fields.roles, before: joinList(member.roles, none), after: joinList(roles, none), reset: resetRoles })
+  if (deleted !== member.deleted) changes.push({ field: t.fields.deleted, before: deletedText(member.deleted), after: deletedText(deleted), reset: resetDeleted })
 
   return (
     <EditModal
@@ -39,6 +41,10 @@ export function MemberEditModal({ lawsuitId, member, onClose, onSave }: Props) {
       description={t.description(lawsuitId)}
       saveLabel="실행"
       changes={changes}
+      onResetAll={() => {
+        resetRoles()
+        resetDeleted()
+      }}
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}
       onTicketChange={setTicket}

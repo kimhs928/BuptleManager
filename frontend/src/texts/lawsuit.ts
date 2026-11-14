@@ -39,7 +39,7 @@ export const lawsuit = {
     migrated: { true: '예', false: '아니오' },
     members: (n: number) => `${n}명`,
     created: (d: string) => `생성 ${d}`,
-    deleted: '삭제됨',
+    deleted: '비활성화',
     detail: '상세 보기',
     emptyTitle: '검색 결과가 없습니다',
     emptyDescription: (q: string) => ['"' + q + '"에 해당하는 소송이 없습니다.', '소송 ID 형식(00000-0000 / 00000000)이나 고객사 선택이 맞는지 확인해 주세요.'],
@@ -53,7 +53,7 @@ export const lawsuit = {
     searchHint: 'ID는 00000-0000 / 00000000 모두 가능 · 삭제된 소송 포함',
     status: '상태',
     migrated: '마이그레이션',
-    deleted: '삭제됨',
+    deleted: '비활성화',
     tabsLabel: '소송 탭',
     tabs: { basic: '기본 정보', members: '참여 유저', emails: '히스토리·이메일 발송 내역' },
   },
@@ -64,7 +64,7 @@ export const lawsuit = {
     action: '소송 · 히스토리 수정',
     groups: { info: '히스토리 정보', edit: '수정 항목' },
     fields: { type: '액션 타입', at: '액션 일자', sender: '발신자', subject: '메일 제목', deleted: '삭제 유무' },
-    deletedOptions: { N: 'N (사용)', Y: 'Y (삭제)' },
+    deletedOptions: { N: '활성화', Y: '비활성화' },
   },
 
   /** 이메일 발송 내역 탭의 소송 히스토리 */
@@ -99,8 +99,8 @@ export const lawsuit = {
       updatedAt: '수정일',
     },
     migrated: { true: '예', false: '아니오' },
-    deletedYes: '삭제됨',
-    deletedNo: '사용 중',
+    deletedYes: '비활성화',
+    deletedNo: '활성화',
     emptyDesc: '-',
     courtTitle: '연동 정보',
     courtBadge: '대법원 연동',
@@ -121,7 +121,7 @@ export const lawsuit = {
     groups: { info: '소송 정보', amount: '소송 금액', state: '상태 · 삭제' },
     fields: { name: '소송명', desc: '소송 설명', amount: '소송 금액 (원)', status: '상태', deleted: '삭제 유무' },
     changeLabels: { name: '소송명', desc: '소송 설명', amount: '소송 금액', status: '상태', deleted: '삭제 유무' },
-    deletedOptions: { false: '사용 중', true: '삭제됨' },
+    deletedOptions: { false: '활성화', true: '비활성화' },
   },
 
   /** 참여 유저 탭 */
@@ -133,9 +133,9 @@ export const lawsuit = {
     footer: '',
     add: '추가',
     columns: { user: '유저', company: '회사명', dept: '부서', phone: '번호', roles: '역할', deleted: '삭제 유무', createdAt: '생성일', updatedAt: '수정일', deletedAt: '삭제일', action: '작업' },
-    deleted: '삭제됨',
+    deleted: '비활성화',
     deletedLabel: '삭제',
-    active: '사용',
+    active: '활성화',
     edit: '수정',
   },
 
@@ -143,11 +143,11 @@ export const lawsuit = {
     title: (name: string) => `참여 유저 수정 · ${name}`,
     description: (id: string) => `${id} · 변경 전/후 값이 히스토리에 저장됩니다.`,
     action: '소송 · 참여 유저 수정',
-    groups: { info: '유저 정보', roles: '유저 역할', deleted: '삭제 여부' },
+    groups: { info: '유저 정보', roles: '유저 역할', deleted: '삭제 유무' },
     rolesNote: '· 복수 선택',
     fixed: '변경 불가',
     fields: { name: '이름', email: '이메일', org: '소속 · 부서', roles: '유저 역할', deleted: '삭제 유무' },
-    deletedOptions: { false: '참여 중', true: '삭제됨' },
+    deletedOptions: { false: '활성화', true: '비활성화' },
   },
 
   memberAdd: {

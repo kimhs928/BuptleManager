@@ -25,13 +25,14 @@ export function BasicEditModal({ lawsuit, onClose, onSave }: Props) {
   const set = <K extends keyof LawsuitDetail>(key: K, value: LawsuitDetail[K]) => setForm((f) => ({ ...f, [key]: value }))
   const deletedText = (v: boolean) => t.deletedOptions[String(v) as 'true' | 'false']
   const l = t.changeLabels
+  const resetKey = <K extends keyof LawsuitDetail>(key: K) => set(key, lawsuit[key])
 
   const changes: Change[] = []
-  if (form.name !== lawsuit.name) changes.push({ field: l.name, before: lawsuit.name, after: form.name })
-  if (form.desc !== lawsuit.desc) changes.push({ field: l.desc, before: lawsuit.desc || '-', after: form.desc || '-' })
-  if (form.amount !== lawsuit.amount) changes.push({ field: l.amount, before: texts.lawsuit.won(lawsuit.amount), after: texts.lawsuit.won(form.amount) })
-  if (form.status !== lawsuit.status) changes.push({ field: l.status, before: LAWSUIT_STATUS_INFO[lawsuit.status].label, after: LAWSUIT_STATUS_INFO[form.status].label })
-  if (form.deleted !== lawsuit.deleted) changes.push({ field: l.deleted, before: deletedText(lawsuit.deleted), after: deletedText(form.deleted) })
+  if (form.name !== lawsuit.name) changes.push({ field: l.name, before: lawsuit.name, after: form.name, reset: () => resetKey('name') })
+  if (form.desc !== lawsuit.desc) changes.push({ field: l.desc, before: lawsuit.desc || '-', after: form.desc || '-', reset: () => resetKey('desc') })
+  if (form.amount !== lawsuit.amount) changes.push({ field: l.amount, before: texts.lawsuit.won(lawsuit.amount), after: texts.lawsuit.won(form.amount), reset: () => resetKey('amount') })
+  if (form.status !== lawsuit.status) changes.push({ field: l.status, before: LAWSUIT_STATUS_INFO[lawsuit.status].label, after: LAWSUIT_STATUS_INFO[form.status].label, reset: () => resetKey('status') })
+  if (form.deleted !== lawsuit.deleted) changes.push({ field: l.deleted, before: deletedText(lawsuit.deleted), after: deletedText(form.deleted), reset: () => resetKey('deleted') })
 
   return (
     <EditModal
@@ -39,6 +40,7 @@ export function BasicEditModal({ lawsuit, onClose, onSave }: Props) {
       description={t.description(lawsuit.id)}
       saveLabel="실행"
       changes={changes}
+      onResetAll={() => setForm(lawsuit)}
       canSubmit={form.name.trim() !== ''}
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}

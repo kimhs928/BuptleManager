@@ -98,21 +98,23 @@ export function MemberAddModal({ kind, members, onClose, onSave }: Props) {
   // 사용자가 직접 입력하거나 기본값에서 바꾼 항목만 보여 준다
   const changes: Change[] = []
   const f = t.fields
-  const add = (field: string, value: string, changed: boolean) => changed && value.trim() !== '' && changes.push({ field, after: value })
-  add(f.name, name, true)
-  add(f.email, email, true)
-  if (internal) add(f.userId, userId, true)
-  else add(f.company, form.company, true)
-  add(f.dept, form.dept, true)
-  add(f.phone, form.phone, true)
-  add(f.lang, texts.contract.lang[form.lang], form.lang !== emptyForm.lang)
+  // 각 항목은 그 입력만 처음 값(비움 또는 기본값)으로 되돌린다
+  const reset = (key: keyof Form) => () => set(key, emptyForm[key])
+  const add = (field: string, value: string, changed: boolean, key: keyof Form) => changed && value.trim() !== '' && changes.push({ field, after: value, reset: reset(key) })
+  add(f.name, name, true, 'name')
+  add(f.email, email, true, 'email')
+  if (internal) add(f.userId, userId, true, 'userId')
+  else add(f.company, form.company, true, 'company')
+  add(f.dept, form.dept, true, 'dept')
+  add(f.phone, form.phone, true, 'phone')
+  add(f.lang, texts.contract.lang[form.lang], form.lang !== emptyForm.lang, 'lang')
   if (internal) {
-    add(f.roles, joinList(form.roles, ''), true)
-    add(f.perm, joinList(form.perm, ''), true)
+    add(f.roles, joinList(form.roles, ''), true, 'roles')
+    add(f.perm, joinList(form.perm, ''), true, 'perm')
   }
-  add(f.signMethod, form.signMethod, form.signMethod !== emptyForm.signMethod)
-  add(f.signType, form.signType, form.signType !== emptyForm.signType)
-  add(f.signStatus, form.signStatus, form.signStatus !== emptyForm.signStatus)
+  add(f.signMethod, form.signMethod, form.signMethod !== emptyForm.signMethod, 'signMethod')
+  add(f.signType, form.signType, form.signType !== emptyForm.signType, 'signType')
+  add(f.signStatus, form.signStatus, form.signStatus !== emptyForm.signStatus, 'signStatus')
 
   const save = () => {
     const now = formatDateTime().replace(' ', 'T')
@@ -145,6 +147,7 @@ export function MemberAddModal({ kind, members, onClose, onSave }: Props) {
       description={t.description(kindLabel)}
       saveLabel={t.save}
       changes={changes}
+      onResetAll={() => setForm(emptyForm)}
       canSubmit={valid}
       changesTitle={t.changesTitle}
       changesEmpty={t.changesEmpty}

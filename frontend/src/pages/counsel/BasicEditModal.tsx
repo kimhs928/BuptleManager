@@ -38,15 +38,25 @@ export function BasicEditModal({ counsel, onClose, onSave }: Props) {
   }
   const projectsText = (list: string[]) => (list.length > 0 ? list.join(', ') : t.projectsNone)
 
+  // 항목별로 처음 값으로 되돌린다. 프로젝트는 입력 중이던 글자도 비운다
+  const reset = <K extends keyof CounselDetail>(key: K) => () => {
+    set(key, counsel[key])
+    if (key === 'projects') setProjectInput('')
+  }
+  const resetAll = () => {
+    setForm(counsel)
+    setProjectInput('')
+  }
+
   const changes: Change[] = []
-  if (form.status !== counsel.status) changes.push({ field: t.fields.status, before: COUNSEL_STATUS_INFO[counsel.status].label, after: COUNSEL_STATUS_INFO[form.status].label })
-  if (form.name !== counsel.name) changes.push({ field: t.fields.name, before: counsel.name, after: form.name })
-  if (form.counselType !== counsel.counselType) changes.push({ field: t.fields.counselType, before: tb.counselTypes[counsel.counselType], after: tb.counselTypes[form.counselType] })
-  if (form.showRangeType !== counsel.showRangeType) changes.push({ field: t.fields.showRange, before: tb.showRanges[counsel.showRangeType], after: tb.showRanges[form.showRangeType] })
-  if (form.projects.join('|') !== counsel.projects.join('|')) changes.push({ field: t.fields.projects, before: projectsText(counsel.projects), after: projectsText(form.projects) })
-  if (form.createdAt !== counsel.createdAt) changes.push({ field: t.fields.createdAt, before: counsel.createdAt, after: form.createdAt })
-  if (form.updatedAt !== counsel.updatedAt) changes.push({ field: t.fields.updatedAt, before: counsel.updatedAt, after: form.updatedAt })
-  if (form.deleted !== counsel.deleted) changes.push({ field: t.fields.deleted, before: deletedText(counsel.deleted), after: deletedText(form.deleted) })
+  if (form.status !== counsel.status) changes.push({ field: t.fields.status, before: COUNSEL_STATUS_INFO[counsel.status].label, after: COUNSEL_STATUS_INFO[form.status].label, reset: reset('status') })
+  if (form.name !== counsel.name) changes.push({ field: t.fields.name, before: counsel.name, after: form.name, reset: reset('name') })
+  if (form.counselType !== counsel.counselType) changes.push({ field: t.fields.counselType, before: tb.counselTypes[counsel.counselType], after: tb.counselTypes[form.counselType], reset: reset('counselType') })
+  if (form.showRangeType !== counsel.showRangeType) changes.push({ field: t.fields.showRange, before: tb.showRanges[counsel.showRangeType], after: tb.showRanges[form.showRangeType], reset: reset('showRangeType') })
+  if (form.projects.join('|') !== counsel.projects.join('|')) changes.push({ field: t.fields.projects, before: projectsText(counsel.projects), after: projectsText(form.projects), reset: reset('projects') })
+  if (form.createdAt !== counsel.createdAt) changes.push({ field: t.fields.createdAt, before: counsel.createdAt, after: form.createdAt, reset: reset('createdAt') })
+  if (form.updatedAt !== counsel.updatedAt) changes.push({ field: t.fields.updatedAt, before: counsel.updatedAt, after: form.updatedAt, reset: reset('updatedAt') })
+  if (form.deleted !== counsel.deleted) changes.push({ field: t.fields.deleted, before: deletedText(counsel.deleted), after: deletedText(form.deleted), reset: reset('deleted') })
 
   const save = () => {
     // 수정일을 직접 바꾸지 않았다면 저장 시각으로 갱신하고, 삭제 상태가 바뀌면 삭제일도 맞춘다
@@ -65,6 +75,7 @@ export function BasicEditModal({ counsel, onClose, onSave }: Props) {
       description={t.description(counsel.id)}
       saveLabel="실행"
       changes={changes}
+      onResetAll={resetAll}
       canSubmit={form.name.trim() !== '' && form.createdAt !== '' && form.updatedAt !== ''}
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}

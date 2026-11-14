@@ -49,6 +49,8 @@ type Props = {
   /** false면 오른쪽에 변경 항목 목록을 감춘다 (추출처럼 값을 바꾸지 않는 작업) */
   showChanges?: boolean
   changesEmpty?: string
+  /** 있으면 변경 항목 위에 전체 초기화 버튼을 보여 준다. 모달 안의 입력을 처음 값으로 되돌린다 */
+  onResetAll?: () => void
   children: ReactNode
 }
 
@@ -70,6 +72,7 @@ export function EditModal({
   changesTitle,
   showChanges = true,
   changesEmpty,
+  onResetAll,
   children,
 }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -103,7 +106,7 @@ export function EditModal({
           <div className="flex min-w-0 flex-col gap-3">{children}</div>
 
           <aside aria-label={t.asideLabel} className="sticky top-0 flex flex-col gap-4 self-stretch border-l-2 border-line pl-5">
-            {showChanges && <ChangeSummary changes={changes} title={changesTitle} emptyText={changesEmpty} />}
+            {showChanges && <ChangeSummary changes={changes} title={changesTitle} emptyText={changesEmpty} onResetAll={onResetAll} />}
             <Field label={t.ticket.label} required>
               {(id) => <TextInput id={id} value={ticket} onChange={(e) => onTicketChange(e.target.value)} placeholder={t.ticket.placeholder} />}
             </Field>

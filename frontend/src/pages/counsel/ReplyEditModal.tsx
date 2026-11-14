@@ -27,8 +27,13 @@ export function ReplyEditModal({ counselId, comment, reply, onClose, onSave }: P
 
   const deletedText = (v: boolean) => t.deletedOptions[String(v) as 'true' | 'false']
   const changes: Change[] = []
-  if (text !== reply.text) changes.push({ field: t.fields.text, before: reply.text, after: text })
-  if (deleted !== reply.deleted) changes.push({ field: t.fields.deleted, before: deletedText(reply.deleted), after: deletedText(deleted) })
+  if (text !== reply.text) changes.push({ field: t.fields.text, before: reply.text, after: text, reset: () => setText(reply.text) })
+  if (deleted !== reply.deleted) changes.push({ field: t.fields.deleted, before: deletedText(reply.deleted), after: deletedText(deleted), reset: () => setDeleted(reply.deleted) })
+
+  const resetAll = () => {
+    setText(reply.text)
+    setDeleted(reply.deleted)
+  }
 
   return (
     <EditModal
@@ -36,6 +41,7 @@ export function ReplyEditModal({ counselId, comment, reply, onClose, onSave }: P
       description={t.description(counselId)}
       saveLabel="실행"
       changes={changes}
+      onResetAll={resetAll}
       canSubmit={text.trim() !== ''}
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}

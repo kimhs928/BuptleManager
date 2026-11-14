@@ -53,16 +53,28 @@ export function ConfigFormModal({ row, existing, scopes, customers, fixedCustome
   // 같은 고객사(PUBLIC은 전체) 안에서 같은 타입에 같은 이름이 있으면 중복이다
   const duplicate = !editing && trimmedName !== '' && existing.some((r) => r.scope === scope && r.name === trimmedName && r.customerId === (isPublic ? '' : customerId))
 
+  // 열었을 때 값. 수정이면 그 컨피그의 값, 등록이면 처음 채워 둔 값
+  const initialCustomerId = row?.customerId ?? fixedCustomerId ?? defaultCustomerId ?? ''
+  const resetValue = () => setValue(row?.value ?? '')
+  const resetDescription = () => setDescription(row?.description ?? '')
+  const resetAll = () => {
+    setScope(row?.scope ?? scopes[0])
+    setCustomerId(initialCustomerId)
+    setName(row?.name ?? '')
+    resetValue()
+    resetDescription()
+  }
+
   const changes: Change[] = []
   if (editing && row) {
-    if (hasValue && value !== row.value) changes.push({ field: t.fields.value, before: row.value || t.noValue, after: value || t.noValue })
-    if (description !== row.description) changes.push({ field: t.fields.description, before: row.description, after: description })
+    if (hasValue && value !== row.value) changes.push({ field: t.fields.value, before: row.value || t.noValue, after: value || t.noValue, reset: resetValue })
+    if (description !== row.description) changes.push({ field: t.fields.description, before: row.description, after: description, reset: resetDescription })
   } else if (trimmedName !== '') {
-    changes.push({ field: t.fields.type, after: typeLabel[scope] })
-    if (!isPublic && customer) changes.push({ field: t.fields.customer, after: customer.name })
-    changes.push({ field: t.fields.name, after: trimmedName })
-    if (hasValue && value.trim() !== '') changes.push({ field: t.fields.value, after: value })
-    if (description.trim() !== '') changes.push({ field: t.fields.description, after: description })
+    changes.push({ field: t.fields.type, after: typeLabel[scope], reset: () => setScope(scopes[0]) })
+    if (!isPublic && customer) changes.push({ field: t.fields.customer, after: customer.name, reset: () => setCustomerId(initialCustomerId) })
+    changes.push({ field: t.fields.name, after: trimmedName, reset: () => setName('') })
+    if (hasValue && value.trim() !== '') changes.push({ field: t.fields.value, after: value, reset: resetValue })
+    if (description.trim() !== '') changes.push({ field: t.fields.description, after: description, reset: resetDescription })
   }
 
   const customerOk = isPublic || customerId !== ''
@@ -97,6 +109,7 @@ export function ConfigFormModal({ row, existing, scopes, customers, fixedCustome
       description={editing ? t.editDescription(companyLabel) : t.addDescription(companyLabel)}
       saveLabel={t.save}
       changes={changes}
+      onResetAll={resetAll}
       canSubmit={valid}
       audit={audit}
       ticket={ticket}

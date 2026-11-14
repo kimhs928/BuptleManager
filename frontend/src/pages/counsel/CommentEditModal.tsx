@@ -25,8 +25,13 @@ export function CommentEditModal({ counselId, comment, onClose, onSave }: Props)
 
   const deletedText = (v: boolean) => t.deletedOptions[String(v) as 'true' | 'false']
   const changes: Change[] = []
-  if (text !== comment.text) changes.push({ field: t.fields.text, before: comment.text, after: text })
-  if (deleted !== comment.deleted) changes.push({ field: t.fields.deleted, before: deletedText(comment.deleted), after: deletedText(deleted) })
+  if (text !== comment.text) changes.push({ field: t.fields.text, before: comment.text, after: text, reset: () => setText(comment.text) })
+  if (deleted !== comment.deleted) changes.push({ field: t.fields.deleted, before: deletedText(comment.deleted), after: deletedText(deleted), reset: () => setDeleted(comment.deleted) })
+
+  const resetAll = () => {
+    setText(comment.text)
+    setDeleted(comment.deleted)
+  }
 
   const save = () => {
     // 수정일은 저장 시각으로 갱신하고, 삭제 상태가 바뀌면 삭제일도 맞춘다
@@ -40,6 +45,7 @@ export function CommentEditModal({ counselId, comment, onClose, onSave }: Props)
       description={t.description(counselId)}
       saveLabel="실행"
       changes={changes}
+      onResetAll={resetAll}
       canSubmit={text.trim() !== ''}
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}

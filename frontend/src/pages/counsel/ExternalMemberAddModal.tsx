@@ -33,7 +33,13 @@ export function ExternalMemberAddModal({ members, onClose, onSave }: Props) {
   const taken = email ? members.find((m) => m.email.toLowerCase() === email.toLowerCase()) : undefined
   const canSubmit = name !== '' && email !== '' && !taken && roles.length > 0
 
-  const changes: Change[] = canSubmit ? [{ field: e.change, after: `${name} (${email}) · ${joinList(roles, t.noRole)}` }] : []
+  // 추가 모달은 변경 항목이 하나뿐이라, 되돌리면 입력을 모두 비운다
+  const resetAll = () => {
+    setForm({ name: '', email: '', company: '', dept: '', phone: '' })
+    setRoles([])
+  }
+
+  const changes: Change[] = canSubmit ? [{ field: e.change, after: `${name} (${email}) · ${joinList(roles, t.noRole)}`, reset: resetAll }] : []
 
   const save = () => {
     const now = formatDateTime()
@@ -64,6 +70,7 @@ export function ExternalMemberAddModal({ members, onClose, onSave }: Props) {
       description={e.description}
       saveLabel={t.save}
       changes={changes}
+      onResetAll={resetAll}
       canSubmit={canSubmit}
       audit={makeAudit(e.action, openedAt)}
       ticket={ticket}

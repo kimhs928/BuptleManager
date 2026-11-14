@@ -48,7 +48,12 @@ export function MemberAddModal({ members, onClose, onSave }: Props) {
 
   const match: Match = taken ? (taken.deleted ? 'deletedJoined' : 'joined') : selected ? 'ok' : filled ? 'bad' : 'idle'
 
-  const changes: Change[] = selected ? [{ field: t.change, after: `${selected.name} (${selected.userId}) · ${joinList(roles, t.noRole)}` }] : []
+  // 추가는 한 건이라 항목 되돌리기도 입력 전체를 비운다
+  const resetAll = () => {
+    setForm({ name: '', email: '', userId: '' })
+    setRoles([])
+  }
+  const changes: Change[] = selected ? [{ field: t.change, after: `${selected.name} (${selected.userId}) · ${joinList(roles, t.noRole)}`, reset: resetAll }] : []
 
   const save = () => {
     if (!selected) return
@@ -78,6 +83,7 @@ export function MemberAddModal({ members, onClose, onSave }: Props) {
       description={t.description}
       saveLabel={t.save}
       changes={changes}
+      onResetAll={resetAll}
       canSubmit={!!selected && roles.length > 0}
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}

@@ -26,7 +26,7 @@ export function WorkflowEditModal({ workflow, onClose, onSave }: Props) {
   const changes: Change[] = []
   form.attrs.forEach((a, i) => {
     const before = workflow.attrs[i]
-    if (joinList(a.value, none) !== joinList(before.value, none)) changes.push({ field: a.label, before: joinList(before.value, none), after: joinList(a.value, none) })
+    if (joinList(a.value, none) !== joinList(before.value, none)) changes.push({ field: a.label, before: joinList(before.value, none), after: joinList(a.value, none), reset: () => setAttr(a.key, before.value) })
   })
 
   const setAttr = (key: string, value: string[]) => setForm((f) => ({ ...f, attrs: f.attrs.map((a) => (a.key === key ? { ...a, value } : a)) }))
@@ -37,6 +37,7 @@ export function WorkflowEditModal({ workflow, onClose, onSave }: Props) {
       description={t.description('CT-2024-0315')}
       saveLabel="실행"
       changes={changes}
+      onResetAll={() => setForm(workflow)}
       canSubmit
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}

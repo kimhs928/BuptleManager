@@ -63,7 +63,7 @@ export function MemberEditModal({ member, onClose, onSave }: Props) {
 
   const changes: Change[] = (internal ? internalKeys : externalKeys)
     .filter((k) => show(k, form) !== show(k, member))
-    .map((k) => ({ field: t.fields[k], before: show(k, member), after: show(k, form) }))
+    .map((k) => ({ field: t.fields[k], before: show(k, member), after: show(k, form), reset: () => setForm((f) => ({ ...f, [k]: member[k as keyof ContractMember] })) }))
 
   const kindLabel = texts.contract.members.kind[member.kind]
 
@@ -73,6 +73,7 @@ export function MemberEditModal({ member, onClose, onSave }: Props) {
       description={t.description(kindLabel)}
       saveLabel="실행"
       changes={changes}
+      onResetAll={() => setForm(member)}
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}
       onTicketChange={setTicket}

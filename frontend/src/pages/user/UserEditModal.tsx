@@ -41,7 +41,7 @@ export function UserEditModal({ user, onClose, onSave }: Props) {
   const [openedAt] = useState(() => formatDateTime())
 
   const set = <K extends keyof CompanyUser>(key: K, value: CompanyUser[K]) => setForm((f) => ({ ...f, [key]: value }))
-  const changes: Change[] = keys.filter((k) => show(k, form) !== show(k, user)).map((k) => ({ field: t.labels[k], before: show(k, user), after: show(k, form) }))
+  const changes: Change[] = keys.filter((k) => show(k, form) !== show(k, user)).map((k) => ({ field: t.labels[k], before: show(k, user), after: show(k, form), reset: () => set(k, user[k]) }))
 
   return (
     <EditModal
@@ -49,6 +49,7 @@ export function UserEditModal({ user, onClose, onSave }: Props) {
       description={t.description(user.email)}
       saveLabel="실행"
       changes={changes}
+      onResetAll={() => setForm(user)}
       canSubmit={form.name.trim() !== '' && form.email.trim() !== ''}
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}

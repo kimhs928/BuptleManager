@@ -28,14 +28,17 @@ export function MemberEditModal({ counselId, member, onClose, onSave }: Props) {
   const set = <K extends keyof CounselMember>(key: K, value: CounselMember[K]) => setForm((f) => ({ ...f, [key]: value }))
   const deletedText = (v: boolean) => t.deletedOptions[String(v) as 'true' | 'false']
 
+  const reset = <K extends keyof CounselMember>(key: K) => () => set(key, member[key])
+  const resetAll = () => setForm(member)
+
   const changes: Change[] = []
-  if (form.company !== member.company) changes.push({ field: t.fields.company, before: member.company, after: form.company })
-  if (form.phone !== member.phone) changes.push({ field: t.fields.phone, before: member.phone, after: form.phone })
-  if (form.dept !== member.dept) changes.push({ field: t.fields.dept, before: member.dept, after: form.dept })
+  if (form.company !== member.company) changes.push({ field: t.fields.company, before: member.company, after: form.company, reset: reset('company') })
+  if (form.phone !== member.phone) changes.push({ field: t.fields.phone, before: member.phone, after: form.phone, reset: reset('phone') })
+  if (form.dept !== member.dept) changes.push({ field: t.fields.dept, before: member.dept, after: form.dept, reset: reset('dept') })
   if (joinList(form.roles, texts.counsel.none) !== joinList(member.roles, texts.counsel.none)) {
-    changes.push({ field: t.fields.roles, before: joinList(member.roles, texts.counsel.none), after: joinList(form.roles, texts.counsel.none) })
+    changes.push({ field: t.fields.roles, before: joinList(member.roles, texts.counsel.none), after: joinList(form.roles, texts.counsel.none), reset: reset('roles') })
   }
-  if (form.deleted !== member.deleted) changes.push({ field: t.fields.deleted, before: deletedText(member.deleted), after: deletedText(form.deleted) })
+  if (form.deleted !== member.deleted) changes.push({ field: t.fields.deleted, before: deletedText(member.deleted), after: deletedText(form.deleted), reset: reset('deleted') })
 
   return (
     <EditModal
@@ -43,6 +46,7 @@ export function MemberEditModal({ counselId, member, onClose, onSave }: Props) {
       description={t.description(counselId)}
       saveLabel="실행"
       changes={changes}
+      onResetAll={resetAll}
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}
       onTicketChange={setTicket}

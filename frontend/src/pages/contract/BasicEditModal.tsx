@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Alert, EditModal, Field, FieldGroup, Select, TextInput, Textarea } from '../../components/ui'
+import { Alert, EditModal, Field, FieldGroup, RichTextEditor, Select, TextInput } from '../../components/ui'
 import type { Change } from '../../components/ui'
 import { formatDateTime } from '../../lib/date'
+import { htmlToPlain } from '../../lib/safeHtml'
 import type { EnumValue } from '../../lib/enums'
 import type { ContractDetail } from '../../mocks/contract'
 import { texts } from '../../texts'
@@ -28,6 +29,8 @@ function show(key: EditKey, c: ContractDetail): string {
       return texts.contract.lang[c.lang]
     case 'deleted':
       return t.deletedOptions[String(c.deleted) as 'true' | 'false']
+    case 'summary':
+      return htmlToPlain(c.summary)
     default:
       return String(c[key])
   }
@@ -57,15 +60,29 @@ export function BasicEditModal({ contract, onClose, onSave, onGoWorkflow }: Prop
   const set = <K extends keyof ContractDetail>(key: K, value: ContractDetail[K]) => setForm((f) => ({ ...f, [key]: value }))
 
   const shown = (k: EditKey, c: ContractDetail) => (k === 'status' && c === form && statusChanged && statusValue ? `${statusValue.label} (${statusValue.code})` : show(k, c))
+  // 상태는 코드와 분류도 같이 들고 있어서 함께 되돌린다
+  const resetStatus = () => {
+    setStatusCode(initialStatusCode(contract))
+    setStatusValue(undefined)
+  }
+  const resetKey = (k: EditKey) => {
+    setForm((f) => ({ ...f, [k]: contract[k], ...(k === 'status' ? { statusCode: contract.statusCode, statusGroup: contract.statusGroup } : {}) }))
+    if (k === 'status') resetStatus()
+  }
+  const resetAll = () => {
+    setForm(contract)
+    resetStatus()
+  }
   const changes: Change[] = keys
     .filter((k) => shown(k, form) !== shown(k, contract))
-    .map((k) => ({ field: t.labels[k], before: shown(k, contract), after: shown(k, form) }))
+    .map((k) => ({ field: t.labels[k], before: shown(k, contract), after: shown(k, form), reset: () => resetKey(k) }))
 
   return (
     <EditModal
       title={t.title}
       saveLabel="실행"
       changes={changes}
+      onResetAll={resetAll}
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}
       onTicketChange={setTicket}
@@ -98,7 +115,7 @@ export function BasicEditModal({ contract, onClose, onSave, onGoWorkflow }: Prop
           {(id) => <TextInput id={id} value={form.name} onChange={(e) => set('name', e.target.value)} />}
         </Field>
         <Field label={t.fields.summary} className="col-span-2">
-          {(id) => <Textarea id={id} rows={2} value={form.summary} onChange={(e) => set('summary', e.target.value)} />}
+          {(id) => <RichTextEditor id={id} value={form.summary} onChange={(html) => set('summary', html)} />}
         </Field>
         <Field label={t.fields.amount}>
           {(id) => <TextInput id={id} type="number" min={0} value={form.amount} onChange={(e) => set('amount', Number(e.target.value) || 0)} />}

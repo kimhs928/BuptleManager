@@ -48,7 +48,13 @@ export function MemberAddModal({ members, onClose, onSave }: Props) {
 
   const match: Match = taken ? (taken.deleted ? 'deletedJoined' : 'joined') : selected ? 'ok' : filled ? 'bad' : 'idle'
 
-  const changes: Change[] = selected ? [{ field: t.change, after: `${selected.name} (${selected.userId}) · ${joinList(roles, t.noRole)}` }] : []
+  // 추가 모달은 변경 항목이 하나뿐이라, 되돌리면 입력을 모두 비운다
+  const resetAll = () => {
+    setForm({ name: '', email: '', userId: '' })
+    setRoles([])
+  }
+
+  const changes: Change[] = selected ? [{ field: t.change, after: `${selected.name} (${selected.userId}) · ${joinList(roles, t.noRole)}`, reset: resetAll }] : []
 
   const save = () => {
     if (!selected) return
@@ -81,6 +87,7 @@ export function MemberAddModal({ members, onClose, onSave }: Props) {
       description={t.description}
       saveLabel={t.save}
       changes={changes}
+      onResetAll={resetAll}
       canSubmit={!!selected && roles.length > 0}
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}

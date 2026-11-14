@@ -28,10 +28,17 @@ export function HistoryEditModal({ row, users, onClose, onSave }: Props) {
 
   const f = t.fields
   const changes: Change[] = []
-  if (user !== row.user) changes.push({ field: f.user, before: row.user, after: user })
-  if (at && at.replace('T', ' ') !== row.at) changes.push({ field: f.at, before: row.at, after: at.replace('T', ' ') })
-  if ((deleted === 'Y') !== row.deleted) changes.push({ field: f.deleted, before: row.deleted ? 'Y' : 'N', after: deleted })
-  if (comment !== row.comment) changes.push({ field: f.comment, before: row.comment, after: comment || t.emptyComment })
+  if (user !== row.user) changes.push({ field: f.user, before: row.user, after: user, reset: () => setUser(row.user) })
+  if (at && at.replace('T', ' ') !== row.at) changes.push({ field: f.at, before: row.at, after: at.replace('T', ' '), reset: () => setAt(row.at.replace(' ', 'T')) })
+  if ((deleted === 'Y') !== row.deleted) changes.push({ field: f.deleted, before: row.deleted ? 'Y' : 'N', after: deleted, reset: () => setDeleted(row.deleted ? 'Y' : 'N') })
+  if (comment !== row.comment) changes.push({ field: f.comment, before: row.comment, after: comment || t.emptyComment, reset: () => setComment(row.comment) })
+
+  const resetAll = () => {
+    setUser(row.user)
+    setAt(row.at.replace(' ', 'T'))
+    setDeleted(row.deleted ? 'Y' : 'N')
+    setComment(row.comment)
+  }
 
   const userOptions = users.includes(row.user) ? users : [row.user, ...users]
 
@@ -41,6 +48,7 @@ export function HistoryEditModal({ row, users, onClose, onSave }: Props) {
       description={t.description}
       saveLabel="실행"
       changes={changes}
+      onResetAll={resetAll}
       canSubmit={at !== ''}
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}

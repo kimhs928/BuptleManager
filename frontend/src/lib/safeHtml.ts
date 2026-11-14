@@ -88,3 +88,18 @@ export function sanitizeHtml(html: string): string {
 export function looksLikeHtml(text: string): boolean {
   return /<\/?[a-z][a-z0-9]*(\s[^>]*)?>/i.test(text)
 }
+
+const ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;' }
+
+/** 일반 글자를 HTML 로 바꾼다. 줄바꿈은 <br> 로 살린다 */
+export function plainToHtml(text: string): string {
+  return text.replace(/[&<>]/g, (c) => ESCAPES[c]).replace(/\r?\n/g, '<br>')
+}
+
+/** HTML 을 태그 없는 글자로 바꾼다 (변경 내용 비교·표시용). 문단과 줄바꿈은 줄바꿈으로 남긴다 */
+export function htmlToPlain(html: string): string {
+  if (!looksLikeHtml(html)) return html
+  const withBreaks = html.replace(/<br\s*\/?>/gi, '\n').replace(/<\/(p|div|li|h[1-6]|tr)>/gi, '$&\n')
+  const doc = new DOMParser().parseFromString(withBreaks, 'text/html')
+  return (doc.body.textContent ?? '').replace(/\n{3,}/g, '\n\n').trim()
+}

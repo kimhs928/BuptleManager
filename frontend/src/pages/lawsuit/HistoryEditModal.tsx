@@ -22,8 +22,9 @@ export function HistoryEditModal({ row, onClose, onSave }: Props) {
   const [openedAt] = useState(() => formatDateTime())
 
   const f = t.fields
+  const resetDeleted = () => setDeleted(row.deleted ? 'Y' : 'N')
   const changes: Change[] = []
-  if ((deleted === 'Y') !== row.deleted) changes.push({ field: f.deleted, before: row.deleted ? 'Y' : 'N', after: deleted })
+  if ((deleted === 'Y') !== row.deleted) changes.push({ field: f.deleted, before: row.deleted ? 'Y' : 'N', after: deleted, reset: resetDeleted })
 
   const save = () => {
     const nextDeleted = deleted === 'Y'
@@ -38,6 +39,7 @@ export function HistoryEditModal({ row, onClose, onSave }: Props) {
       description={t.description}
       saveLabel="실행"
       changes={changes}
+      onResetAll={resetDeleted}
       canSubmit
       audit={makeAudit(t.action, openedAt)}
       ticket={ticket}
