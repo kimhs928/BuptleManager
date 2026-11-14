@@ -36,6 +36,9 @@ import org.springframework.web.bind.annotation.RestController
 class ContractStubController(
 	private val companies: CompanyRepository,
 	private val reader: BizContractReader,
+	private val memberReader: BizMemberReader,
+	private val historyReader: BizHistoryReader,
+	private val workflowReader: BizWorkflowReader,
 ) {
 
 	/** BuptleManager 에 등록된 Biz 고객사인지 확인한다. 아니면 404 */
@@ -85,7 +88,11 @@ class ContractStubController(
 		@PathVariable schemaName: String,
 		@PathVariable id: String,
 		@Parameter(description = "삭제된 유저 포함") @RequestParam(defaultValue = "true") includeDeleted: Boolean,
-	): ListResponse<ContractMemberResponse> = notImplemented()
+	): ListResponse<ContractMemberResponse> {
+		requireBizCompany(schemaName)
+		val items = memberReader.members(schemaName, id, includeDeleted) ?: throw BusinessException(CommonErrorCode.NOT_FOUND, "계약을 찾을 수 없습니다.")
+		return ListResponse(items, items.size.toLong())
+	}
 
 	@Operation(
 		summary = "계약 참여 유저 추가",
@@ -113,7 +120,10 @@ class ContractStubController(
 
 	@Operation(summary = "계약 workflow 정보")
 	@GetMapping("/{id}/workflow")
-	fun workflow(@PathVariable schemaName: String, @PathVariable id: String): WorkflowResponse = notImplemented()
+	fun workflow(@PathVariable schemaName: String, @PathVariable id: String): WorkflowResponse {
+		requireBizCompany(schemaName)
+		return workflowReader.workflow(schemaName, id) ?: throw BusinessException(CommonErrorCode.NOT_FOUND, "계약을 찾을 수 없습니다.")
+	}
 
 	@Operation(summary = "계약 workflow 수정", description = "name, rev 는 수정 불가.")
 	@PatchMapping("/{id}/workflow")
@@ -132,7 +142,10 @@ class ContractStubController(
 		@Parameter(description = "true 면 docId 가 있는 이력만") @RequestParam(defaultValue = "false") docOnly: Boolean,
 		@Parameter(description = "액션 유저 이름 일치") @RequestParam(required = false) user: String?,
 		@Parameter(description = "액션 이름 일치") @RequestParam(required = false) action: String?,
-	): ContractHistoryListResponse = notImplemented()
+	): ContractHistoryListResponse {
+		requireBizCompany(schemaName)
+		return historyReader.history(schemaName, id, includeDeleted, docOnly, user, action) ?: throw BusinessException(CommonErrorCode.NOT_FOUND, "계약을 찾을 수 없습니다.")
+	}
 
 	@Operation(summary = "계약 히스토리 수정", description = "수정 불가: 액션 타입, 단계 이동(from, to). deleted=true 면 삭제 일시를 서버가 기록한다.")
 	@PatchMapping("/{id}/history/{historyId}")
@@ -145,5 +158,9 @@ class ContractStubController(
 
 	@Operation(summary = "계약 이메일 정보", description = "최신순(생성 일시 내림차순).")
 	@GetMapping("/{id}/emails")
-	fun emails(@PathVariable schemaName: String, @PathVariable id: String): ListResponse<ContractEmailResponse> = notImplemented()
+	fun emails(@PathVariable schemaName: String, @PathVariable id: String): ListResponse<ContractEmailResponse> {
+		requireBizCompany(schemaName)
+		val items = historyReader.emails(schemaName, id) ?: throw BusinessException(CommonErrorCode.NOT_FOUND, "계약을 찾을 수 없습니다.")
+		return ListResponse(items, items.size.toLong())
+	}
 }
