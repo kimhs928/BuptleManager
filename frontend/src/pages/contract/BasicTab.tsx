@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { EditIcon, FileIcon, LockIcon } from '../../components/icons'
-import { Button } from '../../components/ui'
+import { Button, RichText } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { historyHref, historyOf } from '../../mocks/history'
 import type { ContractDetail } from '../../mocks/contract'
@@ -93,8 +93,8 @@ export function BasicTab({ contract, docs, template: tpl, onSave, onShowWorkflow
                 <dt className="text-[13px]">{t.fields.summary}</dt>
                 <dd className="m-0">
                   {/* 길면 이 영역 안에서만 스크롤한다 */}
-                  <div tabIndex={0} role="region" aria-label={t.summaryLabel} className="max-h-[92px] overflow-y-auto whitespace-pre-wrap rounded-[10px] bg-[#f5f5f7] px-3 py-[9px] text-[13px] leading-[1.6] text-ink-2">
-                    {contract.summary}
+                  <div tabIndex={0} role="region" aria-label={t.summaryLabel} className="max-h-[92px] overflow-y-auto rounded-[10px] bg-[#f5f5f7] px-3 py-[9px] text-[13px] leading-[1.6] text-ink-2">
+                    <RichText text={contract.summary} />
                   </div>
                 </dd>
               </div>
