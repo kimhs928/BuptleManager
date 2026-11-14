@@ -81,17 +81,18 @@ class EnumCatalogRepositoryAdapter(
 
 	private fun values(setCode: String): List<EnumValue> = jdbc.sql(
 		"""
-		select v.id, v.value_code, v.const_name, v.label, v.remark, g.group_code, v.sort_order, v.is_active
+		select v.id, v.value_code, v.const_name, v.label, v.remark, g.group_code, v.sort_order, v.is_active, cs.set_code as child_set_code
 		from enum_values v
 		join enum_sets s on s.id = v.set_id
 		left join enum_groups g on g.id = v.group_id
+		left join enum_sets cs on cs.id = v.child_set_id
 		where s.set_code = :set
 		order by v.sort_order, v.id
 		""".trimIndent(),
 	).param("set", setCode).query { rs, _ ->
 		EnumValue(
 			rs.getLong("id"), rs.getString("value_code"), rs.getString("const_name"), rs.getString("label"),
-			rs.getString("remark"), rs.getString("group_code"), rs.getInt("sort_order"), rs.getBoolean("is_active"),
+			rs.getString("remark"), rs.getString("group_code"), rs.getInt("sort_order"), rs.getBoolean("is_active"), rs.getString("child_set_code"),
 		)
 	}.list()
 

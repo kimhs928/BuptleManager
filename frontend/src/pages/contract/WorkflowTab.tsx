@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronRightIcon, EditIcon } from '../../components/icons'
+import { CheckIcon, ChevronRightIcon, CopyIcon, EditIcon } from '../../components/icons'
 import { Button } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import type { GuideStage, HistoryRow, Workflow, WorkflowUser } from '../../mocks/contract'
@@ -22,6 +22,35 @@ const stageTone: Record<StageState, { card: string; no: string; badge: string }>
   done: { card: 'border border-line-strong bg-bg text-ink shadow-card', no: 'bg-line text-ink-2', badge: 'border border-line bg-[#f2f2f5] text-ink-2' },
   current: { card: 'border-2 border-[#e5a800] bg-[#fff8db] text-ink shadow-[0_0_0_4px_rgba(254,198,1,0.18)]', no: 'bg-[#fec601] text-[#3a2e00]', badge: 'bg-[#fec601] text-[#3a2e00]' },
   pending: { card: 'border border-dashed border-line-strong bg-surface text-ink-3 shadow-card', no: 'bg-[#f2f2f5] text-ink-4', badge: 'bg-[#f2f2f5] text-ink-4' },
+}
+
+/** rev_num 값과 복사 버튼 */
+function RevValue({ rev }: { rev: string }) {
+  const [copied, setCopied] = useState(false)
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(rev)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // 클립보드 권한이 없으면 복사하지 못한다
+    }
+  }
+  return (
+    <>
+      <code className="min-w-0 break-all rounded-[5px] bg-[#ebebf0] px-1.5 py-px font-mono text-[11.5px] text-ink-2">{rev}</code>
+      <button
+        type="button"
+        onClick={() => void copy()}
+        aria-label={t.copy}
+        title={t.copy}
+        className="ml-2 inline-flex h-6 shrink-0 items-center gap-1 rounded-md border border-line-strong bg-surface px-2 text-xs font-medium text-ink-2 hover:bg-hover"
+      >
+        {copied ? <CheckIcon size={12} /> : <CopyIcon size={12} />}
+        <span aria-live="polite">{copied ? t.copied : t.copy}</span>
+      </button>
+    </>
+  )
 }
 
 /** 계약 워크플로우 (계약 형태 · 프로세스 가이드) */
@@ -48,10 +77,10 @@ export function WorkflowTab({ workflow, guide, users, history, onSave }: Props) 
           <h3 className="m-0 text-[13px] font-semibold">{t.shapeTitle}</h3>
           <dl className="m-0 grid grid-cols-[repeat(auto-fill,minmax(min(100%,340px),1fr))] gap-px overflow-hidden rounded-xl border border-line-soft bg-line-soft shadow-card">
             {[
-              { label: texts.contract.workflowEdit.fields.name, value: <span className="text-[13px] font-medium">{workflow.name}</span> },
-              { label: texts.contract.workflowEdit.fields.rev, value: <code className="rounded-[5px] bg-[#ebebf0] px-1.5 py-px font-mono text-[11.5px] text-ink-2">{workflow.rev}</code> },
+              { label: texts.contract.workflowEdit.fields.name, value: <span className="text-[13px] font-medium">{workflow.name}</span>, wide: false },
+              { label: texts.contract.workflowEdit.fields.rev, value: <RevValue rev={workflow.rev} />, wide: true },
             ].map((r) => (
-              <div key={r.label} className="grid grid-cols-[148px_minmax(0,1fr)] bg-surface">
+              <div key={r.label} className={cn('grid grid-cols-[148px_minmax(0,1fr)] bg-surface', r.wide && 'min-[760px]:col-span-2')}>
                 <dt className="flex items-center bg-[#fafafb] px-3.5 py-2.5 text-[12.5px] font-medium text-ink-3">{r.label}</dt>
                 <dd className="m-0 flex flex-wrap items-center gap-1 px-3 py-2">{r.value}</dd>
               </div>

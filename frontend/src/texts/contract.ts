@@ -314,6 +314,8 @@ export const contract = {
   workflow: {
     title: '계약 워크플로우',
     edit: '수정',
+    copy: '복사',
+    copied: '복사됨',
     shapeTitle: '01. 워크플로우 설정',
     usersTitle: '02. 워크플로우 설정 유저',
     usersHint: '',

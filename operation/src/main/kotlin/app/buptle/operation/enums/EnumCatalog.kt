@@ -25,6 +25,8 @@ data class EnumValue(
 	val groupCode: String?,
 	val sortOrder: Int,
 	val active: Boolean,
+	/** 이 값의 하위 선택지를 담은 표 코드. 없으면 null (예: 워크플로우 항목 -> 그 항목의 선택값 표). 수정 API 로는 바꾸지 않는다 */
+	val childSetCode: String? = null,
 )
 
 data class EnumSetDetail(
