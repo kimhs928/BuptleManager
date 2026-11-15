@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { EditIcon, LockIcon } from '../../components/icons'
 import { Button } from '../../components/ui'
+import { useEnumLabels } from '../../hooks/useEnumLabels'
 import { cn } from '../../lib/cn'
 import type { CounselDetail } from '../../mocks/counsel'
 import { historyHref, historyOf } from '../../mocks/history'
@@ -35,6 +36,8 @@ type Props = {
 /** 기본 정보 탭 */
 export function BasicTab({ counsel, onSave }: Props) {
   const [editing, setEditing] = useState(false)
+  const types = useEnumLabels('BIZ_COUNSEL_TYPE')
+  const ranges = useEnumLabels('BIZ_COUNSEL_SHOW_RANGE')
 
   // 이 자문의 처리 내역(변경 히스토리). 전체 보기는 검색 조건이 걸린 처리 내역 히스토리 화면으로 연다
   const changes = historyOf('자문', counsel.id)
@@ -55,7 +58,7 @@ export function BasicTab({ counsel, onSave }: Props) {
         <div className={box}>
           <dl className="m-0 grid grid-cols-1 gap-x-8 px-5 pb-2 pt-1 sm:grid-cols-2 [&>div:last-child]:border-b-0">
             <Row label={t.fields.id}>
-              <span className="font-mono text-[12.5px]">{counsel.id}</span> <span className="text-xs text-ink-4">({counsel.idPlain})</span>
+              <span className="font-mono text-[12.5px]">{counsel.id}</span>
             </Row>
             <Row label={t.fields.status}>
               <span className="font-medium">
@@ -78,8 +81,8 @@ export function BasicTab({ counsel, onSave }: Props) {
             <Row label={t.fields.managed}>
               {counsel.managed ? t.managedYes : t.managedNo} <span className="text-xs text-ink-4">(ismanaged)</span>
             </Row>
-            <Row label={t.fields.counselType}>{t.counselTypes[counsel.counselType]}</Row>
-            <Row label={t.fields.showRange}>{t.showRanges[counsel.showRangeType]}</Row>
+            <Row label={t.fields.counselType}>{types.label(counsel.counselType)}</Row>
+            <Row label={t.fields.showRange}>{ranges.label(counsel.showRangeType)}</Row>
             <Row label={t.fields.migrated}>
               <span className={cn(!counsel.migrated && 'text-ink-4')}>{counsel.migrated ? t.migratedYes : t.migratedNo}</span>
             </Row>

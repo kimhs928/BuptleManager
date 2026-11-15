@@ -3,7 +3,8 @@ import { CloseIcon, SearchIcon } from '../../components/icons'
 import { CompanyShell } from '../../components/layout/CompanyShell'
 import { Button } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import { getCounselDetail, MOCK_COUNSEL_COMMENTS, MOCK_COUNSEL_EMAILS, MOCK_COUNSEL_HISTORY, MOCK_COUNSEL_MEMBERS, MOCK_COUNSEL_WORKFLOW } from '../../mocks/counsel'
+import { useCounselBundle } from '../../hooks/useCounselBundle'
+import type { CaseEmail } from '../../mocks/contract'
 import type { CounselComment, CounselDetail, CounselHistoryRow, CounselMember, CounselWorkflow } from '../../mocks/counsel'
 import { texts } from '../../texts'
 import { BasicTab } from './BasicTab'
@@ -11,7 +12,9 @@ import { CommentsTab } from './CommentsTab'
 import { MembersTab } from './MembersTab'
 import { ProcessTab } from './ProcessTab'
 import { StatusDot } from './shared'
-import { replaceUrl } from '../../lib/selectedCompany'
+import { currentCompany, replaceUrl } from '../../lib/selectedCompany'
+import { toCounselDetail, toEmail, toHistoryRow, toMember, toProcess } from './counselAdapter'
+import type { ProcessView } from './counselAdapter'
 
 const t = texts.counsel
 
@@ -28,14 +31,58 @@ type Props = {
 
 const dot = <span aria-hidden="true" className="size-[3px] rounded-full bg-ink-5" />
 
-/** 자문 상세 */
+/** 자문 상세. 기본 정보 · 참여 유저 · 프로세스 · 히스토리 · 이메일은 Biz DB 에서 불러온다 */
 export function CounselDetailPage({ counselId, initialTab = 'basic' }: Props) {
+  const { data, loading, error } = useCounselBundle(currentCompany().schema, counselId)
+  const l = t.detailLoad
+
+  if (data) {
+    return (
+      <CounselDetailView
+        key={data.detail.id}
+        initial={toCounselDetail(data.detail)}
+        initialMembers={data.members.map(toMember)}
+        initialHistory={data.history.map(toHistoryRow)}
+        processView={toProcess(data.process)}
+        emails={data.emails.map(toEmail)}
+        initialTab={initialTab}
+      />
+    )
+  }
+
+  const notFound = error !== null && /찾을 수 없/.test(error)
+  return (
+    <CompanyShell active="counsel" trail={[{ label: t.breadcrumb.features }, { label: t.breadcrumb.counsel, href: '/counsel' }, { label: counselId }]}>
+      <div className="mx-auto w-full max-w-[1100px] py-16 text-center text-[14px] text-ink-3">
+        {loading ? <p role="status">{l.loading}</p> : <p role="alert">{notFound ? l.notFound(counselId) : l.error(error ?? '')}</p>}
+        {!loading && (
+          <a href="/counsel" className="mt-4 inline-block text-[13px] text-link hover:underline">
+            {t.breadcrumb.counsel}
+          </a>
+        )}
+      </div>
+    </CompanyShell>
+  )
+}
+
+type ViewProps = {
+  initial: CounselDetail
+  initialMembers: CounselMember[]
+  initialHistory: CounselHistoryRow[]
+  processView: ProcessView
+  emails: CaseEmail[]
+  initialTab: CounselTab
+}
+
+function CounselDetailView({ initial, initialMembers, initialHistory, processView, emails, initialTab }: ViewProps) {
+  const counselId = initial.id
   const [tab, setTab] = useState<CounselTab>(initialTab)
-  const [counsel, setCounsel] = useState<CounselDetail>(() => getCounselDetail(counselId))
-  const [members, setMembers] = useState<CounselMember[]>(MOCK_COUNSEL_MEMBERS)
-  const workflow: CounselWorkflow = MOCK_COUNSEL_WORKFLOW
-  const [history, setHistory] = useState<CounselHistoryRow[]>(MOCK_COUNSEL_HISTORY)
-  const [comments, setComments] = useState<CounselComment[]>(MOCK_COUNSEL_COMMENTS)
+  const [counsel, setCounsel] = useState<CounselDetail>(initial)
+  const [members, setMembers] = useState<CounselMember[]>(initialMembers)
+  const workflow: CounselWorkflow = processView.workflow
+  const [history, setHistory] = useState<CounselHistoryRow[]>(initialHistory)
+  // 코멘트는 아직 Biz 와 연결하지 않았다
+  const [comments, setComments] = useState<CounselComment[]>([])
   const [toast, setToast] = useState('')
   const [query, setQuery] = useState(counselId)
 
@@ -160,7 +207,8 @@ export function CounselDetailPage({ counselId, initialTab = 'basic' }: Props) {
               workflow={workflow}
               history={history}
               comments={comments}
-              emails={MOCK_COUNSEL_EMAILS}
+              emails={emails}
+              guide={processView.guide}
               onSaveRow={(next, fields, ticket) => {
                 setHistory((prev) => prev.map((h) => (h.id === next.id ? next : h)))
                 setToast(t.toast.historySaved(next.action, fields.join(', '), ticket))

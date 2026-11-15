@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { CheckGroup, EditModal, Field, FieldGroup, GroupField, Select, TextInput } from '../../components/ui'
 import type { Change } from '../../components/ui'
 import { formatDateTime } from '../../lib/date'
-import { COUNSEL_ROLES, INTERNAL_COUNSEL_ROLES } from '../../mocks/counsel'
+import { useEnumLabels } from '../../hooks/useEnumLabels'
 import type { CounselMember } from '../../mocks/counsel'
 import { texts } from '../../texts'
 import { makeAudit } from '../contract/audit'
@@ -21,6 +21,8 @@ type Props = {
 /** 자문 참여 유저 수정 */
 export function MemberEditModal({ counselId, member, onClose, onSave }: Props) {
   const [form, setForm] = useState<CounselMember>(member)
+  // 역할 선택지와 이름은 enum 표(DB)에서 읽는다. 외부 변호사도 Biz 의 사내 유저라서 모든 역할을 고를 수 있다
+  const allRoles = useEnumLabels('BIZ_COUNSEL_PARTICIPANT_ROLE').options.map((o) => o.label)
   const [ticket, setTicket] = useState('')
   const [reason, setReason] = useState('')
   const [openedAt] = useState(() => formatDateTime())
@@ -81,7 +83,7 @@ export function MemberEditModal({ counselId, member, onClose, onSave }: Props) {
 
       <FieldGroup title={t.groups.roles} columns={1}>
         <GroupField label={t.fields.roles} hint={t.rolesNote}>
-          <CheckGroup label={t.fields.roles} options={member.userId ? INTERNAL_COUNSEL_ROLES : COUNSEL_ROLES} value={form.roles} onChange={(v) => set('roles', v)} />
+          <CheckGroup label={t.fields.roles} options={allRoles} value={form.roles} onChange={(v) => set('roles', v)} />
         </GroupField>
       </FieldGroup>
 

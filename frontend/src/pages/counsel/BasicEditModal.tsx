@@ -3,16 +3,19 @@ import { CloseIcon, PlusIcon } from '../../components/icons'
 import { Button, EditModal, Field, FieldGroup, Select, TextInput } from '../../components/ui'
 import type { Change } from '../../components/ui'
 import { formatDateTime } from '../../lib/date'
-import { COUNSEL_STATUS_INFO, COUNSEL_STATUSES } from '../../mocks/counsel'
-import type { CounselDetail, CounselStatus, CounselType, ShowRangeType } from '../../mocks/counsel'
+import { useEnumLabels } from '../../hooks/useEnumLabels'
+import type { EnumOption } from '../../hooks/useEnumLabels'
+import type { CounselDetail } from '../../mocks/counsel'
 import { texts } from '../../texts'
 import { makeAudit } from '../contract/audit'
 
 const t = texts.counsel.basicEdit
-const tb = texts.counsel.basic
 
-const COUNSEL_TYPES: CounselType[] = ['PUBLIC', 'PRIVATE']
-const SHOW_RANGES: ShowRangeType[] = ['PRIVATE', 'INNER', 'OUTER', 'DEPARTMENT']
+/** 선택지에 없는 현재 값도 보이게 해서 값이 사라지지 않게 한다 */
+function withCurrent(options: EnumOption[], current: string, label: (code: string) => string): EnumOption[] {
+  return options.some((o) => o.code === current) ? options : [...options, { code: current, label: label(current) }]
+}
+const tb = texts.counsel.basic
 
 type Props = {
   counsel: CounselDetail
@@ -23,6 +26,10 @@ type Props = {
 /** 자문 기본 정보 수정 */
 export function BasicEditModal({ counsel, onClose, onSave }: Props) {
   const [form, setForm] = useState<CounselDetail>(counsel)
+  // 상태, 종류, 공개 범위의 선택지와 이름은 enum 표(DB)에서 읽는다
+  const statuses = useEnumLabels('BIZ_COUNSEL_STATUS')
+  const types = useEnumLabels('BIZ_COUNSEL_TYPE')
+  const ranges = useEnumLabels('BIZ_COUNSEL_SHOW_RANGE')
   const [ticket, setTicket] = useState('')
   const [reason, setReason] = useState('')
   const [projectInput, setProjectInput] = useState('')
@@ -49,10 +56,10 @@ export function BasicEditModal({ counsel, onClose, onSave }: Props) {
   }
 
   const changes: Change[] = []
-  if (form.status !== counsel.status) changes.push({ field: t.fields.status, before: COUNSEL_STATUS_INFO[counsel.status].label, after: COUNSEL_STATUS_INFO[form.status].label, reset: reset('status') })
+  if (form.status !== counsel.status) changes.push({ field: t.fields.status, before: statuses.label(counsel.status), after: statuses.label(form.status), reset: reset('status') })
   if (form.name !== counsel.name) changes.push({ field: t.fields.name, before: counsel.name, after: form.name, reset: reset('name') })
-  if (form.counselType !== counsel.counselType) changes.push({ field: t.fields.counselType, before: tb.counselTypes[counsel.counselType], after: tb.counselTypes[form.counselType], reset: reset('counselType') })
-  if (form.showRangeType !== counsel.showRangeType) changes.push({ field: t.fields.showRange, before: tb.showRanges[counsel.showRangeType], after: tb.showRanges[form.showRangeType], reset: reset('showRangeType') })
+  if (form.counselType !== counsel.counselType) changes.push({ field: t.fields.counselType, before: types.label(counsel.counselType), after: types.label(form.counselType), reset: reset('counselType') })
+  if (form.showRangeType !== counsel.showRangeType) changes.push({ field: t.fields.showRange, before: ranges.label(counsel.showRangeType), after: ranges.label(form.showRangeType), reset: reset('showRangeType') })
   if (form.projects.join('|') !== counsel.projects.join('|')) changes.push({ field: t.fields.projects, before: projectsText(counsel.projects), after: projectsText(form.projects), reset: reset('projects') })
   if (form.createdAt !== counsel.createdAt) changes.push({ field: t.fields.createdAt, before: counsel.createdAt, after: form.createdAt, reset: reset('createdAt') })
   if (form.updatedAt !== counsel.updatedAt) changes.push({ field: t.fields.updatedAt, before: counsel.updatedAt, after: form.updatedAt, reset: reset('updatedAt') })
@@ -91,10 +98,10 @@ export function BasicEditModal({ counsel, onClose, onSave }: Props) {
         </Field>
         <Field label={t.fields.status} required>
           {(id) => (
-            <Select id={id} value={form.status} onChange={(e) => set('status', e.target.value as CounselStatus)}>
-              {COUNSEL_STATUSES.map((s) => (
-                <option key={s} value={s}>
-                  {COUNSEL_STATUS_INFO[s].label}
+            <Select id={id} value={form.status} onChange={(e) => set('status', e.target.value)}>
+              {withCurrent(statuses.options, form.status, statuses.label).map((o) => (
+                <option key={o.code} value={o.code}>
+                  {o.label}
                 </option>
               ))}
             </Select>
@@ -105,10 +112,10 @@ export function BasicEditModal({ counsel, onClose, onSave }: Props) {
         </Field>
         <Field label={t.fields.counselType} required>
           {(id) => (
-            <Select id={id} value={form.counselType} onChange={(e) => set('counselType', e.target.value as CounselType)}>
-              {COUNSEL_TYPES.map((v) => (
-                <option key={v} value={v}>
-                  {tb.counselTypes[v]}
+            <Select id={id} value={form.counselType} onChange={(e) => set('counselType', e.target.value)}>
+              {withCurrent(types.options, form.counselType, types.label).map((o) => (
+                <option key={o.code} value={o.code}>
+                  {o.label}
                 </option>
               ))}
             </Select>
@@ -116,10 +123,10 @@ export function BasicEditModal({ counsel, onClose, onSave }: Props) {
         </Field>
         <Field label={t.fields.showRange} required>
           {(id) => (
-            <Select id={id} value={form.showRangeType} onChange={(e) => set('showRangeType', e.target.value as ShowRangeType)}>
-              {SHOW_RANGES.map((v) => (
-                <option key={v} value={v}>
-                  {tb.showRanges[v]}
+            <Select id={id} value={form.showRangeType} onChange={(e) => set('showRangeType', e.target.value)}>
+              {withCurrent(ranges.options, form.showRangeType, ranges.label).map((o) => (
+                <option key={o.code} value={o.code}>
+                  {o.label}
                 </option>
               ))}
             </Select>

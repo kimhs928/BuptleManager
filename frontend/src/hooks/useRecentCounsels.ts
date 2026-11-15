@@ -1,0 +1,39 @@
+import { useEffect, useState } from 'react'
+import type { OperationType } from './useRecentContracts'
+
+export type RecentCounsel = {
+  counselId: string
+  /** 작업 당시 기록된 자문명. 기록이 없으면 빈 문자열 */
+  name: string
+  lastOperation: OperationType
+  /** ISO 8601 (UTC) */
+  operatedAt: string
+  operator: string
+}
+
+type State = { schema: string; items: RecentCounsel[]; error: boolean }
+
+/** 고객사에서 최근 작업한 자문을 BuptleManager 작업 이력에서 가져온다 */
+export function useRecentCounsels(schema: string | null) {
+  const [state, setState] = useState<State>({ schema: '', items: [], error: false })
+
+  useEffect(() => {
+    if (!schema) return
+    const controller = new AbortController()
+    fetch(`/api/biz/companies/${encodeURIComponent(schema)}/counsels/recent`, { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error(String(res.status))
+        return res.json() as Promise<{ items: RecentCounsel[] }>
+      })
+      .then((r) => setState({ schema, items: r.items, error: false }))
+      .catch((e: unknown) => {
+        if (e instanceof DOMException && e.name === 'AbortError') return
+        setState({ schema, items: [], error: true })
+      })
+    return () => controller.abort()
+  }, [schema])
+
+  if (!schema) return { items: [], loading: false, error: false }
+  const ready = state.schema === schema
+  return { items: ready ? state.items : [], loading: !ready, error: ready && state.error }
+}

@@ -5,11 +5,14 @@ import { ViewModal } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import type { CounselComment, CounselHistoryRow } from '../../mocks/counsel'
 import { texts } from '../../texts'
+import { RichText } from '../../components/ui'
+import { Line } from '../contract/HistoryTimeline'
 import { DeletedBadge } from '../contract/shared'
 import { CommentDetailModal, ReplyList, TypeChip } from './CommentParts'
 import { isLong } from './commentText'
 
 const t = texts.counsel.historyNotes
+const commentLabel = texts.contract.history.commentLabel
 
 /** 히스토리 박스 안의 작은 토글 버튼 */
 function Toggle({ open, disabled, onClick, children }: { open: boolean; disabled?: boolean; onClick: () => void; children: ReactNode }) {
@@ -80,29 +83,44 @@ type Props = {
   comments: CounselComment[]
 }
 
-/** 히스토리 박스 아래의 본문 · 코멘트 토글. 길면 상세 보기로 원문을 팝업에서 본다 */
+/** 히스토리 박스 안의 코멘트 줄과, 본문이 있을 때만 본문 · 코멘트 토글. 길면 상세 보기로 원문을 팝업에서 본다 */
 export function HistoryNotes({ row, counselId, comments }: Props) {
   const [bodyOpen, setBodyOpen] = useState(false)
   const [commentsOpen, setCommentsOpen] = useState(false)
   const [detail, setDetail] = useState(false)
 
   const linked = comments.filter((c) => c.historyId === row.id)
+  const body = row.body ?? ''
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="flex flex-wrap items-center gap-2">
-        <Toggle open={bodyOpen} onClick={() => setBodyOpen((v) => !v)}>
-          {bodyOpen ? t.hideBody : t.showBody}
-        </Toggle>
-        <Toggle open={commentsOpen} disabled={linked.length === 0} onClick={() => setCommentsOpen((v) => !v)}>
-          {linked.length === 0 ? t.noComments : commentsOpen ? t.hideComments : t.showComments(linked.length)}
-        </Toggle>
-      </span>
+      {/* 이력에 남은 코멘트는 계약 히스토리와 같은 '코멘트' 줄로 보여 준다 */}
+      {row.comment && (
+        <Line label={commentLabel}>
+          <RichText text={row.comment} />
+        </Line>
+      )}
 
-      {bodyOpen && (
+      {/* 본문이나 연결된 코멘트가 있을 때만 토글을 보여 준다 */}
+      {(body || linked.length > 0) && (
+        <span className="flex flex-wrap items-center gap-2">
+          {body && (
+            <Toggle open={bodyOpen} onClick={() => setBodyOpen((v) => !v)}>
+              {bodyOpen ? t.hideBody : t.showBody}
+            </Toggle>
+          )}
+          {linked.length > 0 && (
+            <Toggle open={commentsOpen} onClick={() => setCommentsOpen((v) => !v)}>
+              {commentsOpen ? t.hideComments : t.showComments(linked.length)}
+            </Toggle>
+          )}
+        </span>
+      )}
+
+      {bodyOpen && body && (
         <div className="flex flex-col items-start gap-1 rounded-lg bg-[#f6f6f8] px-3 py-2.5">
-          <span className="line-clamp-3 whitespace-pre-wrap text-[12.5px] leading-[1.5] text-ink-2">{row.comment}</span>
-          {isLong(row.comment) && <MoreButton onClick={() => setDetail(true)} />}
+          <span className="line-clamp-3 whitespace-pre-wrap text-[12.5px] leading-[1.5] text-ink-2">{body}</span>
+          {isLong(body) && <MoreButton onClick={() => setDetail(true)} />}
         </div>
       )}
 
@@ -116,7 +134,7 @@ export function HistoryNotes({ row, counselId, comments }: Props) {
 
       {detail && (
         <ViewModal title={t.bodyTitle} description={`${row.action} · ${row.user} · ${row.at}`} onClose={() => setDetail(false)}>
-          <div className="whitespace-pre-wrap rounded-xl border border-line bg-[#f2f2f5] px-4 py-3.5 text-[13px] leading-relaxed">{row.comment}</div>
+          <div className="whitespace-pre-wrap rounded-xl border border-line bg-[#f2f2f5] px-4 py-3.5 text-[13px] leading-relaxed">{body}</div>
         </ViewModal>
       )}
     </div>

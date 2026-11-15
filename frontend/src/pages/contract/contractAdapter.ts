@@ -61,7 +61,7 @@ export function toTemplate(api: ContractDetailApi): ContractTemplate | null {
 }
 
 /** ISO(UTC) → 'YYYY-MM-DD HH:mm' (브라우저 시간대) */
-function toLocalText(iso: string): string {
+export function toLocalText(iso: string): string {
   return toLocalInput(iso).replace('T', ' ')
 }
 

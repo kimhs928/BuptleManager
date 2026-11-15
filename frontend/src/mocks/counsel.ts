@@ -2,42 +2,8 @@
 import type { CaseEmail } from './contract'
 import { MOCK_DOC_TITLES } from './user'
 
-/** 자문 상태 코드 (BCounsel.status) */
-export type CounselStatus =
-  | 'DRAFT'
-  | 'DEPT_CONFIRM'
-  | 'DEPT_DENY'
-  | 'EDITABLE'
-  | 'REVIEW'
-  | 'RE_REVIEW'
-  | 'FINAL'
-  | 'REVIEW_EDIT'
-  | 'CIRCULATION'
-  | 'CIR_COMPLETE'
-  | 'CIR_REPLY_COMPLETE'
-  | 'CIR_REVIEW_EDIT'
-  | 'COMPLETE'
-  | 'STOP'
-
-/** 상태 코드별 화면 이름과 점 색 */
-export const COUNSEL_STATUS_INFO: Record<CounselStatus, { label: string; dot: string }> = {
-  DRAFT: { label: '초안', dot: 'bg-ink-5' },
-  DEPT_CONFIRM: { label: '부서장 승인 대기', dot: 'bg-[#fec601]' },
-  DEPT_DENY: { label: '부서장 반려', dot: 'bg-danger' },
-  EDITABLE: { label: '검토자 할당 대기', dot: 'bg-[#fec601]' },
-  REVIEW: { label: '검토 중', dot: 'bg-[#fec601]' },
-  RE_REVIEW: { label: '재검토 중', dot: 'bg-[#fec601]' },
-  FINAL: { label: '최종 승인 요청', dot: 'bg-[#fec601]' },
-  REVIEW_EDIT: { label: '최종 승인 반려', dot: 'bg-danger' },
-  CIRCULATION: { label: '회람 중', dot: 'bg-[#3da5d9]' },
-  CIR_COMPLETE: { label: '회람 완료', dot: 'bg-[#3da5d9]' },
-  CIR_REPLY_COMPLETE: { label: '회람 답변 완료', dot: 'bg-[#3da5d9]' },
-  CIR_REVIEW_EDIT: { label: '회람 답변 변경 요청', dot: 'bg-danger' },
-  COMPLETE: { label: '자문 완료', dot: 'bg-success' },
-  STOP: { label: '자문 중단', dot: 'bg-ink-3' },
-}
-
-export const COUNSEL_STATUSES = Object.keys(COUNSEL_STATUS_INFO) as CounselStatus[]
+/** 자문 상태 코드 (counsel_bcounsel.status). 값과 이름은 enum 표 BIZ_COUNSEL_STATUS 에서 읽는다 */
+export type CounselStatus = string
 
 /** 검색 결과 한 줄 */
 export type CounselSummary = {
@@ -63,10 +29,10 @@ export const MOCK_COUNSELS: CounselSummary[] = [
 ]
 
 /** 자문 종류 (counsel_type) */
-export type CounselType = 'PUBLIC' | 'PRIVATE'
+export type CounselType = string
 
 /** 자문 공개 범위 (show_range_type) */
-export type ShowRangeType = 'PRIVATE' | 'INNER' | 'OUTER' | 'DEPARTMENT'
+export type ShowRangeType = string
 
 export type CounselDetail = {
   id: string
@@ -130,10 +96,10 @@ export function getCounselDetail(id: string): CounselDetail {
 }
 
 /** 자문 승인 타입 (BApproval.approval_type: DEPT / REVIEW / FINAL) */
-export type CounselApprovalType = '부서장' | '검토자' | '최종승인자'
+export type CounselApprovalType = string
 
 /** 자문 승인 내역 */
-export type CounselApprovalStatus = '등록' | '요청' | '승인' | '부결/반려' | '자문 중단'
+export type CounselApprovalStatus = string
 
 export type CounselMember = {
   id: string
@@ -158,10 +124,7 @@ export type CounselMember = {
   deletedAt: string
 }
 
-export const COUNSEL_ROLES = ['요청자', '외부 변호사', '검토자', '참조']
 
-/** 외부 변호사는 외부 유저만 가질 수 있어서 내부 유저의 역할 목록에서는 뺀다 */
-export const INTERNAL_COUNSEL_ROLES = COUNSEL_ROLES.filter((r) => r !== '외부 변호사')
 
 export const MOCK_COUNSEL_MEMBERS: CounselMember[] = [
   { id: 'u1', userId: 'A00112', name: '박지훈', email: 'jihoon.park@acetech.co.kr', company: '에이스테크놀로지(주)', phone: '010-2345-6789', roles: ['요청자'], dept: '구매팀', sysRoles: ['일반유저'], approvalType: '부서장', approvalStatus: '승인', deleted: false, createdAt: '2024-01-12 10:20', updatedAt: '2024-01-12 10:20', deletedAt: '' },
@@ -231,6 +194,8 @@ export type CounselHistoryRow = {
   at: string
   deleted: boolean
   comment: string
+  /** 본문(질문/답변 내용). 본문이 없는 이력은 비어 있다 */
+  body?: string
   from: string
   to: string
   /** 프로세스 단계가 실제로 바뀐 이력인지. 서버가 구분해서 내려준다 */
@@ -253,10 +218,8 @@ export const MOCK_COUNSEL_HISTORY: CounselHistoryRow[] = [
 /** 히스토리 액션 유저로 선택할 수 있는 이름 */
 export const MOCK_COUNSEL_HISTORY_USERS = ['김효선', '박부장', '이법무', '장변호사', '최법무', '오재무', '한보안']
 
-/** 코멘트 종류는 질문과 답변 두 가지다 */
-export type CommentType = '질문' | '답변'
+export type CommentType = string
 
-export const COMMENT_TYPES: CommentType[] = ['질문', '답변']
 
 /** 질문 · 답변에 달린 댓글 */
 export type CounselReply = {

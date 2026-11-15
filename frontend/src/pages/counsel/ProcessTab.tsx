@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { ChevronRightIcon, LockIcon } from '../../components/icons'
 import { cn } from '../../lib/cn'
-import { COUNSEL_GUIDE, MOCK_COUNSEL_HISTORY_USERS } from '../../mocks/counsel'
-import type { CounselComment, CounselHistoryRow, CounselWorkflow } from '../../mocks/counsel'
+import { MOCK_COUNSEL_HISTORY_USERS } from '../../mocks/counsel'
+import type { CounselComment, CounselGuideStage, CounselHistoryRow, CounselWorkflow } from '../../mocks/counsel'
 import type { CaseEmail } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { EmailHistory } from '../contract/EmailHistory'
@@ -25,9 +25,9 @@ const stageTone: Record<StageState, { card: string; no: string; badge: string }>
 }
 
 /** 워크플로우 설정(부서장 승인 등)에 따라 실제로 거치는 프로세스 단계 */
-function stagesFor(workflow: CounselWorkflow) {
+function stagesFor(workflow: CounselWorkflow, all: CounselGuideStage[]) {
   const on = (key: string) => !!workflow.attrs.find((a) => a.key === key)?.value.includes('필요')
-  return COUNSEL_GUIDE.filter((g) => !g.opt || on(g.opt))
+  return all.filter((g) => !g.opt || on(g.opt))
 }
 
 /** 시간순 히스토리를 진행 줄로 나눈다. 단계가 되돌아가면 새 줄에서 다시 시작한다 */
@@ -63,6 +63,8 @@ function Legend({ className, label }: { className: string; label: string }) {
 type Props = {
   counselId: string
   workflow: CounselWorkflow
+  /** 프로세스 단계 안내 전체 (설정에 따라 일부만 보인다) */
+  guide: CounselGuideStage[]
   history: CounselHistoryRow[]
   /** 히스토리에 연결된 코멘트 (본문 · 코멘트 토글에서 보여 준다) */
   comments: CounselComment[]
@@ -71,16 +73,16 @@ type Props = {
 }
 
 /** 프로세스 · 히스토리 탭 (자문 워크플로우 + 진행 히스토리) */
-export function ProcessTab({ counselId, workflow, history, comments, emails, onSaveRow }: Props) {
+export function ProcessTab({ counselId, workflow, guide: allStages, history, comments, emails, onSaveRow }: Props) {
   const [editingRow, setEditingRow] = useState<CounselHistoryRow | null>(null)
 
-  const guide = stagesFor(workflow)
+  const guide = stagesFor(workflow, allStages)
 
   // 단계 순서. 워크플로우 변경으로 빠진 단계는 앞 단계 바로 뒤에 둔다
   const order: Record<string, number> = {}
   guide.forEach((g, i) => (order[g.name] = i))
   let lastIdx = -1
-  for (const g of COUNSEL_GUIDE) {
+  for (const g of allStages) {
     if (order[g.name] !== undefined) lastIdx = order[g.name]
     else order[g.name] = lastIdx + 0.5
   }

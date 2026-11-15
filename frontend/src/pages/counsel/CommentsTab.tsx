@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ChevronDownIcon, ChevronRightIcon, EditIcon } from '../../components/icons'
 import { Button, SegmentedControl } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import { COMMENT_TYPES } from '../../mocks/counsel'
+import { useEnumLabels } from '../../hooks/useEnumLabels'
 import type { CommentType, CounselComment, CounselReply } from '../../mocks/counsel'
 import { texts } from '../../texts'
 import { deletedRow, tableTd } from '../contract/format'
@@ -36,6 +36,8 @@ export function CommentsTab({ counselId, comments, onEdit, onEditReply }: Props)
   // 삭제된 코멘트 포함 여부, 코멘트 타입 필터(빈 문자열이면 전체)
   const [includeDeleted, setIncludeDeleted] = useState(true)
   const [typeFilter, setTypeFilter] = useState<'' | CommentType>('')
+  // 코멘트 종류(질문/답변)는 enum 표(DB)에서 읽는다
+  const commentTypes = useEnumLabels('BIZ_COUNSEL_CONTENT_STATUS').options.map((o) => o.label)
   // 프로세스 탭의 히스토리에서 넘어오면 해당 코멘트를 강조하고 그 자리로 이동한다 (?comment=ID)
   const targetId = new URLSearchParams(window.location.search).get('comment')
   const targetRef = useRef<HTMLTableRowElement>(null)
@@ -78,7 +80,7 @@ export function CommentsTab({ counselId, comments, onEdit, onEditReply }: Props)
               onChange={setTypeFilter}
               options={[
                 { value: '', label: `${t.filter.all} ${visible.length}` },
-                ...COMMENT_TYPES.map((type) => ({ value: type, label: `${type} ${visible.filter((c) => c.type === type).length}` })),
+                ...commentTypes.map((type) => ({ value: type, label: `${type} ${visible.filter((c) => c.type === type).length}` })),
               ]}
             />
           </span>

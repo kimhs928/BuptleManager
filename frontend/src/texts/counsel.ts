@@ -17,15 +17,43 @@ export const counsel = {
 
   none: '(없음)',
 
+  detailLoad: {
+    loading: '자문을 불러오는 중…',
+    notFound: (id: string) => `"${id}" 자문을 찾을 수 없습니다.`,
+    error: (m: string) => `자문을 불러오지 못했습니다. (${m})`,
+  },
+
   /** 자문 검색 */
   search: {
+    loading: '자문을 불러오는 중입니다.',
+    error: '자문을 불러오지 못했습니다. 서버 연결을 확인해 주세요.',
     title: '자문 검색',
     label: '자문 ID 또는 자문명',
     placeholder: '자문 ID (CN-2024-0112 / 20240112) 또는 자문명',
     clear: '검색어 지우기',
     submit: '검색',
     includeDeleted: '삭제된 자문 포함',
-    recentTitle: '최근 조회한 자문',
+    recentTitle: '최근 작업한 자문',
+    /** 최근 작업한 자문 (BuptleManager 작업 이력) */
+    recent: {
+      count: (n: number) => `${n}건`,
+      loading: '최근 작업한 자문을 불러오는 중입니다.',
+      error: '최근 작업한 자문을 불러오지 못했습니다. 서버 연결을 확인해 주세요.',
+      empty: '최근 작업한 자문이 없습니다.',
+      noCompany: '고객사를 먼저 선택해 주세요.',
+      goMain: '메인으로 이동',
+      columns: { operation: '최근 작업', operatedAt: '작업 시각', operator: '작업자' },
+      operations: {
+        SEARCH: '검색',
+        VIEW: '조회',
+        UPDATE: '수정',
+        ADD: '추가',
+        DELETE: '삭제',
+        TRANSFER: '이관',
+        EXPORT: '추출',
+        FORCE_LOGOUT: '강제 로그아웃',
+      },
+    },
     resultTitle: '검색 결과',
     count: (n: number, includeDeleted: boolean) => `${n}건${includeDeleted ? ' · 삭제 포함' : ''}`,
     columns: {
@@ -75,8 +103,6 @@ export const counsel = {
       projects: '관련 프로젝트',
       migrated: '마이그레이션',
     },
-    counselTypes: { PUBLIC: '일반', PRIVATE: '개인' },
-    showRanges: { PRIVATE: '비공개', INNER: '사내', OUTER: '사외 포함', DEPARTMENT: '부서' },
     categoryTitle: '카테고리',
     category: '카테고리',
     subCategory: '하위',
@@ -91,7 +117,7 @@ export const counsel = {
     links: { members: '참여 유저', history: '히스토리', comments: '코멘트' },
     persons: (n: number) => `${n}명`,
     cases: (n: number) => `${n}건`,
-    editHint: '자문 기본 정보 · 상태 · 종류 · 프로젝트 · 날짜',
+    editHint: '자문 기본 정보',
     recentTitle: '최근 히스토리',
     recentAll: (n: number) => `전체 ${n}건`,
     recentEmpty: '히스토리가 없습니다.',

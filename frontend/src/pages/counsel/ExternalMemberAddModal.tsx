@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { CheckGroup, EditModal, Field, FieldGroup, GroupField, TextInput } from '../../components/ui'
 import type { Change } from '../../components/ui'
 import { formatDateTime } from '../../lib/date'
-import { COUNSEL_ROLES } from '../../mocks/counsel'
+import { useEnumLabels } from '../../hooks/useEnumLabels'
 import type { CounselMember } from '../../mocks/counsel'
 import { texts } from '../../texts'
 import { makeAudit } from '../contract/audit'
@@ -22,6 +22,8 @@ type Props = {
 export function ExternalMemberAddModal({ members, onClose, onSave }: Props) {
   const [form, setForm] = useState({ name: '', email: '', company: '', dept: '', phone: '' })
   const [roles, setRoles] = useState<string[]>([])
+  // 역할 선택지와 이름은 enum 표(DB)에서 읽는다
+  const roleOptions = useEnumLabels('BIZ_COUNSEL_PARTICIPANT_ROLE').options.map((o) => o.label)
   const [ticket, setTicket] = useState('')
   const [reason, setReason] = useState('')
   const [openedAt] = useState(() => formatDateTime())
@@ -100,7 +102,7 @@ export function ExternalMemberAddModal({ members, onClose, onSave }: Props) {
 
       <FieldGroup title={t.groups.setting} columns={1}>
         <GroupField label={t.rolesLabel} hint={t.rolesNote} required>
-          <CheckGroup label={t.rolesLabel} options={COUNSEL_ROLES} value={roles} onChange={setRoles} />
+          <CheckGroup label={t.rolesLabel} options={roleOptions} value={roles} onChange={setRoles} />
         </GroupField>
         <span className="text-xs text-ink-4">{t.activeNote}</span>
       </FieldGroup>

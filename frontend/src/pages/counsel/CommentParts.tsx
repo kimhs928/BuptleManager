@@ -6,14 +6,14 @@ import type { CommentType, CounselComment, CounselReply } from '../../mocks/coun
 import { texts } from '../../texts'
 import { DeletedBadge } from '../contract/shared'
 
-const typeTone: Record<CommentType, string> = {
+const typeTone: Record<string, string> = {
   질문: 'border border-transparent bg-[#fec601] text-[#3a2e00]',
   답변: 'border border-transparent bg-[#2fa24f] text-white',
 }
 
 /** 코멘트 종류 칩 (질문 · 답변) */
 export function TypeChip({ type }: { type: CommentType }) {
-  return <span className={cn('inline-flex h-6 w-[76px] items-center justify-center rounded-md text-[12px] font-semibold', typeTone[type])}>{type}</span>
+  return <span className={cn('inline-flex h-6 w-[76px] items-center justify-center rounded-md text-[12px] font-semibold', typeTone[type] ?? 'border border-transparent bg-[#f2f2f5] text-ink-3')}>{type}</span>
 }
 
 /** 질문 · 답변에 달린 댓글 목록 */

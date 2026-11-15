@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { ChevronRightIcon, EditIcon, PlusIcon } from '../../components/icons'
 import { Button, SegmentedControl } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import type { CounselApprovalStatus, CounselMember } from '../../mocks/counsel'
+import type { CounselMember } from '../../mocks/counsel'
 import type { MemberKind } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { deletedName } from '../contract/format'
@@ -17,7 +17,7 @@ const t = texts.counsel.members
 /** 사내 유저는 user_id(사번)를 가진다. 없으면 외부 유저 */
 const kindOf = (m: CounselMember): MemberKind => (m.userId ? 'internal' : 'external')
 
-const approvalTone: Record<CounselApprovalStatus, string> = {
+const approvalTone: Record<string, string> = {
   등록: 'bg-[#f2f2f5] text-ink-3',
   요청: 'bg-warn-soft text-warn-ink',
   승인: 'bg-success-soft text-success-ink',
@@ -117,7 +117,7 @@ function MemberCard({ m, onEdit }: { m: CounselMember; onEdit: () => void }) {
             <dt className="text-xs text-ink-3">{t.cells.approvalStatus}</dt>
             <dd className="m-0 min-h-[1lh]">
               {m.approvalStatus && (
-                <span className={cn('inline-flex items-center rounded-full px-[9px] py-[3px] text-[11px] font-semibold', m.deleted ? 'bg-[#f2f2f5] text-ink-4' : approvalTone[m.approvalStatus])}>{m.approvalStatus}</span>
+                <span className={cn('inline-flex items-center rounded-full px-[9px] py-[3px] text-[11px] font-semibold', m.deleted ? 'bg-[#f2f2f5] text-ink-4' : (approvalTone[m.approvalStatus] ?? 'bg-[#f2f2f5] text-ink-3'))}>{m.approvalStatus}</span>
               )}
             </dd>
           </dl>

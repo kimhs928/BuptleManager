@@ -59,7 +59,7 @@ function Row({ at, dot, first, last, children }: { at?: string; dot: string; fir
 }
 
 /** 이력 박스 안의 '라벨 + 값' 한 줄. 라벨 너비를 같게 맞춘다 */
-function Line({ label, children }: { label: string; children: ReactNode }) {
+export function Line({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex items-baseline gap-2">
       <span className="w-[52px] shrink-0 rounded-md border border-line-strong px-1 py-px text-center text-[10.5px] font-semibold text-ink-3">{label}</span>

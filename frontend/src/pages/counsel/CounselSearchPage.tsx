@@ -3,10 +3,13 @@ import { ChevronRightIcon, CloseIcon, SearchIcon } from '../../components/icons'
 import { CompanyShell } from '../../components/layout/CompanyShell'
 import { Button, Card, Lines } from '../../components/ui'
 import { cn } from '../../lib/cn'
-import { MOCK_COUNSELS } from '../../mocks/counsel'
+import { useCounselSearch } from '../../hooks/useCounselSearch'
+import { currentCompany } from '../../lib/selectedCompany'
 import { texts } from '../../texts'
 import { deletedName, deletedRow, tableTd, tableTh } from '../contract/format'
 import { DeletedBadge } from '../contract/shared'
+import { toSummary } from './counselAdapter'
+import { RecentCounselsCard } from './RecentCounselsCard'
 import { StatusDot } from './shared'
 
 const t = texts.counsel.search
@@ -21,11 +24,9 @@ export function CounselSearchPage({ initialQuery = '' }: Props) {
   const [query, setQuery] = useState(initialQuery)
   const [includeDeleted, setIncludeDeleted] = useState(true)
 
-  const q = query.trim().toLowerCase()
-  const qPlain = q.replace(/-/g, '')
-  const results = MOCK_COUNSELS.filter((c) => includeDeleted || !c.deleted).filter((c) =>
-    q ? c.id.toLowerCase().replace(/-/g, '').includes(qPlain) || c.name.toLowerCase().includes(q) : c.recent,
-  )
+  const q = query.trim()
+  const search = useCounselSearch(currentCompany().schema, q, includeDeleted)
+  const results = search.items.map(toSummary)
 
   return (
     <CompanyShell active="counsel" trail={[{ label: texts.counsel.breadcrumb.features }, { label: texts.counsel.breadcrumb.counsel }]}>
@@ -68,12 +69,15 @@ export function CounselSearchPage({ initialQuery = '' }: Props) {
           </div>
         </section>
 
-        <section aria-label={q ? t.resultTitle : t.recentTitle}>
+        {!q && <RecentCounselsCard />}
+
+        {q && (
+        <section aria-label={t.resultTitle}>
           <Card className="overflow-hidden">
             <div className="flex items-baseline gap-2 border-b border-line-soft px-5 py-4">
-              <span className="text-[15px] font-semibold">{q ? t.resultTitle : t.recentTitle}</span>
+              <span className="text-[15px] font-semibold">{t.resultTitle}</span>
               <span className="text-[13px] text-ink-4" aria-live="polite">
-                {t.count(results.length, includeDeleted)}
+                {search.loading ? t.loading : t.count(search.total, includeDeleted)}
               </span>
             </div>
 
@@ -123,6 +127,10 @@ export function CounselSearchPage({ initialQuery = '' }: Props) {
                   </tbody>
                 </table>
               </div>
+            ) : search.loading || search.error ? (
+              <p role={search.error ? 'alert' : 'status'} className="m-0 px-6 py-14 text-center text-[13px] text-ink-4">
+                {search.loading ? t.loading : t.error}
+              </p>
             ) : (
               <div className="flex flex-col items-center gap-1.5 px-6 py-14 text-center">
                 <p className="m-0 text-[15px] font-semibold text-ink-2">{t.emptyTitle}</p>
@@ -133,6 +141,7 @@ export function CounselSearchPage({ initialQuery = '' }: Props) {
             )}
           </Card>
         </section>
+        )}
       </div>
     </CompanyShell>
   )
