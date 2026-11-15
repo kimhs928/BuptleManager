@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Chip } from './Chip'
 
 /** 복수 선택 칩 묶음 */
-export function CheckGroup({ options, value, onChange, label }: { options: readonly string[]; value: readonly string[]; onChange: (next: string[], toggled: string) => void; label: string }) {
+export function CheckGroup({ options, value, onChange, label, disabled }: { options: readonly string[]; value: readonly string[]; onChange: (next: string[], toggled: string) => void; label: string; disabled?: boolean }) {
   return (
     <div role="group" aria-label={label} className="flex flex-wrap gap-1.5">
       {options.map((o) => (
@@ -10,6 +10,7 @@ export function CheckGroup({ options, value, onChange, label }: { options: reado
           key={o}
           label={o}
           checked={value.includes(o)}
+          disabled={disabled}
           onChange={() => onChange(value.includes(o) ? value.filter((v) => v !== o) : [...value, o], o)}
         />
       ))}

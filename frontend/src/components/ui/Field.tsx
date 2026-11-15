@@ -49,7 +49,7 @@ export function TextInput({ className, readOnly, ...rest }: InputHTMLAttributes<
 
 export function Select({ className, children, ...rest }: SelectHTMLAttributes<HTMLSelectElement>) {
   return (
-    <select className={cn(control, 'h-[38px]', className)} {...rest}>
+    <select className={cn(control, 'h-[38px] disabled:cursor-not-allowed disabled:bg-fill disabled:text-ink-4', className)} {...rest}>
       {children}
     </select>
   )

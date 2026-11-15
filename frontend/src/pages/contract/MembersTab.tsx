@@ -72,7 +72,9 @@ function MemberCard({ m, onEdit }: { m: ContractMember; onEdit: () => void }) {
         {internal && m.perm.length > 0 && (
           <>
             <span aria-hidden="true" className="mx-1 h-4 w-px bg-line-strong" />
-            <span className={cn('inline-flex h-7 items-center rounded-md px-3 text-[13px] font-semibold leading-none', m.deleted ? 'bg-[#f2f2f5] text-ink-4' : 'bg-ink-2 text-white')}>{m.perm.join(', ')}</span>
+            {m.perm.map((p) => (
+              <span key={p} className={cn('inline-flex h-7 items-center rounded-md px-3 text-[13px] font-semibold leading-none', m.deleted ? 'bg-[#f2f2f5] text-ink-4' : 'bg-ink-2 text-white')}>{p}</span>
+            ))}
           </>
         )}
       </div>

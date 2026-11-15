@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useSignTypeOptions } from '../../hooks/useSignTypeOptions'
+import { fromSignList, SIGN_NONE, toSignList } from './signOptions'
 import { CheckGroup, GroupField, Alert, EditModal, Field, FieldGroup, Select, TextInput } from '../../components/ui'
 import type { Change } from '../../components/ui'
 import { CheckIcon, CloseIcon } from '../../components/icons'
@@ -10,6 +12,9 @@ import type { ContractMember, MemberKind } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { makeAudit } from './audit'
 import { joinList } from './format'
+
+/** 새 참여자의 서명 상태. 완료는 이 화면에서 만들 수 없다 */
+const SIGN_PENDING = '대기'
 
 const t = texts.contract.memberAdd
 const opt = texts.contract.memberOptions
@@ -39,24 +44,12 @@ const emptyForm: Form = {
   lang: 'ko',
   roles: [],
   perm: [],
-  signMethod: '개인 서명',
-  signType: 'SMS 인증',
-  signStatus: '대기',
+  signMethod: SIGN_NONE,
+  signType: SIGN_NONE,
+  signStatus: SIGN_PENDING,
 }
 
 type Match = 'idle' | 'ok' | 'bad' | 'joined'
-
-function Options({ list }: { list: readonly string[] }) {
-  return (
-    <>
-      {list.map((o) => (
-        <option key={o} value={o}>
-          {o}
-        </option>
-      ))}
-    </>
-  )
-}
 
 const matchTone: Record<Match, string> = {
   idle: 'border-line-strong bg-[#f2f2f5] text-ink',
@@ -92,7 +85,12 @@ export function MemberAddModal({ kind, members, onClose, onSave }: Props) {
 
   // 내부 유저는 사내 유저(이름·이메일·user_id)와 모두 일치해야 하고, 이미 참여 중이면 안 된다
   const match: Match = joined ? 'joined' : inDirectory ? 'ok' : name && email && userId ? 'bad' : 'idle'
-  const baseFilled = name !== '' && email !== '' && form.signMethod !== '' && form.signType !== ''
+  const signTypeOptions = useSignTypeOptions()
+  // 내부 유저는 권한에 '서명'이 체크되어 있을 때만 서명 방식·종류를 고른다 (아니면 '-')
+  const signLocked = internal && !form.perm.includes('서명')
+  // 서명 방식·종류는 서명 권한이 있는 내부 유저만 필수다. 외부 유저는 비워도 된다
+  const signRequired = internal && !signLocked
+  const baseFilled = name !== '' && email !== '' && (!signRequired || (form.signMethod !== SIGN_NONE && form.signType !== SIGN_NONE))
   const valid = internal ? match === 'ok' && baseFilled && form.roles.length > 0 && form.perm.length > 0 : baseFilled && !joined
 
   // 사용자가 직접 입력하거나 기본값에서 바꾼 항목만 보여 준다
@@ -112,9 +110,10 @@ export function MemberAddModal({ kind, members, onClose, onSave }: Props) {
     add(f.roles, joinList(form.roles, ''), true, 'roles')
     add(f.perm, joinList(form.perm, ''), true, 'perm')
   }
-  add(f.signMethod, form.signMethod, form.signMethod !== emptyForm.signMethod, 'signMethod')
-  add(f.signType, form.signType, form.signType !== emptyForm.signType, 'signType')
-  add(f.signStatus, form.signStatus, form.signStatus !== emptyForm.signStatus, 'signStatus')
+  if (!signLocked) {
+    add(f.signMethod, form.signMethod, form.signMethod !== emptyForm.signMethod, 'signMethod')
+    add(f.signType, form.signType, form.signType !== emptyForm.signType, 'signType')
+  }
 
   const save = () => {
     const now = formatDateTime().replace(' ', 'T')
@@ -128,8 +127,8 @@ export function MemberAddModal({ kind, members, onClose, onSave }: Props) {
       dept: form.dept.trim() || '-',
       phone: form.phone.trim() || '-',
       perm: internal ? form.perm : [],
-      signMethod: form.signMethod,
-      signType: form.signType,
+      signMethod: signLocked ? SIGN_NONE : form.signMethod,
+      signType: signLocked ? SIGN_NONE : form.signType,
       signStatus: form.signStatus,
       lang: form.lang,
       sysRoles: internal ? ['일반유저'] : [],
@@ -238,26 +237,20 @@ export function MemberAddModal({ kind, members, onClose, onSave }: Props) {
       </FieldGroup>
 
       <FieldGroup title={t.groups.sign}>
-        <Field label={f.signMethod} required>
-          {(id) => (
-            <Select id={id} value={form.signMethod} onChange={(e) => set('signMethod', e.target.value)}>
-              <Options list={opt.signMethods} />
-            </Select>
-          )}
-        </Field>
-        <Field label={f.signType} required>
-          {(id) => (
-            <Select id={id} value={form.signType} onChange={(e) => set('signType', e.target.value)}>
-              <Options list={opt.signTypes} />
-            </Select>
-          )}
-        </Field>
-        <Field label={f.signStatus}>
-          {(id) => (
-            <Select id={id} value={form.signStatus} onChange={(e) => set('signStatus', e.target.value)}>
-              <Options list={opt.signStatusesAdd} />
-            </Select>
-          )}
+        {signLocked && (
+          <Alert tone="warn" className="col-span-2">
+            {texts.contract.memberEdit.signLockedNote}
+          </Alert>
+        )}
+        <GroupField label={f.signMethod} hint={t.multi} required={signRequired}>
+          <CheckGroup label={f.signMethod} disabled={signLocked} options={opt.signMethods.filter((o) => o !== SIGN_NONE)} value={toSignList(form.signMethod)} onChange={(v) => set('signMethod', fromSignList(v))} />
+        </GroupField>
+        <GroupField label={f.signType} hint={t.multi} required={signRequired}>
+          <CheckGroup label={f.signType} disabled={signLocked} options={signTypeOptions} value={toSignList(form.signType)} onChange={(v) => set('signType', fromSignList(v))} />
+        </GroupField>
+        {/* 새로 추가하는 참여자의 서명 상태는 항상 대기. 완료는 유저가 직접 서명해야 된다 */}
+        <Field label={f.signStatus} readOnlyHint>
+          {(id) => <TextInput id={id} readOnly value={SIGN_PENDING} />}
         </Field>
       </FieldGroup>
 

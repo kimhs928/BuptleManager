@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { CheckGroup, GroupField, EditModal, Field, FieldGroup, Select, TextInput } from '../../components/ui'
+import { fromSignList, SIGN_NONE, toSignList, withCurrent } from './signOptions'
+import { useSignTypeOptions } from '../../hooks/useSignTypeOptions'
+import { Alert, Button, CheckGroup, GroupField, EditModal, Field, FieldGroup, Select, TextInput } from '../../components/ui'
 import type { Change } from '../../components/ui'
 import { formatDateTime } from '../../lib/date'
 import type { ContractMember } from '../../mocks/contract'
@@ -11,6 +13,12 @@ const t = texts.contract.memberEdit
 const opt = texts.contract.memberOptions
 
 type FieldKey = keyof typeof t.fields
+
+/** 서명 정보를 고치려면 권한에 있어야 하는 값 */
+const SIGN_PERM = '서명'
+/** 서명 상태 값. 완료는 유저가 직접 서명해야만 되고, 취소하면 대기로 돌아간다 */
+const SIGN_DONE = '완료'
+const SIGN_PENDING = '대기'
 
 const internalKeys: FieldKey[] = ['roles', 'perm', 'dept', 'phone', 'lang', 'signMethod', 'signType', 'signStatus', 'joinedAt', 'updatedAt', 'deleted', 'deletedAt']
 const externalKeys: FieldKey[] = ['name', 'email', 'company', 'dept', 'phone', 'lang', 'signMethod', 'signType', 'signStatus', 'joinedAt', 'updatedAt', 'deleted', 'deletedAt']
@@ -31,18 +39,6 @@ function show(key: FieldKey, m: ContractMember): string {
     default:
       return String(m[key as keyof ContractMember] ?? '') || texts.contract.none
   }
-}
-
-function Options({ list }: { list: readonly string[] }) {
-  return (
-    <>
-      {list.map((o) => (
-        <option key={o} value={o}>
-          {o}
-        </option>
-      ))}
-    </>
-  )
 }
 
 type Props = {
@@ -66,6 +62,12 @@ export function MemberEditModal({ member, onClose, onSave }: Props) {
     .map((k) => ({ field: t.fields[k], before: show(k, member), after: show(k, form), reset: () => setForm((f) => ({ ...f, [k]: member[k as keyof ContractMember] })) }))
 
   const kindLabel = texts.contract.members.kind[member.kind]
+  // 내부 유저는 권한에 '서명'이 체크되어 있을 때만 서명 정보를 고칠 수 있다
+  // 서명 방식·종류는 여러 개를 고를 수 있다. 값은 ', ' 로 이어 붙인 글자(없으면 '-')로 들고 있다
+  const signTypeEnum = useSignTypeOptions()
+  const methodOptions = withCurrent(opt.signMethods.filter((o) => o !== SIGN_NONE), toSignList(form.signMethod))
+  const typeOptions = withCurrent(signTypeEnum, toSignList(form.signType))
+  const signLocked = internal && !form.perm.includes(SIGN_PERM)
 
   return (
     <EditModal
@@ -136,25 +138,28 @@ export function MemberEditModal({ member, onClose, onSave }: Props) {
       </FieldGroup>
 
       <FieldGroup title={t.groups.sign}>
-        <Field label={t.fields.signMethod}>
+        {signLocked && (
+          <Alert tone="warn" className="col-span-2">
+            {t.signLockedNote}
+          </Alert>
+        )}
+        <GroupField label={t.fields.signMethod} hint={t.multi}>
+          <CheckGroup label={t.fields.signMethod} disabled={signLocked} options={methodOptions} value={toSignList(form.signMethod)} onChange={(v) => set('signMethod', fromSignList(v))} />
+        </GroupField>
+        <GroupField label={t.fields.signType} hint={t.multi}>
+          <CheckGroup label={t.fields.signType} disabled={signLocked} options={typeOptions} value={toSignList(form.signType)} onChange={(v) => set('signType', fromSignList(v))} />
+        </GroupField>
+        {/* 서명 상태는 이 화면에서 완료로 바꿀 수 없다(유저가 직접 서명해야 완료). 완료된 서명은 취소만 가능하다 */}
+        <Field label={t.fields.signStatus} readOnlyHint>
           {(id) => (
-            <Select id={id} value={form.signMethod} onChange={(e) => set('signMethod', e.target.value)}>
-              <Options list={opt.signMethods} />
-            </Select>
-          )}
-        </Field>
-        <Field label={t.fields.signType}>
-          {(id) => (
-            <Select id={id} value={form.signType} onChange={(e) => set('signType', e.target.value)}>
-              <Options list={opt.signTypes} />
-            </Select>
-          )}
-        </Field>
-        <Field label={t.fields.signStatus}>
-          {(id) => (
-            <Select id={id} value={form.signStatus} onChange={(e) => set('signStatus', e.target.value)}>
-              <Options list={opt.signStatuses} />
-            </Select>
+            <div className="flex items-center gap-2">
+              <TextInput id={id} readOnly value={form.signStatus} />
+              {form.signStatus === SIGN_DONE && (
+                <Button type="button" variant="secondary" disabled={signLocked} onClick={() => set('signStatus', SIGN_PENDING)} className="h-[38px] shrink-0 whitespace-nowrap text-danger-ink">
+                  {t.signCancel}
+                </Button>
+              )}
+            </div>
           )}
         </Field>
       </FieldGroup>

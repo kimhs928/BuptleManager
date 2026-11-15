@@ -233,9 +233,7 @@ export const contract = {
     permsEdit: ['조회', '서명', '관리'],
     permsAdd: ['조회', '서명', '관리자'],
     signMethods: ['개인 서명', '회사 서명', '-'],
-    signTypes: ['SMS 인증', '공인인증서', '디지털 직인', '수기 서명', '-'],
     signStatuses: ['완료', '대기', '거부', '-'],
-    signStatusesAdd: ['대기', '완료', '거부', '-'],
     externalRole: '상대방 서명자',
   },
 
@@ -266,6 +264,9 @@ export const contract = {
     deletedOptions: { false: '활성화', true: '비활성화' },
     readOnly: '수정 불가',
     sysRolesNote: '유저 관리 페이지에서 변경 가능합니다.',
+    signLockedNote: '서명 권한을 체크해주세요',
+    signCancel: '서명 취소',
+    multi: '· 복수 선택',
     externalSysNote: '수정 불가 · 외부 유저 해당 없음',
   },
 
