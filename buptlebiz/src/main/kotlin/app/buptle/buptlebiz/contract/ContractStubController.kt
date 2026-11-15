@@ -42,10 +42,9 @@ class ContractStubController(
 ) {
 
 	/** BuptleManager 에 등록된 Biz 고객사인지 확인한다. 아니면 404 */
-	private fun requireBizCompany(schemaName: String) {
+	private fun requireBizCompany(schemaName: String) =
 		companies.findBySchemaName(schemaName)?.takeIf { it.platform == ServicePlatform.BUPTLE_BIZ }
 			?: throw BusinessException(CommonErrorCode.NOT_FOUND, "고객사를 찾을 수 없습니다.")
-	}
 
 	@Operation(summary = "계약 검색", description = "계약 ID 또는 계약명 검색. 최근 작업한 계약은 GET /recent 로 따로 조회한다.")
 	@GetMapping
@@ -159,8 +158,8 @@ class ContractStubController(
 	@Operation(summary = "계약 이메일 정보", description = "최신순(생성 일시 내림차순).")
 	@GetMapping("/{id}/emails")
 	fun emails(@PathVariable schemaName: String, @PathVariable id: String): ListResponse<ContractEmailResponse> {
-		requireBizCompany(schemaName)
-		val items = historyReader.emails(schemaName, id) ?: throw BusinessException(CommonErrorCode.NOT_FOUND, "계약을 찾을 수 없습니다.")
+		val company = requireBizCompany(schemaName)
+		val items = historyReader.emails(schemaName, id, company.name) ?: throw BusinessException(CommonErrorCode.NOT_FOUND, "계약을 찾을 수 없습니다.")
 		return ListResponse(items, items.size.toLong())
 	}
 }

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { CopyIcon } from '../../components/icons'
 import { Button, ViewModal } from '../../components/ui'
 import type { CaseEmail } from '../../mocks/contract'
@@ -14,12 +15,12 @@ type Props = {
 
 /** 이메일 내용 보기 */
 export function EmailViewModal({ email, copied, onCopy, onClose }: Props) {
-  const rows: [string, string][] = [
-    [t.fields.sender, `${email.sender} · ${email.senderMail}`],
+  const rows: [string, ReactNode][] = [
+    [t.fields.sender, email.sender ? [email.sender, email.senderMail].filter(Boolean).join(' · ') : <span key="sys" className="text-danger-ink">{texts.contract.history.systemSender}</span>],
     [t.fields.receiver, `${email.receiver} · ${email.receiverMail}`],
     [t.fields.createdAt, email.createdAt],
     [t.fields.updatedAt, email.updatedAt],
-    ...(email.contractId ? ([[t.fields.contractId, email.contractId]] as [string, string][]) : []),
+    ...(email.contractId ? ([[t.fields.contractId, email.contractId]] as [string, ReactNode][]) : []),
     [t.fields.link, email.link],
   ]
 

@@ -50,13 +50,16 @@ class BizHistoryReader(
 		}
 	}
 
-	fun emails(schema: String, viewCode: String): List<ContractEmailResponse>? =
+	/** companyName 은 @@company@@ 에 들어갈 고객사 이름 */
+	fun emails(schema: String, viewCode: String, companyName: String): List<ContractEmailResponse>? =
 		db().forTenant(schema) { jdbc ->
 			val contractId = contractId(jdbc, viewCode) ?: return@forTenant null
+			val contractName = jdbc.queryForObject("select coalesce(name, '') from contract_bcontract where id = :cid", mapOf("cid" to contractId), String::class.java).orEmpty()
+			val fixed = mapOf("company" to companyName, "contitle" to contractName, "systemname" to SYSTEM_NAME)
 			jdbc.query(
 				"""
 				select m.id, m.created_time, m.modified_time, m.user_name, m.from_email, m.target_email, m.link,
-				       m.params_all ->> 'title' as title, m.params_all ->> 'content' as content,
+				       m.params_all ->> 'title' as title, m.params_all ->> 'content' as content, m.params_all::text as params_all,
 				       (select ct.name from contract_bcontractor ct
 				         where ct.contract_id = :cid and lower(ct.email) = lower(m.target_email) order by ct.id limit 1) as receiver
 				from main_bmailrequesthistory m
@@ -65,17 +68,19 @@ class BizHistoryReader(
 				""".trimIndent(),
 				mapOf("cid" to contractId, "cidText" to contractId.toString()),
 			) { rs, _ ->
+				val values = fixed + paramValues(rs.getString("params_all"))
+				val fill = { text: String -> fillPlaceholders(text, values) }
 				ContractEmailResponse(
 					id = "e${rs.getLong("id")}",
 					createdAt = rs.instant("created_time") ?: Instant.EPOCH,
 					updatedAt = rs.instant("modified_time") ?: Instant.EPOCH,
-					sender = rs.getString("user_name").orEmpty(),
+					sender = senderName(rs.getString("user_name")),
 					senderMail = rs.getString("from_email").orEmpty(),
 					receiver = rs.getString("receiver").orEmpty(),
 					receiverMail = rs.getString("target_email").orEmpty(),
-					subject = rs.getString("title").orEmpty(),
+					subject = fill(rs.getString("title").orEmpty()),
 					link = rs.getString("link").orEmpty(),
-					body = htmlToText(rs.getString("content").orEmpty()),
+					body = htmlToText(fill(rs.getString("content").orEmpty())),
 					contractId = viewCode,
 				)
 			}
@@ -170,4 +175,31 @@ class BizHistoryReader(
 	private fun db(): BizDatabase = biz.ifAvailable ?: throw IllegalStateException("Biz DB 가 연결되어 있지 않습니다 (BIZ_DB_URL).")
 
 	private fun ResultSet.instant(column: String): Instant? = getTimestamp(column)?.toInstant()
+
+	/** Biz 는 user_name 에 "계약번호 -> 이름" 으로 쌓는다. 번호는 빼고 이름만 보여 준다 (요청한 유저가 없으면 빈 값) */
+	private fun senderName(raw: String?): String = raw.orEmpty().replace(SENDER_PREFIX, "").trim()
+
+	/** 메일 제목·본문의 @@키@@ 를 값으로 바꾼다. 값을 찾지 못한 자리표시는 그대로 둔다 */
+	private fun fillPlaceholders(text: String, values: Map<String, String>): String =
+		PLACEHOLDER.replace(text) { m -> values[m.groupValues[1]] ?: m.value }
+
+	/** 메일 요청 기록(params_all)의 params 안에 있는 문자·숫자·불리언 값. 중첩 값과 null 은 건너뛴다 */
+	private fun paramValues(raw: String?): Map<String, String> {
+		val params = raw?.let { runCatching { json.readTree(it) }.getOrNull() }?.get("params") ?: return emptyMap()
+		if (!params.isObject) return emptyMap()
+		return params.properties().mapNotNull { (key, v) ->
+			when {
+				v.isString -> key to v.asText()
+				v.isNumber || v.isBoolean -> key to v.asText()
+				else -> null
+			}
+		}.toMap()
+	}
+
+	private companion object {
+		const val SYSTEM_NAME = "법무관리시스템"
+		val PLACEHOLDER = Regex("""@@(\w+)@@""")
+
+		val SENDER_PREFIX = Regex("""^\s*\d*\s*->""")
+	}
 }

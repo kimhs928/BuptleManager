@@ -64,8 +64,8 @@ export function EmailHistory({ emails }: { emails: CaseEmail[] }) {
                     <td className={cn(td, 'tabular-nums text-ink-2')}>{m.updatedAt}</td>
                     <td className={td}>
                       <span className="flex flex-col gap-0.5 leading-tight">
-                        <span className="font-medium">{m.sender}</span>
-                        <span className="text-[11.5px] text-ink-4">{m.senderMail}</span>
+                        {m.sender ? <span className="font-medium">{m.sender}</span> : <span className="font-medium text-danger-ink">{t.systemSender}</span>}
+                        {m.senderMail && <span className="text-[11.5px] text-ink-4">{m.senderMail}</span>}
                       </span>
                     </td>
                     <td className={td}>

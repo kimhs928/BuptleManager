@@ -361,6 +361,7 @@ export const contract = {
       empty: '조건에 맞는 히스토리가 없습니다.',
     },
     emailTitle: '이메일 발송 내역',
+    systemSender: '시스템 발송',
     emailCount: (n: number) => `총 ${n}건`,
     emailColumns: {
       createdAt: '이메일 생성일자',
