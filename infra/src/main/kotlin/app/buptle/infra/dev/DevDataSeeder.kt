@@ -31,6 +31,7 @@ class DevDataSeeder(
 	private val companies: CompanyJpaRepository,
 	@Value("\${buptle.dev-user.email}") private val devUserEmail: String,
 	@Value("\${buptle.dev-user.name}") private val devUserName: String,
+	@Value("\${BIZ_DB_URL:}") private val bizDbUrl: String,
 ) : ApplicationRunner {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -49,7 +50,9 @@ class DevDataSeeder(
 	}
 
 	private fun seedCompanies() {
-		val created = SAMPLES.filter { companies.findBySchemaName(it.schemaName) == null }.onEach { companies.save(it.toEntity()) }
+		// Biz DB 에 연결되어 있으면 Biz 고객사는 실제 DB 에서 동기화하므로 가짜 Biz 고객사는 만들지 않는다
+		val samples = if (bizDbUrl.isNotEmpty()) SAMPLES.filter { it.platform != ServicePlatform.BUPTLE_BIZ } else SAMPLES
+		val created = samples.filter { companies.findBySchemaName(it.schemaName) == null }.onEach { companies.save(it.toEntity()) }
 		if (created.isNotEmpty()) log.info("개발용 고객사 {}곳 생성", created.size)
 	}
 
