@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { ArrowRightIcon, ChevronDownIcon, EditIcon, EyeIcon, UndoIcon } from '../../components/icons'
+import { ChevronDownIcon, EditIcon, EyeIcon, UndoIcon } from '../../components/icons'
 import { RichText } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { SIGN_CLS, SIGN_METHOD_CODE, STAGE_ORDER } from '../../mocks/contract'
@@ -61,7 +61,6 @@ function Row({ at, dot, first, last, children }: { at?: string; dot: string; fir
 function Entry<R extends TimelineRow>({ row, back, onEdit, onDetail, renderBody }: { row: R; back: boolean } & Handlers<R>) {
   const signCls = row.extra?.signCls
   const signMethod = row.extra?.signMethod
-  const move = row.stageMove
   return (
     <div
       className={cn(
@@ -79,21 +78,31 @@ function Entry<R extends TimelineRow>({ row, back, onEdit, onDetail, renderBody 
           <span className={cn('text-sm font-bold', back && 'text-[#c23b22]', row.deleted && 'text-ink-4 line-through decoration-danger decoration-[1.5px]')}>{row.action}</span>
           {row.deleted && <DeletedBadge label={t.deleted} />}
           <span className="text-[13px] font-medium text-ink-2">{row.user}</span>
-          {move && (
-            <span className={cn('inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11.5px] font-semibold text-ink-2', back && !row.deleted ? 'bg-white/75' : 'bg-[#f2f2f5]')}>
-              {row.from}
-              <ArrowRightIcon size={11} strokeWidth={2.6} className="shrink-0" />
-              {row.to}
-            </span>
-          )}
-          {signCls !== undefined && (
-            <span className="rounded-full bg-[#f2f2f5] px-1.5 py-px text-[10.5px] font-semibold text-ink-2">
-              {SIGN_CLS[signCls].label.split(' ')[0]}
-              {signMethod !== undefined && ` · ${SIGN_METHOD_CODE[signMethod]}`}
-            </span>
-          )}
         </span>
-        {renderBody ? renderBody(row) : <RichText text={row.comment} className="text-[12.5px] leading-[1.5] text-ink-2" />}
+        {renderBody ? (
+          renderBody(row)
+        ) : (
+          row.comment && (
+            <div className="flex items-baseline gap-2">
+              <span className="shrink-0 rounded-md border border-line-strong px-1.5 py-px text-[10.5px] font-semibold text-ink-3">{t.commentLabel}</span>
+              <RichText text={row.comment} className="min-w-0 text-[12.5px] leading-[1.5] text-ink-2" />
+            </div>
+          )
+        )}
+        {signCls !== undefined && (
+          <div className="flex items-baseline gap-2">
+            <span className="shrink-0 rounded-md border border-line-strong px-1.5 py-px text-[10.5px] font-semibold text-ink-3">{t.signLabel}</span>
+            <span className="text-[12.5px] leading-[1.5] text-ink-2">
+              {SIGN_CLS[signCls].label.split(' ')[0]}
+              {signMethod !== undefined && (
+                <>
+                  <span aria-hidden="true" className="mx-1.5 text-ink-5">|</span>
+                  {SIGN_METHOD_CODE[signMethod]}
+                </>
+              )}
+            </span>
+          </div>
+        )}
       </div>
       {(onEdit || onDetail) && (
       <span className="ml-auto inline-flex shrink-0 items-center gap-2">
@@ -117,8 +126,9 @@ function Stage({ name, current }: { name: string; current: boolean }) {
   return (
     <span
       className={cn(
-        'box-border inline-flex h-[30px] items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-semibold',
-        current ? 'border-2 border-[#e5a800] bg-[#fff8db] shadow-[0_0_0_3px_rgba(254,198,1,0.22)]' : 'border border-divider bg-[#f2f2f5] text-ink',
+        'box-border inline-flex h-[30px] items-center gap-2 whitespace-nowrap text-sm font-bold text-ink',
+        // 박스 대신 글자 자체를 키우고, 현재 단계만 노란 테두리 박스로 눈에 띄게 한다
+        current && 'rounded-md border-2 border-[#e5a800] bg-[#fff8db] px-2.5',
       )}
     >
       {name}
@@ -126,7 +136,6 @@ function Stage({ name, current }: { name: string; current: boolean }) {
     </span>
   )
 }
-
 
 /** 진행 줄 하나를 세로 타임라인으로 그린다. 단계는 큰 점, 이력은 작은 점 */
 function Timeline<R extends TimelineRow>({ items, handlers }: { items: Item<R>[]; handlers: Handlers<R> }) {

@@ -339,6 +339,8 @@ export const contract = {
 
   /** 히스토리 탭 */
   history: {
+    commentLabel: '코멘트',
+    signLabel: '서명',
     title: '계약 진행 히스토리',
     legend: { forward: '순방향 액션', backward: '역방향 액션', deleted: '삭제된 이력', current: '현재 단계' },
     laneLabel: (i: number, last: boolean) => `${i}차 진행${last ? ' · 진행 중' : ''}`,

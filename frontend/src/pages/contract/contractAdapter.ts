@@ -101,6 +101,37 @@ export function toEmail(m: EmailApi): ContractEmail {
   return { ...m, createdAt: toLocalText(m.createdAt), updatedAt: toLocalText(m.updatedAt) }
 }
 
+type AttrSlot = { key: string; /** 값이 없어도 빈 칸으로 자리를 보여 줄 때 쓰는 이름 */ blankLabel?: string }
+
+/**
+ * 워크플로우 설정 항목을 보여 주는 순서 (일반 설정 → 초안 → 법무팀 검토 → 최종승인 → 서명).
+ * 여기 없는 항목은 마지막에 원래 순서대로 나온다.
+ */
+const ATTR_SLOTS: AttrSlot[] = [
+  // 일반 설정
+  { key: 'contents_type' }, { key: 'sign_type' }, { key: 'grade', blankLabel: '보안등급 설정' }, { key: 'is_multiple_receivers' }, { key: 'receive_contract' },
+  // 초안
+  { key: 'dept_confirm' }, { key: 'dept_edit_allow', blankLabel: '부서장 수정 권한' }, { key: 'template_edit' }, { key: 'con_attach' },
+  // 법무팀 검토
+  { key: 'legal_term' }, { key: 'legal_review' },
+  // 최종승인
+  { key: 'user_confirm_9' },
+  // 서명
+  { key: 'chkIncludeSealProc' }, { key: 'chksealcollecmail' }, { key: 'chkOrigRecovProc' }, { key: 'chkIncludeSealProcCreator' }, { key: 'chkOrigRecovProcCreator' },
+]
+
+/** 설정 항목을 정해진 순서로 늘어놓는다. blankLabel 이 있는 항목은 값이 없어도 빈 값으로 자리를 보여 준다 */
+export function orderedAttrs(attrs: Workflow['attrs']): Workflow['attrs'] {
+  const byKey = new Map(attrs.map((a) => [a.key, a]))
+  const used = new Set(ATTR_SLOTS.map((s) => s.key))
+  const ordered = ATTR_SLOTS.flatMap(({ key, blankLabel }) => {
+    const found = byKey.get(key)
+    if (found) return [found]
+    return blankLabel ? [{ key, label: blankLabel, type: 'single' as const, options: [], value: [''] }] : []
+  })
+  return [...ordered, ...attrs.filter((a) => !used.has(a.key))]
+}
+
 export type WorkflowView = { workflow: Workflow; guide: GuideStage[]; users: WorkflowUser[] }
 
 export function toWorkflow(w: WorkflowApi): WorkflowView {

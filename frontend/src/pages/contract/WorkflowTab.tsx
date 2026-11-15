@@ -4,6 +4,7 @@ import { Button } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import type { GuideStage, HistoryRow, Workflow, WorkflowUser } from '../../mocks/contract'
 import { texts } from '../../texts'
+import { orderedAttrs } from './contractAdapter'
 import { WorkflowEditModal } from './WorkflowEditModal'
 
 const t = texts.contract.workflow
@@ -88,11 +89,11 @@ export function WorkflowTab({ workflow, guide, users, history, onSave }: Props) 
                 <dd className="m-0 flex flex-wrap items-center gap-1 px-3 py-2">{r.value}</dd>
               </div>
             ))}
-            {workflow.attrs.map((a) => (
+            {orderedAttrs(workflow.attrs).map((a) => (
               <div key={a.key} className="grid grid-cols-[148px_minmax(0,1fr)] bg-surface">
                 <dt className="flex items-center bg-[#fafafb] px-3.5 py-2.5 text-[12.5px] font-medium text-ink-3">{a.label}</dt>
                 <dd className="m-0 flex flex-wrap items-center gap-1 px-3 py-2">
-                  {a.value.map((v) => (
+                  {a.value.filter((v) => v !== '').map((v) => (
                     <span key={v} className={cn('inline-flex h-6 items-center rounded-md px-[9px] text-xs font-medium', PRESENT_VALUES.has(v) ? 'border border-danger-line bg-danger-soft text-danger-ink' : 'bg-[#f2f2f5] text-ink')}>
                       {v}
                     </span>
@@ -133,7 +134,7 @@ export function WorkflowTab({ workflow, guide, users, history, onSave }: Props) 
 
         <div className="flex flex-col gap-2.5">
           <h3 className="m-0 text-[13px] font-semibold">{t.processTitle}</h3>
-          <ol className="m-0 flex list-none items-stretch gap-1.5 overflow-x-auto p-0">
+          <ol className="m-0 flex list-none flex-wrap items-stretch gap-x-1.5 gap-y-3 p-0">
             {guide.map((g, i) => {
               const state: StageState = currentIndex < 0 || i > currentIndex ? 'pending' : i === currentIndex ? 'current' : 'done'
               const tone = stageTone[state]
