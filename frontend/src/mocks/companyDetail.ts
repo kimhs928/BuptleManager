@@ -96,12 +96,3 @@ export type LiveUser = {
   recent: boolean
   loginAt: string
 }
-
-export const MOCK_LIVE_USERS: LiveUser[] = [
-  { id: 'u1', name: '김민수', email: 'minsu.kim@acetech.co.kr', employeeNo: 'A00123', ip: '211.34.12.8', session: 'sess_8f2a…c91d', lastActive: '방금 전', recent: true, loginAt: '2024-05-23 09:12' },
-  { id: 'u2', name: '이서연', email: 'seoyeon.lee@acetech.co.kr', employeeNo: 'A00241', ip: '211.34.12.19', session: 'sess_17b0…e4a2', lastActive: '2분 전', recent: true, loginAt: '2024-05-23 09:03' },
-  { id: 'u3', name: '박준호', email: 'junho.park@acetech.co.kr', employeeNo: 'A00388', ip: '121.160.77.5', session: 'sess_c4d9…0b77', lastActive: '11분 전', recent: false, loginAt: '2024-05-23 08:47' },
-  { id: 'u4', name: '최지우', email: 'jiwoo.choi@acetech.co.kr', employeeNo: 'A00402', ip: '211.34.12.33', session: 'sess_a91e…52f8', lastActive: '18분 전', recent: false, loginAt: '2024-05-23 08:31' },
-  { id: 'u5', name: '정하늘', email: 'haneul.jung@acetech.co.kr', employeeNo: 'A00517', ip: '175.223.14.90', session: 'sess_6e3b…7d10', lastActive: '35분 전', recent: false, loginAt: '2024-05-23 08:20' },
-  { id: 'u6', name: '한도윤', email: 'doyoon.han@acetech.co.kr', employeeNo: 'A00590', ip: '211.34.12.41', session: 'sess_02ff…b6c3', lastActive: '52분 전', recent: false, loginAt: '2024-05-23 07:58' },
-]

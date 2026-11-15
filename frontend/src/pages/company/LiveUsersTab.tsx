@@ -14,6 +14,9 @@ const t = texts.company.liveUsers
 type Props = {
   company: CompanyDetail
   users: LiveUser[]
+  loading?: boolean
+  error?: boolean
+  onRefresh: () => void
   onForceLogout: (ids: string[], ticket: string) => void
 }
 
@@ -30,7 +33,7 @@ function UserCell({ user }: { user: LiveUser }) {
 }
 
 /** 실시간 접속 유저 탭 (선택한 세션 강제 로그아웃) */
-export function LiveUsersTab({ company, users, onForceLogout }: Props) {
+export function LiveUsersTab({ company, users, loading, error, onRefresh, onForceLogout }: Props) {
   const platform = platformLabel[company.platform]
   const [selected, setSelected] = useState<string[]>([])
   const [refreshedAt, setRefreshedAt] = useState<string>(t.justNow)
@@ -79,7 +82,7 @@ export function LiveUsersTab({ company, users, onForceLogout }: Props) {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm" icon={<RefreshIcon size={14} />} onClick={() => setRefreshedAt(formatTime())}>
+          <Button variant="secondary" size="sm" icon={<RefreshIcon size={14} />} onClick={() => { setRefreshedAt(formatTime()); onRefresh() }}>
             {t.refresh}
           </Button>
           <Button variant="danger" size="sm" icon={<LogOutIcon size={14} />} disabled={selectedUsers.length === 0} onClick={openModal}>
@@ -130,7 +133,11 @@ export function LiveUsersTab({ company, users, onForceLogout }: Props) {
               })}
             </tbody>
           </table>
-          {users.length === 0 && <div className="px-6 py-14 text-center text-[13px] text-ink-4">{t.empty}</div>}
+          {users.length === 0 && (
+            <div role={error ? 'alert' : 'status'} className="px-6 py-14 text-center text-[13px] text-ink-4">
+              {loading ? t.loading : error ? t.loadFailed : t.empty}
+            </div>
+          )}
         </div>
       </Card>
 

@@ -1,6 +1,10 @@
 package app.buptle.buptlebiz.company
 
+import app.buptle.company.domain.CompanyRepository
+import app.buptle.company.domain.ServicePlatform
 import app.buptle.core.api.notImplemented
+import app.buptle.core.error.BusinessException
+import app.buptle.core.error.CommonErrorCode
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
@@ -15,11 +19,18 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "특정 고객사 > 고객사 정보")
 @RestController
 @RequestMapping("/api/biz/companies/{schemaName}")
-class BizLiveUserController {
+class BizLiveUserController(
+	private val companies: CompanyRepository,
+	private val reader: BizLiveUserReader,
+) {
 
 	@Operation(summary = "실시간 접속 유저")
 	@GetMapping("/live-users")
-	fun liveUsers(@PathVariable schemaName: String): LiveUsersResponse = notImplemented()
+	fun liveUsers(@PathVariable schemaName: String): LiveUsersResponse {
+		companies.findBySchemaName(schemaName)?.takeIf { it.platform == ServicePlatform.BUPTLE_BIZ }
+			?: throw BusinessException(CommonErrorCode.NOT_FOUND, "고객사를 찾을 수 없습니다.")
+		return reader.liveUsers(schemaName)
+	}
 
 	@Operation(summary = "강제 로그아웃", description = "선택한 유저의 세션을 끊고 처리 내역에 기록한다.")
 	@PostMapping("/live-users/force-logout")

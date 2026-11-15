@@ -142,6 +142,8 @@ export const company = {
     title: '현재 접속 중인 유저',
     description: (_platform: string, refreshedAt: string) => `마지막 갱신 (${refreshedAt})`,
     justNow: '방금 전',
+    loading: '실시간 접속 유저를 불러오는 중입니다.',
+    loadFailed: '실시간 접속 유저를 불러오지 못했습니다. 서버가 켜져 있는지 확인해 주세요.',
     refresh: '새로고침',
     forceLogout: '강제 로그아웃',
     forceLogoutWithCount: (n: number) => `강제 로그아웃 (${n})`,

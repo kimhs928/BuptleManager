@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import { CompanyShell } from '../../components/layout/CompanyShell'
 import { CloseIcon } from '../../components/icons'
 import { useCompanyDetail } from '../../hooks/useCompanyDetail'
+import { useLiveUsers } from '../../hooks/useLiveUsers'
 import { cn } from '../../lib/cn'
 import type { ServicePlatform } from '../../lib/platform'
 import { saveSelectedCompany } from '../../lib/selectedCompany'
-import { MOCK_CONFIGS, MOCK_LIVE_USERS } from '../../mocks/companyDetail'
-import type { CompanyDetail, LiveUser } from '../../mocks/companyDetail'
+import { MOCK_CONFIGS } from '../../mocks/companyDetail'
+import type { CompanyDetail } from '../../mocks/companyDetail'
 import { MOCK_COMPANY_DETAIL } from '../../mocks/companyDetail'
 import { texts } from '../../texts'
 import { BasicInfoTab } from './BasicInfoTab'
@@ -50,14 +51,17 @@ function SelectedCompany({ initialTab, platform, schema }: { initialTab: Company
 /** 고객사 정보 화면 (기본 정보 · 컨피그 · 실시간 접속 유저) */
 function CompanyView({ company, initialTab }: { company: CompanyDetail; initialTab: CompanyTab }) {
   const [tab, setTab] = useState<CompanyTab>(initialTab)
-  const [users, setUsers] = useState<LiveUser[]>(MOCK_LIVE_USERS)
+  const live = useLiveUsers(company.platform, company.schema)
+  // 강제 로그아웃한 유저는 새로 불러올 때까지 목록에서 뺀다 (실제 세션 종료는 아직 연결되지 않았다)
+  const [loggedOut, setLoggedOut] = useState<string[]>([])
+  const users = live.users.filter((u) => !loggedOut.includes(u.id))
   const [toast, setToast] = useState('')
   // 주소로 바로 들어온 경우에도 다른 화면이 같은 고객사를 쓰도록 기억한다
   useEffect(() => {
     if (company !== MOCK_COMPANY_DETAIL) saveSelectedCompany({ platform: company.platform, schema: company.schema, name: company.name })
   }, [company])
   // 고객사를 가리키는 주소. 새로고침해도 같은 고객사가 열린다
-  const base = `?company=${encodeURIComponent(company.schema)}&platform=${company.platform}`
+  const base = `/company?schema=${encodeURIComponent(company.schema)}&platform=${company.platform}`
 
   const counts: Record<CompanyTab, number | undefined> = { basic: undefined, config: MOCK_CONFIGS.length, users: users.length }
 
@@ -69,7 +73,7 @@ function CompanyView({ company, initialTab }: { company: CompanyDetail; initialT
 
   const forceLogout = (ids: string[], ticket: string) => {
     const targets = users.filter((u) => ids.includes(u.id))
-    setUsers((prev) => prev.filter((u) => !ids.includes(u.id)))
+    setLoggedOut((prev) => [...prev, ...ids])
     setToast(t.toast.forceLogoutDone(targets.length, targets.map((u) => u.name).join(', '), ticket))
   }
 
@@ -145,7 +149,7 @@ function CompanyView({ company, initialTab }: { company: CompanyDetail; initialT
           <div id="company-tabpanel" role="tabpanel" aria-labelledby={`company-tab-${tab}`}>
             {tab === 'basic' && <BasicInfoTab company={company} liveUserCount={users.length} />}
             {tab === 'config' && <ConfigTab />}
-            {tab === 'users' && <LiveUsersTab company={company} users={users} onForceLogout={forceLogout} />}
+            {tab === 'users' && <LiveUsersTab company={company} users={users} loading={live.loading} error={live.error} onRefresh={() => { setLoggedOut([]); live.reload() }} onForceLogout={forceLogout} />}
           </div>
     </CompanyShell>
   )
