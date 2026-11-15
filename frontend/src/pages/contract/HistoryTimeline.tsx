@@ -21,7 +21,7 @@ export type TimelineRow = {
   to: string
   user: string
   stageMove: boolean
-  extra?: { signCls?: SignCls; signMethod?: SignMethodCode }
+  extra?: { signCls?: SignCls; signMethod?: SignMethodCode; compareDoc?: boolean; docId?: string }
 }
 
 export type Item<R extends TimelineRow = HistoryRow> = { type: 'node'; name: string; current: boolean } | { type: 'edge'; row: R; back: boolean }
@@ -58,9 +58,20 @@ function Row({ at, dot, first, last, children }: { at?: string; dot: string; fir
   )
 }
 
+/** 이력 박스 안의 '라벨 + 값' 한 줄. 라벨 너비를 같게 맞춘다 */
+function Line({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex items-baseline gap-2">
+      <span className="w-[52px] shrink-0 rounded-md border border-line-strong px-1 py-px text-center text-[10.5px] font-semibold text-ink-3">{label}</span>
+      <div className="min-w-0 flex-1 text-[12.5px] leading-[1.5] text-ink-2">{children}</div>
+    </div>
+  )
+}
+
 function Entry<R extends TimelineRow>({ row, back, onEdit, onDetail, renderBody }: { row: R; back: boolean } & Handlers<R>) {
   const signCls = row.extra?.signCls
   const signMethod = row.extra?.signMethod
+  const docId = row.extra?.compareDoc ? row.extra.docId : undefined
   return (
     <div
       className={cn(
@@ -79,29 +90,28 @@ function Entry<R extends TimelineRow>({ row, back, onEdit, onDetail, renderBody 
           {row.deleted && <DeletedBadge label={t.deleted} />}
           <span className="text-[13px] font-medium text-ink-2">{row.user}</span>
         </span>
-        {renderBody ? (
-          renderBody(row)
-        ) : (
-          row.comment && (
-            <div className="flex items-baseline gap-2">
-              <span className="shrink-0 rounded-md border border-line-strong px-1.5 py-px text-[10.5px] font-semibold text-ink-3">{t.commentLabel}</span>
-              <RichText text={row.comment} className="min-w-0 text-[12.5px] leading-[1.5] text-ink-2" />
-            </div>
-          )
-        )}
+        {renderBody
+          ? renderBody(row)
+          : row.comment && (
+              <Line label={t.commentLabel}>
+                <RichText text={row.comment} />
+              </Line>
+            )}
         {signCls !== undefined && (
-          <div className="flex items-baseline gap-2">
-            <span className="shrink-0 rounded-md border border-line-strong px-1.5 py-px text-[10.5px] font-semibold text-ink-3">{t.signLabel}</span>
-            <span className="text-[12.5px] leading-[1.5] text-ink-2">
-              {SIGN_CLS[signCls].label.split(' ')[0]}
-              {signMethod !== undefined && (
-                <>
-                  <span aria-hidden="true" className="mx-1.5 text-ink-5">|</span>
-                  {SIGN_METHOD_CODE[signMethod]}
-                </>
-              )}
-            </span>
-          </div>
+          <Line label={t.signLabel}>
+            {SIGN_CLS[signCls].label.split(' ')[0]}
+            {signMethod !== undefined && (
+              <>
+                <span aria-hidden="true" className="mx-1.5 text-ink-5">|</span>
+                {SIGN_METHOD_CODE[signMethod]}
+              </>
+            )}
+          </Line>
+        )}
+        {docId && (
+          <Line label={t.docIdLabel}>
+            <code className="font-mono text-[11.5px]">{docId}</code>
+          </Line>
         )}
       </div>
       {(onEdit || onDetail) && (
