@@ -11,6 +11,7 @@ import { CommentsTab } from './CommentsTab'
 import { MembersTab } from './MembersTab'
 import { ProcessTab } from './ProcessTab'
 import { StatusDot } from './shared'
+import { replaceUrl } from '../../lib/selectedCompany'
 
 const t = texts.counsel
 
@@ -41,13 +42,13 @@ export function CounselDetailPage({ counselId, initialTab = 'basic' }: Props) {
   const changeTab = (next: CounselTab) => {
     setTab(next)
     // 새로고침해도 같은 탭이 열리도록 주소만 갱신한다
-    window.history.replaceState(null, '', `?counsel=${counsel.id}${next === 'basic' ? '' : `&tab=${next}`}`)
+    replaceUrl(`/counsel/${encodeURIComponent(counsel.id)}`, next === 'basic' ? {} : { tab: next })
   }
 
   const counts: Partial<Record<CounselTab, number>> = { members: members.length, comments: comments.length }
 
   return (
-    <CompanyShell active="counsel" trail={[{ label: t.breadcrumb.features }, { label: t.breadcrumb.counsel, href: '?counsel' }, { label: counsel.id }]}>
+    <CompanyShell active="counsel" trail={[{ label: t.breadcrumb.features }, { label: t.breadcrumb.counsel, href: '/counsel' }, { label: counsel.id }]}>
       <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-6">
         <div className="flex flex-col gap-[18px]">
           {toast && (
@@ -65,7 +66,7 @@ export function CounselDetailPage({ counselId, initialTab = 'basic' }: Props) {
             className="flex flex-wrap items-center gap-2.5"
             onSubmit={(e) => {
               e.preventDefault()
-              window.location.assign(`?counsel&q=${encodeURIComponent(query.trim())}`)
+              window.location.assign(`/counsel?q=${encodeURIComponent(query.trim())}`)
             }}
           >
             <label className="relative block max-w-[420px] flex-1">

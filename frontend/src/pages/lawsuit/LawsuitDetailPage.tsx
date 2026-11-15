@@ -11,6 +11,7 @@ import { EmailHistory } from '../contract/EmailHistory'
 import { LawsuitHistory } from './LawsuitHistory'
 import { MembersTab } from './MembersTab'
 import { StatusDot } from './shared'
+import { replaceUrl } from '../../lib/selectedCompany'
 
 const t = texts.lawsuit
 
@@ -39,11 +40,11 @@ export function LawsuitDetailPage({ lawsuitId, initialTab = 'basic' }: Props) {
   const changeTab = (next: LawsuitTab) => {
     setTab(next)
     // 새로고침해도 같은 탭이 열리도록 주소만 갱신한다
-    window.history.replaceState(null, '', `?lawsuit=${lawsuit.id}${next === 'basic' ? '' : `&tab=${next}`}`)
+    replaceUrl(`/lawsuit/${encodeURIComponent(lawsuit.id)}`, next === 'basic' ? {} : { tab: next })
   }
 
   return (
-    <CompanyShell active="lawsuit" trail={[{ label: t.breadcrumb.features }, { label: t.breadcrumb.lawsuit, href: '?lawsuit' }, { label: lawsuit.id }]}>
+    <CompanyShell active="lawsuit" trail={[{ label: t.breadcrumb.features }, { label: t.breadcrumb.lawsuit, href: '/lawsuit' }, { label: lawsuit.id }]}>
       <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-6">
         <div className="flex flex-col gap-[18px]">
           {toast && (
@@ -61,7 +62,7 @@ export function LawsuitDetailPage({ lawsuitId, initialTab = 'basic' }: Props) {
             className="flex flex-wrap items-center gap-2.5"
             onSubmit={(e) => {
               e.preventDefault()
-              window.location.assign(`?lawsuit&q=${encodeURIComponent(query.trim())}`)
+              window.location.assign(`/lawsuit?q=${encodeURIComponent(query.trim())}`)
             }}
           >
             <label className="relative block max-w-[420px] flex-1">

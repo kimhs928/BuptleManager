@@ -52,7 +52,7 @@ function CommentItem({ comment, counselId }: { comment: CounselComment; counselI
         <span className="tabular-nums text-ink-4">{t.written(comment.at)}</span>
         {comment.deleted && <DeletedBadge label={t.deleted} />}
         {/* 수정은 코멘트 탭에서 한다. 해당 코멘트로 바로 이동한다 */}
-        <a href={`?counsel=${counselId}&tab=comments&comment=${comment.id}`} className="ml-auto inline-flex items-center gap-1 font-medium text-link hover:underline">
+        <a href={`/counsel/${encodeURIComponent(counselId)}?tab=comments&comment=${comment.id}`} className="ml-auto inline-flex items-center gap-1 font-medium text-link hover:underline">
           <EditIcon size={11} />
           {t.editInTab}
         </a>

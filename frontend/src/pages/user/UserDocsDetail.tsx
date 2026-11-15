@@ -10,9 +10,9 @@ const PER_PAGE = 10
 
 /** 문서 상세 화면 주소. 계약 상세만 구현되어 있고, 자문 · 소송 상세는 화면이 생기면 연결된다 */
 const docHref: Record<DocKind, (id: string) => string> = {
-  contract: (id) => `?contract=${id}`,
-  counsel: (id) => `?counsel=${id}`,
-  lawsuit: (id) => `?lawsuit=${id}`,
+  contract: (id) => `/contract/${encodeURIComponent(id)}`,
+  counsel: (id) => `/counsel/${encodeURIComponent(id)}`,
+  lawsuit: (id) => `/lawsuit/${encodeURIComponent(id)}`,
 }
 
 type Props = {

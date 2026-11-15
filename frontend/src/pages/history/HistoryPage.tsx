@@ -74,7 +74,7 @@ const th = 'whitespace-nowrap border-b border-line-soft px-3.5 py-2.5 text-left 
 const td = 'px-3.5 py-3 align-middle'
 const navBtn = 'inline-flex size-[30px] items-center justify-center rounded-ctl border border-line-strong bg-surface p-0 text-base text-ink-2 disabled:cursor-not-allowed disabled:text-[#c7c7cc]'
 
-/** 처리 내역 히스토리. 기본은 선택한 고객사의 내역, `?history&all`은 고객사를 고르지 않은 화면 */
+/** 처리 내역 히스토리. 기본은 선택한 고객사의 내역, `/history?all`은 고객사를 고르지 않은 화면 */
 export function HistoryPage() {
   const allMode = new URLSearchParams(window.location.search).has('all')
   const current = HISTORY_CURRENT_CUSTOMER

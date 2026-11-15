@@ -70,11 +70,11 @@ function LogoUploader() {
 }
 
 const features: { key: keyof typeof t.features; href: string }[] = [
-  { key: 'contract', href: '?contract' },
-  { key: 'counsel', href: '?counsel' },
-  { key: 'lawsuit', href: '?lawsuit' },
-  { key: 'user', href: '?user' },
-  { key: 'errorReport', href: '?report' },
+  { key: 'contract', href: '/contract' },
+  { key: 'counsel', href: '/counsel' },
+  { key: 'lawsuit', href: '/lawsuit' },
+  { key: 'user', href: '/user' },
+  { key: 'errorReport', href: '/report' },
 ]
 
 type Props = {
@@ -146,13 +146,13 @@ export function Sidebar({ mainHref, noCompany, active = 'company' }: Props) {
         </div>
       )}
 
-      <NavLink href={noCompany ? '?config&all' : '?config'} current={active === 'config'} icon={<SlidersIcon size={16} />} trailing={<ChevronRightIcon size={14} className="text-ink-5" />}>
+      <NavLink href={noCompany ? '/config?all' : '/config'} current={active === 'config'} icon={<SlidersIcon size={16} />} trailing={<ChevronRightIcon size={14} className="text-ink-5" />}>
         {t.config}
       </NavLink>
-      <NavLink href={noCompany ? '?history&all' : '?history'} current={active === 'history'} icon={<HistoryIcon size={16} />} trailing={<ChevronRightIcon size={14} className="text-ink-5" />}>
+      <NavLink href={noCompany ? '/history?all' : '/history'} current={active === 'history'} icon={<HistoryIcon size={16} />} trailing={<ChevronRightIcon size={14} className="text-ink-5" />}>
         {t.history}
       </NavLink>
-      <NavLink href="?admin" current={active === 'admin'} icon={<UsersIcon size={16} />} trailing={<ChevronRightIcon size={14} className="text-ink-5" />}>
+      <NavLink href="/admin" current={active === 'admin'} icon={<UsersIcon size={16} />} trailing={<ChevronRightIcon size={14} className="text-ink-5" />}>
         {t.admin}
       </NavLink>
 

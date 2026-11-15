@@ -35,11 +35,11 @@ export function currentCompany(): SelectedCompany {
 /** 고객사 정보 화면 주소. 고객사를 고르지 않았으면 스키마 없는 주소 */
 export function companyHref(): string {
   const c = loadSelectedCompany()
-  return c ? `?company=${encodeURIComponent(c.schema)}&platform=${c.platform}` : '?company'
+  return c ? `/company?schema=${encodeURIComponent(c.schema)}&platform=${c.platform}` : '/company'
 }
 
 /**
- * 고객사에 속한 화면의 주소에 선택한 고객사를 싣는다 (?contract → ?contract&schema=acetech&platform=BUPTLE_BIZ).
+ * 고객사에 속한 화면의 주소에 선택한 고객사를 싣는다 (/contract → /contract?schema=acetech&platform=BUPTLE_BIZ).
  * 주소에 이미 스키마가 있으면 그것을 따른다. 기억한 고객사와 다르면 기억을 그 고객사로 바꾼다.
  */
 export function syncCompanyToUrl() {
@@ -68,4 +68,17 @@ export function syncCompanyToUrl() {
   const sep = search ? '&' : '?'
   const next = `${pathname}${search}${sep}schema=${encodeURIComponent(saved.schema)}&platform=${saved.platform}${hash}`
   window.history.replaceState(null, '', next)
+}
+
+/** 주소를 새로고침 없이 바꾼다. 지금 주소의 고객사(schema, platform)는 그대로 유지한다 */
+export function replaceUrl(path: string, extra: Record<string, string> = {}) {
+  const current = new URLSearchParams(window.location.search)
+  const next = new URLSearchParams()
+  for (const key of ['schema', 'platform']) {
+    const v = current.get(key)
+    if (v) next.set(key, v)
+  }
+  for (const [k, v] of Object.entries(extra)) next.set(k, v)
+  const qs = next.toString()
+  window.history.replaceState(null, '', qs ? `${path}?${qs}` : path)
 }

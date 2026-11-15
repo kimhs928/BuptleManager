@@ -125,7 +125,7 @@ export function ConfigTab() {
       <div className="mb-2.5 flex flex-wrap items-start gap-2.5 rounded-xl border border-line-strong bg-[#f2f2f5] px-3.5 py-3 text-[13px] leading-normal">
         <InfoIcon size={15} className="mt-0.5 shrink-0 text-ink-3" />
         <span>{t.description}</span>
-        <a href="?config" className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-link hover:underline">
+        <a href="/config" className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-link hover:underline">
           {t.goManage}
           <ArrowRightIcon size={12} />
         </a>

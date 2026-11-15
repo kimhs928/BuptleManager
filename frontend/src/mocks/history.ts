@@ -494,5 +494,5 @@ export function historyOf(func: HistoryFunc, docId: string, customerId: string =
 
 /** 처리 내역 히스토리 화면을 해당 문서의 검색 조건으로 여는 주소 */
 export function historyHref(func: HistoryFunc, docId: string): string {
-  return `?history&func=${encodeURIComponent(func)}&docId=${encodeURIComponent(docId)}&mode=and`
+  return `/history?func=${encodeURIComponent(func)}&docId=${encodeURIComponent(docId)}&mode=and`
 }

@@ -114,7 +114,7 @@ export function UserListPage() {
           <h1 className="m-0 text-[26px] font-bold tracking-[-0.02em]">{t.title}</h1>
           <p className="m-0 text-sm text-ink-3">{t.description(currentCompany().name)}</p>
         </div>
-        <a href="?user=transfer" className="inline-flex h-[34px] items-center gap-[7px] rounded-ctl border border-line-strong bg-surface px-3.5 text-[13px] font-medium text-ink hover:bg-hover">
+        <a href="/user/transfer" className="inline-flex h-[34px] items-center gap-[7px] rounded-ctl border border-line-strong bg-surface px-3.5 text-[13px] font-medium text-ink hover:bg-hover">
           <SwapIcon size={14} />
           {t.transfer}
         </a>

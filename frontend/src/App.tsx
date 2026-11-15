@@ -32,70 +32,69 @@ const lawsuitTabs: LawsuitTab[] = ['basic', 'members', 'emails']
 
 const loginViews: LoginView[] = ['login', 'network', 'denied']
 
-/** 임시 진입점: /, /?view=network, /?view=denied, /?main, /?main&notice, /?company, /?company&tab=config, /?company&tab=users, /?contract, /?contract=CT-2024-0315&tab=members, /?counsel, /?counsel=CN-2024-0112&tab=members, /?lawsuit, /?lawsuit=LT-2024-0101, /?config, /?config&all, /?history, /?admin, /?report, /?user, /?user=transfer, /?gallery */
+/**
+ * 임시 진입점 (라우터 도입 전). 주소 경로로 화면을 고른다:
+ * /, /?view=network, /?view=denied, /main, /main?notice, /company, /company?tab=config, /company?tab=users,
+ * /contract, /contract/CT-2024-0315?tab=members, /counsel, /counsel/CN-2024-0112?tab=members, /lawsuit, /lawsuit/LT-2024-0101,
+ * /config, /config?all, /history, /admin, /report, /user, /user/transfer, /gallery
+ * 고객사에 속한 화면은 ?schema=스키마명&platform=BUPTLE_BIZ 를 함께 싣는다.
+ */
 export default function App() {
   const params = new URLSearchParams(window.location.search)
-  if (ComponentGallery && params.has('gallery')) {
+  const [page, detail] = window.location.pathname.split('/').filter(Boolean).map(decodeURIComponent)
+  if (ComponentGallery && page === 'gallery') {
     return (
       <Suspense fallback={null}>
         <ComponentGallery />
       </Suspense>
     )
   }
-  // 고객사에 속한 화면은 주소에 선택한 고객사(schema)를 싣는다. 고객사 없이 쓰는 화면(?config&all 등)은 제외
-  const companyScoped =
-    ['contract', 'counsel', 'lawsuit', 'user', 'report'].some((k) => params.has(k)) ||
-    (['config', 'history'].some((k) => params.has(k)) && !params.has('all'))
+  // 고객사에 속한 화면은 주소에 선택한 고객사(schema)를 싣는다. 고객사 없이 쓰는 화면(/config?all 등)은 제외
+  const companyScoped = ['contract', 'counsel', 'lawsuit', 'user', 'report'].includes(page ?? '') || (['config', 'history'].includes(page ?? '') && !params.has('all'))
   if (companyScoped) syncCompanyToUrl()
-  if (params.has('company')) {
+  if (page === 'company') {
     const tab = companyTabs.find((t) => t === params.get('tab')) ?? 'basic'
-    // ?company=스키마명&platform=BUPTLE_BIZ. 스키마명이 없으면 임시 mock 고객사
-    // 주소에 없으면 메인에서 고른(기억한) 고객사를 쓴다
+    // /company?schema=스키마명&platform=BUPTLE_BIZ. 주소에 없으면 메인에서 고른(기억한) 고객사를 쓴다
     const saved = loadSelectedCompany()
-    const schema = params.get('company') || saved?.schema
+    const schema = params.get('schema') || saved?.schema
     const platform = params.has('platform') ? (params.get('platform') === 'BUPTLE_NOVA' ? 'BUPTLE_NOVA' : 'BUPTLE_BIZ') : (saved?.platform ?? 'BUPTLE_BIZ')
     return <CompanyPage initialTab={tab} selected={schema ? { platform, schema } : undefined} />
   }
-  if (params.has('contract')) {
+  if (page === 'contract') {
     // 계약 ID가 있으면 상세, 없으면 검색
-    const contractId = params.get('contract')
-    if (contractId) {
+    if (detail) {
       const tab = contractTabs.find((t) => t === params.get('tab')) ?? 'basic'
-      return <ContractDetailPage contractId={contractId} initialTab={tab} />
+      return <ContractDetailPage contractId={detail} initialTab={tab} />
     }
     return <ContractSearchPage initialQuery={params.get('q') ?? ''} />
   }
-  if (params.has('counsel')) {
+  if (page === 'counsel') {
     // 자문 ID가 있으면 상세, 없으면 검색
-    const counselId = params.get('counsel')
-    if (counselId) {
+    if (detail) {
       const tab = counselTabs.find((t) => t === params.get('tab')) ?? 'basic'
-      return <CounselDetailPage counselId={counselId} initialTab={tab} />
+      return <CounselDetailPage counselId={detail} initialTab={tab} />
     }
     return <CounselSearchPage initialQuery={params.get('q') ?? ''} />
   }
-  if (params.has('lawsuit')) {
+  if (page === 'lawsuit') {
     // 소송 ID가 있으면 상세, 없으면 검색
-    const lawsuitId = params.get('lawsuit')
-    if (lawsuitId) {
+    if (detail) {
       const tab = lawsuitTabs.find((t) => t === params.get('tab')) ?? 'basic'
-      return <LawsuitDetailPage lawsuitId={lawsuitId} initialTab={tab} />
+      return <LawsuitDetailPage lawsuitId={detail} initialTab={tab} />
     }
     return <LawsuitSearchPage initialQuery={params.get('q') ?? ''} />
   }
-  if (params.has('config')) return <ConfigManagePage global={params.has('all')} />
-  if (params.has('history')) return <HistoryPage />
-  if (params.has('admin')) return <AdminPage />
-  if (params.has('report')) return <ReportPage />
-  if (params.has('user')) {
-    return params.get('user') === 'transfer' ? <UserTransferPage /> : <UserListPage />
-  }
-  if (params.has('main')) {
+  if (page === 'config') return <ConfigManagePage global={params.has('all')} />
+  if (page === 'history') return <HistoryPage />
+  if (page === 'admin') return <AdminPage />
+  if (page === 'report') return <ReportPage />
+  if (page === 'user') return detail === 'transfer' ? <UserTransferPage /> : <UserListPage />
+  if (page === 'main') {
     // TODO: 라우터 도입 시 선택한 고객사를 경로로 전달
     return (
       <MainPage
         configMismatch={params.has('notice')}
-        onEnter={(schema, platform) => window.location.assign(`?company=${encodeURIComponent(schema)}&platform=${platform}`)}
+        onEnter={(schema, platform) => window.location.assign(`/company?schema=${encodeURIComponent(schema)}&platform=${platform}`)}
       />
     )
   }

@@ -86,7 +86,7 @@ export function UserTransferPage() {
   }
 
   return (
-    <CompanyShell active="user" trail={[{ label: texts.user.breadcrumb.features }, { label: texts.user.breadcrumb.user, href: '?user' }, { label: t.title }]}>
+    <CompanyShell active="user" trail={[{ label: texts.user.breadcrumb.features }, { label: texts.user.breadcrumb.user, href: '/user' }, { label: t.title }]}>
       {toast && (
         <div role="status" className="flex items-center gap-3 rounded-xl border border-success-line bg-success-soft py-[11px] pl-4 pr-3.5 text-[13px] text-success-ink">
           <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-success" />
@@ -101,7 +101,7 @@ export function UserTransferPage() {
         <div className="flex flex-col gap-1.5">
           <h1 className="m-0 text-[26px] font-bold tracking-[-0.02em]">{t.title}</h1>
         </div>
-        <a href="?user" className="inline-flex h-[34px] items-center gap-1.5 rounded-ctl border border-line-strong bg-surface px-3.5 text-[13px] font-medium text-ink hover:bg-hover">
+        <a href="/user" className="inline-flex h-[34px] items-center gap-1.5 rounded-ctl border border-line-strong bg-surface px-3.5 text-[13px] font-medium text-ink hover:bg-hover">
           <ArrowRightIcon size={13} className="rotate-180" />
           {t.back}
         </a>

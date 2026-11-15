@@ -53,7 +53,7 @@ export function RecentContractsCard() {
                     <td className={cn(tableTd, 'whitespace-nowrap tabular-nums text-ink-3')}>{formatDateTime(new Date(c.operatedAt))}</td>
                     <td className={cn(tableTd, 'whitespace-nowrap text-ink-3')}>{c.operator}</td>
                     <td className={cn(tableTd, 'whitespace-nowrap pr-5 text-right')}>
-                      <a href={`?contract=${c.contractId}`} className="inline-flex h-7 items-center gap-1 rounded-ctl border border-line-strong bg-surface px-2.5 text-[12.5px] font-medium text-ink hover:bg-hover">
+                      <a href={`/contract/${encodeURIComponent(c.contractId)}`} className="inline-flex h-7 items-center gap-1 rounded-ctl border border-line-strong bg-surface px-2.5 text-[12.5px] font-medium text-ink hover:bg-hover">
                         {t.detail}
                         <ChevronRightIcon size={11} />
                       </a>

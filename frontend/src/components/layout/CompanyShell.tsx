@@ -5,7 +5,7 @@ import { CompanyTopBar } from './CompanyTopBar'
 import { Sidebar } from './Sidebar'
 
 /** 메인(고객사 선택) 화면 주소 */
-export const MAIN_HREF = '?main'
+export const MAIN_HREF = '/main'
 
 type Props = {
   active: 'company' | 'config' | 'contract' | 'counsel' | 'lawsuit' | 'user' | 'errorReport' | 'history' | 'admin'

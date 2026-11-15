@@ -113,7 +113,7 @@ export function CounselSearchPage({ initialQuery = '' }: Props) {
                         <td className={cn(tableTd, 'whitespace-nowrap', c.deleted ? 'text-ink-5' : 'text-ink-3')}>{c.lawyer}</td>
                         <td className={cn(tableTd, 'whitespace-nowrap text-right tabular-nums', c.deleted ? 'text-ink-5' : 'text-ink-2')}>{t.members(c.members)}</td>
                         <td className={cn(tableTd, 'whitespace-nowrap pr-5 text-right')}>
-                          <a href={`?counsel=${c.id}`} className="inline-flex h-7 items-center gap-1 rounded-ctl border border-line-strong bg-surface px-2.5 text-[12.5px] font-medium text-ink hover:bg-hover">
+                          <a href={`/counsel/${encodeURIComponent(c.id)}`} className="inline-flex h-7 items-center gap-1 rounded-ctl border border-line-strong bg-surface px-2.5 text-[12.5px] font-medium text-ink hover:bg-hover">
                             {t.detail}
                             <ChevronRightIcon size={11} />
                           </a>

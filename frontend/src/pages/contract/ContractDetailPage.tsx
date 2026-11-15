@@ -3,7 +3,7 @@ import { CloseIcon, SearchIcon } from '../../components/icons'
 import { CompanyShell } from '../../components/layout/CompanyShell'
 import { Button } from '../../components/ui'
 import { useContractBundle } from '../../hooks/useContractBundle'
-import { currentCompany } from '../../lib/selectedCompany'
+import { currentCompany, replaceUrl } from '../../lib/selectedCompany'
 import { cn } from '../../lib/cn'
 import type { ContractDetail, ContractEmail, ContractMember, HistoryRow, Workflow } from '../../mocks/contract'
 import { texts } from '../../texts'
@@ -55,11 +55,11 @@ export function ContractDetailPage({ contractId, initialTab = 'basic' }: Props) 
 
   const notFound = error !== null && /찾을 수 없/.test(error)
   return (
-    <CompanyShell active="contract" trail={[{ label: t.breadcrumb.features }, { label: t.breadcrumb.contract, href: '?contract' }, { label: contractId }]}>
+    <CompanyShell active="contract" trail={[{ label: t.breadcrumb.features }, { label: t.breadcrumb.contract, href: '/contract' }, { label: contractId }]}>
       <div className="mx-auto w-full max-w-[1100px] py-16 text-center text-[14px] text-ink-3">
         {loading ? <p role="status">{l.loading}</p> : <p role="alert">{notFound ? l.notFound(contractId) : l.error(error ?? '')}</p>}
         {!loading && (
-          <a href="?contract" className="mt-4 inline-block text-[13px] text-link hover:underline">
+          <a href="/contract" className="mt-4 inline-block text-[13px] text-link hover:underline">
             {t.breadcrumb.contract}
           </a>
         )}
@@ -93,11 +93,11 @@ function ContractDetailView({ initial, docs, template, initialMembers, initialHi
   const changeTab = (next: ContractTab) => {
     setTab(next)
     // 새로고침해도 같은 탭이 열리도록 주소만 갱신한다
-    window.history.replaceState(null, '', `?contract=${contract.id}${next === 'basic' ? '' : `&tab=${next}`}`)
+    replaceUrl(`/contract/${encodeURIComponent(contract.id)}`, next === 'basic' ? {} : { tab: next })
   }
 
   return (
-    <CompanyShell active="contract" trail={[{ label: t.breadcrumb.features }, { label: t.breadcrumb.contract, href: '?contract' }, { label: contract.id }]}>
+    <CompanyShell active="contract" trail={[{ label: t.breadcrumb.features }, { label: t.breadcrumb.contract, href: '/contract' }, { label: contract.id }]}>
       <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-6">
         <div className="flex flex-col gap-[18px]">
           {toast && (
@@ -118,7 +118,7 @@ function ContractDetailView({ initial, docs, template, initialMembers, initialHi
             className="flex flex-wrap items-center gap-2.5"
             onSubmit={(e) => {
               e.preventDefault()
-              window.location.assign(`?contract&q=${encodeURIComponent(query.trim())}`)
+              window.location.assign(`/contract?q=${encodeURIComponent(query.trim())}`)
             }}
           >
             <label className="relative block max-w-[420px] flex-1">
