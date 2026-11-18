@@ -16,6 +16,7 @@ import app.buptle.operation.batch.BatchStatus
 import app.buptle.operation.batch.BatchType
 import app.buptle.operation.batch.NoticeType
 import app.buptle.operation.log.OperationCategory
+import app.buptle.operation.log.OperationSubCategory
 import app.buptle.operation.log.OperationType
 import app.buptle.operation.user.ManagementRole
 import app.buptle.support.IntegrationTest
@@ -124,6 +125,7 @@ class SchemaMappingTest(
 		val user = newUser()
 		val company = newCompany()
 		val log = OperationLogEntity(UUID.randomUUID(), user, OperationCategory.CONTRACT, OperationType.UPDATE, Instant.parse("2024-05-23T05:35:00Z")).apply {
+			category2 = OperationSubCategory.CONTRACT_BASIC
 			ticketNumber = "TKT-2024-0523-001"
 			zendeskTicketId = "#458310"
 			reason = "고객사 요청으로 계약 만료일을 연장했습니다."

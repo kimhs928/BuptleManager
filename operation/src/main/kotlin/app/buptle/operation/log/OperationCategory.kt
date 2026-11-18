@@ -1,13 +1,11 @@
 package app.buptle.operation.log
 
-/** 작업 대상 영역 */
+/** 작업 대상 영역 (category1). 세부 영역은 [OperationSubCategory] (category2) */
 enum class OperationCategory {
 	COMPANY,
 	CONTRACT,
 	COUNSEL,
-	LITIGATION,
+	LAWSUIT,
 	USER,
-	CONFIG,
-	SESSION,
 	ERROR_REPORT,
 }

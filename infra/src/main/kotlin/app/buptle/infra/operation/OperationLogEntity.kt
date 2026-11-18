@@ -3,6 +3,7 @@ package app.buptle.infra.operation
 import app.buptle.infra.company.CompanyEntity
 import app.buptle.infra.user.ManagementUserEntity
 import app.buptle.operation.log.OperationCategory
+import app.buptle.operation.log.OperationSubCategory
 import app.buptle.operation.log.OperationType
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -37,8 +38,8 @@ class OperationLogEntity(
 	val actor: ManagementUserEntity,
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "operation_category", nullable = false, length = 30)
-	val category: OperationCategory,
+	@Column(name = "operation_category1", nullable = false, length = 30)
+	val category1: OperationCategory,
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "operation_type", nullable = false, length = 30)
@@ -50,6 +51,11 @@ class OperationLogEntity(
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	val id: Long? = null
+
+	/** 세부 영역. 세부 영역을 나누기 전에 남긴 이력은 비어 있다 */
+	@Enumerated(EnumType.STRING)
+	@Column(name = "operation_category2", length = 50)
+	var category2: OperationSubCategory? = null
 
 	/** Zendesk 티켓 또는 내부 요청 번호 */
 	@Column(name = "ticket_number", length = 100)
