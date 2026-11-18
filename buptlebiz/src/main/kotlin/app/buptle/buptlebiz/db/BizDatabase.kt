@@ -12,13 +12,13 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource
  *
  * 일부러 DataSource 빈으로 등록하지 않는다. 등록하면 BuptleManager DB 의 자동 구성이 물러난다.
  */
-class BizDatabase(private val dataSource: HikariDataSource) : AutoCloseable {
+open class BizDatabase(private val dataSource: HikariDataSource) : AutoCloseable {
 
 	/**
 	 * [schema] 테넌트의 스키마를 search_path 로 잡은 연결에서 [block] 을 실행한다.
 	 * 쿼리에는 스키마를 붙이지 않고 테이블명만 쓴다. search_path 는 이 트랜잭션 안에서만 적용돼 풀의 다른 연결에 새지 않는다.
 	 */
-	fun <T> forTenant(schema: String, block: (NamedParameterJdbcTemplate) -> T): T {
+	open fun <T> forTenant(schema: String, block: (NamedParameterJdbcTemplate) -> T): T {
 		require(TENANT_PATTERN.matches(schema)) { "올바르지 않은 테넌트(스키마)명입니다: $schema" }
 		dataSource.connection.use { conn ->
 			conn.autoCommit = false
@@ -45,3 +45,6 @@ class BizDatabase(private val dataSource: HikariDataSource) : AutoCloseable {
 		val TENANT_PATTERN = Regex("[A-Za-z0-9_]{1,100}")
 	}
 }
+
+/** Biz 운영 DB 쓰기용 연결. 읽기 전용이 아닌 별도 풀이다. 수정 API 에서만 쓴다. */
+class BizWriteDatabase(dataSource: HikariDataSource) : BizDatabase(dataSource)
