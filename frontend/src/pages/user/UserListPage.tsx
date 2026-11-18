@@ -6,7 +6,10 @@ import { Button, Select, TextInput } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { formatDateTime } from '../../lib/date'
 import { currentCompany } from '../../lib/selectedCompany'
-import { MOCK_USERS, SYSTEM_ROLES } from '../../mocks/user'
+import { toCompanyUser, useCompanyUsers } from '../../hooks/useCompanyUsers'
+import { userApi } from '../../lib/userApi'
+import type { UserUpdateBody } from '../../lib/userApi'
+import { useEnumLabels } from '../../hooks/useEnumLabels'
 import type { CompanyUser, DocKind } from '../../mocks/user'
 import { texts } from '../../texts'
 import { UserDocsDetail } from './UserDocsDetail'
@@ -58,12 +61,19 @@ function Labeled({ label, children, className }: { label: string; children: Reac
   )
 }
 
+/** 'YYYY-MM-DD HH:mm:ss'(브라우저 시간대) → ISO(UTC). 비어 있으면 보내지 않는다 */
+const textToIso = (v: string) => (v ? new Date(v.replace(' ', 'T')).toISOString() : undefined)
+
 const th = 'whitespace-nowrap border-b border-line-soft px-3.5 py-2.5 text-left text-xs font-medium text-ink-4'
 const td = 'whitespace-nowrap px-3.5 py-3 align-top'
 
 /** 유저 관리 (검색 · 조회 · 수정 · 엑셀 추출) */
 export function UserListPage() {
-  const [users, setUsers] = useState<CompanyUser[]>(MOCK_USERS)
+  const loaded = useCompanyUsers(currentCompany().schema)
+  const roleOptions = useEnumLabels('BIZ_USER_SYSTEM_ROLE').options
+  // 수정한 유저는 저장 응답으로 바꿔 보여 준다
+  const [edited, setEdited] = useState<Record<string, CompanyUser>>({})
+  const users = loaded.users.map((u) => edited[u.id] ?? u)
   const [draft, setDraft] = useState<Filter>(blank)
   const [applied, setApplied] = useState<Filter>(blank)
   const [open, setOpen] = useState<Record<string, DocKind | ''>>({})
@@ -129,9 +139,9 @@ export function UserListPage() {
           <Labeled label={t.fields.role}>
             <Select className="h-9" value={draft.role} onChange={set('role')}>
               <option value="">{t.all}</option>
-              {SYSTEM_ROLES.map((r) => (
-                <option key={r} value={r}>
-                  {r}
+              {roleOptions.map((r) => (
+                <option key={r.code} value={r.label}>
+                  {r.label}
                 </option>
               ))}
             </Select>
@@ -302,9 +312,9 @@ export function UserListPage() {
             </tbody>
           </table>
           {rows.length === 0 && (
-            <div className="flex flex-col gap-1.5 px-6 py-14 text-center">
-              <span className="text-[15px] font-semibold text-ink-2">{t.emptyTitle}</span>
-              <span className="text-[13px] text-ink-4">{t.emptyDescription}</span>
+            <div role={loaded.error ? 'alert' : 'status'} className="flex flex-col gap-1.5 px-6 py-14 text-center">
+              <span className="text-[15px] font-semibold text-ink-2">{loaded.loading ? t.loading : loaded.error ? t.loadFailed : t.emptyTitle}</span>
+              {!loaded.loading && !loaded.error && <span className="text-[13px] text-ink-4">{t.emptyDescription}</span>}
             </div>
           )}
         </div>
@@ -314,10 +324,24 @@ export function UserListPage() {
         <UserEditModal
           user={editing}
           onClose={() => setEditing(null)}
-          onSave={(next, ticket) => {
-            setUsers((prev) => prev.map((u) => (u.id === next.id ? next : u)))
+          onSave={async (next, audit) => {
+            const before = editing
+            const body: UserUpdateBody = { audit }
+            if (next.name !== before.name) body.name = next.name
+            if (next.email !== before.email) body.email = next.email
+            if (next.active !== before.active) body.active = next.active
+            if (next.roles.join('|') !== before.roles.join('|')) body.roles = next.roles
+            if (next.phone !== before.phone) body.phone = next.phone
+            if (next.dept !== before.dept) body.dept = next.dept
+            if (next.title !== before.title) body.title = next.title
+            if (next.desc !== before.desc) body.desc = next.desc
+            if (next.empNo !== before.empNo) body.empNo = next.empNo
+            for (const k of ['joinedAt', 'createdAt', 'updatedAt'] as const) if (next[k] !== before[k]) body[k] = textToIso(next[k])
+            const res = await userApi.update(currentCompany().schema, before.pk, body)
+            const saved = toCompanyUser(res.item)
+            setEdited((prev) => ({ ...prev, [saved.id]: saved }))
             setEditing(null)
-            setToast(t.saved(next.name, ticket))
+            setToast(t.saved(saved.name, audit.ticket))
           }}
         />
       )}

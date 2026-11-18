@@ -1,6 +1,7 @@
 import { ChevronRightIcon } from '../../components/icons'
 import { cn } from '../../lib/cn'
-import { MOCK_DOC_TITLES, MOCK_JOINED } from '../../mocks/user'
+import { useUserDocuments } from '../../hooks/useCompanyUsers'
+import { currentCompany } from '../../lib/selectedCompany'
 import type { CompanyUser, DocKind } from '../../mocks/user'
 import { texts } from '../../texts'
 
@@ -26,8 +27,9 @@ type Props = {
 
 /** 유저가 참여 중인 계약 · 자문 · 소송 (행 펼침 영역) */
 export function UserDocsDetail({ user, selected, page, onSelect, onPage }: Props) {
-  const joined = MOCK_JOINED[user.id] ?? { contract: [], counsel: [], lawsuit: [] }
-  const ids = selected ? joined[selected] : []
+  const joined = user.docCounts
+  const docs = useUserDocuments(currentCompany().schema, user.pk, selected)
+  const ids = docs.items
   const last = Math.max(1, Math.ceil(ids.length / PER_PAGE))
   const current = Math.min(Math.max(1, page), last)
   const items = ids.slice((current - 1) * PER_PAGE, current * PER_PAGE)
@@ -40,7 +42,7 @@ export function UserDocsDetail({ user, selected, page, onSelect, onPage }: Props
       <div className="flex flex-wrap items-center gap-2">
         <span className="mr-1.5 text-xs font-semibold">{t.joinedDocs(user.name)}</span>
         {KINDS.map((k) => {
-          const count = joined[k].length
+          const count = joined[k]
           const on = selected === k
           const off = count === 0
           return (
@@ -96,13 +98,15 @@ export function UserDocsDetail({ user, selected, page, onSelect, onPage }: Props
             <span>{t.docIdHead[selected]}</span>
             <span>{t.docTitleHead}</span>
           </div>
-          {items.map((id) => (
-            <div key={id} className="grid grid-cols-[150px_minmax(0,1fr)] items-baseline gap-x-4 border-t border-bg px-3.5 py-2 text-[13px]">
-              <a href={docHref[selected](id)} className="font-mono text-xs text-link hover:underline">
-                {id}
+          {docs.loading && <div className="px-3.5 py-3 text-[12.5px] text-ink-4">{t.docsLoading}</div>}
+          {docs.error && <div role="alert" className="px-3.5 py-3 text-[12.5px] text-danger-ink">{t.docsError}</div>}
+          {items.map((doc) => (
+            <div key={doc.id} className="grid grid-cols-[150px_minmax(0,1fr)] items-baseline gap-x-4 border-t border-bg px-3.5 py-2 text-[13px]">
+              <a href={docHref[selected](doc.id)} className="font-mono text-xs text-link hover:underline">
+                {doc.id}
               </a>
-              <a href={docHref[selected](id)} className="truncate hover:underline">
-                {MOCK_DOC_TITLES[selected][id] ?? ''}
+              <a href={docHref[selected](doc.id)} className="truncate hover:underline">
+                {doc.title}
               </a>
             </div>
           ))}

@@ -1,6 +1,5 @@
 // TODO: 백엔드 연동 시 제거
 import type { CaseEmail } from './contract'
-import { MOCK_DOC_TITLES } from './user'
 
 /** 자문 상태 코드 (counsel_bcounsel.status). 값과 이름은 enum 표 BIZ_COUNSEL_STATUS 에서 읽는다 */
 export type CounselStatus = string
@@ -76,23 +75,6 @@ export const MOCK_COUNSEL_DETAIL: CounselDetail = {
   migrated: false,
   categoryParent: '개인정보 보호',
   category: '처리방침 개정',
-}
-
-/** 자문 ID로 상세를 만든다. 목 데이터는 CN-2024-0112 한 건뿐이라 ID, 이름, 상태, 삭제 여부만 바꾼다 */
-export function getCounselDetail(id: string): CounselDetail {
-  const summary = MOCK_COUNSELS.find((c) => c.id === id)
-  const name = summary?.name ?? MOCK_DOC_TITLES.counsel[id]
-  if (id === MOCK_COUNSEL_DETAIL.id || !name) return MOCK_COUNSEL_DETAIL
-  return {
-    ...MOCK_COUNSEL_DETAIL,
-    id,
-    idPlain: id.replace(/\D/g, ''),
-    name,
-    status: summary?.status ?? MOCK_COUNSEL_DETAIL.status,
-    createdAt: summary ? `${summary.createdAt} 10:20` : MOCK_COUNSEL_DETAIL.createdAt,
-    deleted: summary?.deleted ?? false,
-    deletedAt: summary?.deleted ? '2024-05-20 16:42' : '',
-  }
 }
 
 /** 자문 승인 타입 (BApproval.approval_type: DEPT / REVIEW / FINAL) */

@@ -1,6 +1,5 @@
 // TODO: 백엔드 연동 시 제거
 import type { CaseEmail } from './contract'
-import { MOCK_DOC_TITLES } from './user'
 
 /** 소송 진행 상태 코드 (BLawsuit.suit_progress) */
 export type LawsuitStatus = 'PENDING' | 'REVIEW' | 'REVIEW_DONE' | 'REVIEW_D' | 'REVIEW_WRITE_ANSWER' | 'PROCESS' | 'DONE'
@@ -83,7 +82,7 @@ export const MOCK_LAWSUIT_DETAIL: LawsuitDetail = {
 /** 소송 ID로 상세를 만든다. 목 데이터는 LW-2024-0087 한 건뿐이라 ID, 이름, 상태, 금액, 삭제 여부만 바꾼다 */
 export function getLawsuitDetail(id: string): LawsuitDetail {
   const summary = MOCK_LAWSUITS.find((c) => c.id === id)
-  const name = summary?.name ?? MOCK_DOC_TITLES.lawsuit[id]
+  const name = summary?.name
   if (id === MOCK_LAWSUIT_DETAIL.id || !name) return MOCK_LAWSUIT_DETAIL
   return {
     ...MOCK_LAWSUIT_DETAIL,

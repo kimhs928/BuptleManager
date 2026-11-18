@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { CheckGroup, EditModal, Field, FieldGroup, Select, Textarea, TextInput } from '../../components/ui'
 import type { Change } from '../../components/ui'
 import { formatDateTime } from '../../lib/date'
-import { SYSTEM_ROLES } from '../../mocks/user'
+import { useEnumLabels } from '../../hooks/useEnumLabels'
 import type { CompanyUser } from '../../mocks/user'
 import { texts } from '../../texts'
 import { makeAudit } from '../contract/audit'
+import type { Audit } from '../../lib/apiWrite'
 
 const t = texts.user.edit
 
@@ -30,12 +31,14 @@ const fromInput = (v: string) => v.replace('T', ' ')
 type Props = {
   user: CompanyUser
   onClose: () => void
-  onSave: (next: CompanyUser, ticket: string) => void
+  onSave: (next: CompanyUser, audit: Audit) => void | Promise<void>
 }
 
 /** 유저 정보 수정 */
 export function UserEditModal({ user, onClose, onSave }: Props) {
   const [form, setForm] = useState<CompanyUser>(user)
+  // 시스템 내 역할 선택지는 enum 표(DB)에서 읽는다
+  const roleOptions = useEnumLabels('BIZ_USER_SYSTEM_ROLE').options.map((o) => o.label)
   const [ticket, setTicket] = useState('')
   const [reason, setReason] = useState('')
   const [openedAt] = useState(() => formatDateTime())
@@ -57,7 +60,7 @@ export function UserEditModal({ user, onClose, onSave }: Props) {
       reason={reason}
       onReasonChange={setReason}
       onClose={onClose}
-      onSave={() => onSave(form, ticket.trim())}
+      onSave={(_at, requester) => onSave(form, { ticket: ticket.trim(), requester, reason: reason.trim() })}
     >
       <div className="grid grid-cols-2 items-stretch gap-3.5">
         <FieldGroup title={`${t.groups.id} · ${t.idNote}`} className="col-span-2">
@@ -86,7 +89,7 @@ export function UserEditModal({ user, onClose, onSave }: Props) {
         </FieldGroup>
 
         <FieldGroup title={`${t.groups.roles} · ${t.rolesNote}`} columns={1}>
-          <CheckGroup label={t.groups.roles} options={SYSTEM_ROLES} value={form.roles} onChange={(next) => set('roles', next as CompanyUser['roles'])} />
+          <CheckGroup label={t.groups.roles} options={roleOptions} value={form.roles} onChange={(next) => set('roles', next)} />
         </FieldGroup>
 
         <FieldGroup title={t.groups.status} columns={1}>
@@ -102,8 +105,8 @@ export function UserEditModal({ user, onClose, onSave }: Props) {
 
         <FieldGroup title={`${t.groups.dates} · ${t.datesNote}`} className="col-span-2">
           {(['lastLogin', 'createdAt', 'joinedAt', 'updatedAt'] as const).map((k) => (
-            <Field key={k} label={t.labels[k]}>
-              {(id) => <TextInput id={id} type="datetime-local" step={1} value={toInput(form[k])} onChange={(e) => set(k, fromInput(e.target.value))} className="tabular-nums" />}
+            <Field key={k} label={t.labels[k]} readOnlyHint={k === 'lastLogin'}>
+              {(id) => <TextInput id={id} type="datetime-local" step={1} readOnly={k === 'lastLogin'} value={toInput(form[k])} onChange={(e) => set(k, fromInput(e.target.value))} className="tabular-nums" />}
             </Field>
           ))}
         </FieldGroup>
