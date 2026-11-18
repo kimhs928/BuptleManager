@@ -12,6 +12,7 @@ import type { ContractMember, MemberKind } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { makeAudit } from './audit'
 import { joinList } from './format'
+import type { Audit } from '../../lib/apiWrite'
 
 /** 새 참여자의 서명 상태. 완료는 이 화면에서 만들 수 없다 */
 const SIGN_PENDING = '대기'
@@ -63,7 +64,7 @@ type Props = {
   /** 이미 참여 중인 유저 (삭제된 유저 포함) */
   members: ContractMember[]
   onClose: () => void
-  onSave: (member: ContractMember, ticket: string) => void
+  onSave: (member: ContractMember, audit: Audit) => void | Promise<void>
 }
 
 /** 계약 참여 유저 추가 (내부·외부 유저 공용) */
@@ -115,7 +116,7 @@ export function MemberAddModal({ kind, members, onClose, onSave }: Props) {
     add(f.signType, form.signType, form.signType !== emptyForm.signType, 'signType')
   }
 
-  const save = () => {
+  const save = (_at: string, requester: string) => {
     const now = formatDateTime().replace(' ', 'T')
     const member: ContractMember = {
       id: `m${members.length + 1}`,
@@ -137,7 +138,7 @@ export function MemberAddModal({ kind, members, onClose, onSave }: Props) {
       updatedAt: now,
       deletedAt: '',
     }
-    onSave(member, ticket.trim())
+    return onSave(member, { ticket: ticket.trim(), requester, reason: reason.trim() })
   }
 
   return (

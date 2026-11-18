@@ -9,6 +9,7 @@ import { texts } from '../../texts'
 import { makeAudit } from './audit'
 import { ContractStatusSelect } from './ContractStatusSelect'
 import { initialStatusCode } from './statusMap'
+import type { Audit } from '../../lib/apiWrite'
 
 const t = texts.contract.basicEdit
 
@@ -41,7 +42,7 @@ const keys = Object.keys(t.labels) as EditKey[]
 type Props = {
   contract: ContractDetail
   onClose: () => void
-  onSave: (next: ContractDetail, changeCount: number, ticket: string) => void
+  onSave: (next: ContractDetail, changeCount: number, audit: Audit) => void | Promise<void>
   /** 계약 종류·서명 방식 변경은 워크플로우 탭에서 한다 */
   onGoWorkflow: () => void
 }
@@ -89,7 +90,7 @@ export function BasicEditModal({ contract, onClose, onSave, onGoWorkflow }: Prop
       reason={reason}
       onReasonChange={setReason}
       onClose={onClose}
-      onSave={() => onSave(form, changes.length, ticket.trim())}
+      onSave={(_at, requester) => onSave(form, changes.length, { ticket: ticket.trim(), requester, reason: reason.trim() })}
     >
       <FieldGroup title={t.groups.info}>
         <Field label={t.fields.id} readOnlyHint>

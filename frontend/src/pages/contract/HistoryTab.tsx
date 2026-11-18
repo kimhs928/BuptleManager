@@ -9,6 +9,7 @@ import { HistoryExtraModal } from './HistoryExtraModal'
 import { HistoryEditModal } from './HistoryEditModal'
 import { HistoryTimeline } from './HistoryTimeline'
 import type { Lane } from './HistoryTimeline'
+import type { Audit } from '../../lib/apiWrite'
 
 const t = texts.contract.history
 
@@ -50,7 +51,7 @@ type Props = {
   history: HistoryRow[]
   emails: ContractEmail[]
   members: string[]
-  onSaveRow: (next: HistoryRow, ticket: string) => void
+  onSaveRow: (next: HistoryRow, audit: Audit) => void | Promise<void>
 }
 
 /** 계약 진행 히스토리 · 이메일 발송 내역 */
@@ -150,8 +151,8 @@ export function HistoryTab({ history, emails, members, onSaveRow }: Props) {
           row={editing}
           users={members}
           onClose={() => setEditing(null)}
-          onSave={(next, ticket) => {
-            onSaveRow(next, ticket)
+          onSave={async (next, audit) => {
+            await onSaveRow(next, audit)
             setEditing(null)
           }}
         />

@@ -38,7 +38,7 @@ type Props = {
   onReasonChange: (v: string) => void
   onClose: () => void
   /** 실행을 누른 시각('YYYY-MM-DD HH:mm')과 작업 요청자를 넘겨 준다. 히스토리에는 이 값으로 기록한다 */
-  onSave: (at: string, requester: string) => void
+  onSave: (at: string, requester: string) => void | Promise<void>
   saving?: boolean
   /** 저장 버튼 문구 (기본: 저장 · 히스토리 기록) */
   saveLabel?: string
@@ -77,7 +77,21 @@ export function EditModal({
 }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null)
   const [requester, setRequester] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
   useModalFocus(dialogRef, onClose)
+
+  const save = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      await onSave(formatDateTime(), requester.trim())
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t.saveFailed)
+    } finally {
+      setBusy(false)
+    }
+  }
 
   const canSave = canSubmit && (!showChanges || changes.length > 0) && ticket.trim() !== '' && requester.trim() !== '' && reason.trim() !== ''
 
@@ -134,11 +148,16 @@ export function EditModal({
           </aside>
         </div>
 
+        {error && (
+          <p role="alert" className="m-0 border-t border-danger-line bg-danger-soft px-6 py-2.5 text-[13px] text-danger-ink">
+            {t.saveFailed} ({error})
+          </p>
+        )}
         <div className="flex justify-end gap-2.5 border-t border-line-soft bg-bg/60 px-6 py-3.5">
           <Button variant="secondary" onClick={onClose} className="h-[42px] px-[18px] text-sm">
             {texts.common.action.cancel}
           </Button>
-          <Button variant="primary" onClick={() => onSave(formatDateTime(), requester.trim())} loading={saving} disabled={!canSave} className="h-[42px] px-5 text-sm font-semibold">
+          <Button variant="primary" onClick={() => void save()} loading={saving || busy} disabled={!canSave || busy} className="h-[42px] px-5 text-sm font-semibold">
             {saveLabel}
           </Button>
         </div>

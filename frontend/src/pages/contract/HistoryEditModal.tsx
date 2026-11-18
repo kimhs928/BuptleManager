@@ -6,6 +6,7 @@ import { htmlToPlain } from '../../lib/safeHtml'
 import type { HistoryRow } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { makeAudit } from './audit'
+import type { Audit } from '../../lib/apiWrite'
 
 const t = texts.contract.historyEdit
 
@@ -14,7 +15,7 @@ type Props = {
   /** 선택할 수 있는 액션 유저 (계약 참여 유저) */
   users: string[]
   onClose: () => void
-  onSave: (next: HistoryRow, ticket: string) => void
+  onSave: (next: HistoryRow, audit: Audit) => void | Promise<void>
 }
 
 /** 히스토리 액션 수정 */
@@ -57,7 +58,7 @@ export function HistoryEditModal({ row, users, onClose, onSave }: Props) {
       reason={reason}
       onReasonChange={setReason}
       onClose={onClose}
-      onSave={() => onSave({ ...row, user, at: at.replace('T', ' '), deleted: deleted === 'Y', comment }, ticket.trim())}
+      onSave={(_at, requester) => onSave({ ...row, user, at: at.replace('T', ' '), deleted: deleted === 'Y', comment }, { ticket: ticket.trim(), requester, reason: reason.trim() })}
     >
       <FieldGroup title={t.groups.info}>
         <Field label={f.type} readOnlyHint>

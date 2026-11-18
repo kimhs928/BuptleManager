@@ -6,13 +6,14 @@ import type { Workflow } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { makeAudit } from './audit'
 import { joinList } from './format'
+import type { Audit } from '../../lib/apiWrite'
 
 const t = texts.contract.workflowEdit
 
 type Props = {
   workflow: Workflow
   onClose: () => void
-  onSave: (next: Workflow, changeCount: number, ticket: string) => void
+  onSave: (next: Workflow, changeCount: number, audit: Audit) => void | Promise<void>
 }
 
 /** 워크플로우 변경 */
@@ -45,7 +46,7 @@ export function WorkflowEditModal({ workflow, onClose, onSave }: Props) {
       reason={reason}
       onReasonChange={setReason}
       onClose={onClose}
-      onSave={() => onSave(form, changes.length, ticket.trim())}
+      onSave={(_at, requester) => onSave(form, changes.length, { ticket: ticket.trim(), requester, reason: reason.trim() })}
     >
       <FieldGroup title={t.groups.workflow}>
         <Field label={t.fields.name} readOnlyHint>

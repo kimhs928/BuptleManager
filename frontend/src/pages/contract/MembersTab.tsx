@@ -9,6 +9,7 @@ import { deletedName } from './format'
 import { DeletedBadge } from './shared'
 import { MemberAddModal } from './MemberAddModal'
 import { MemberEditModal } from './MemberEditModal'
+import type { Audit } from '../../lib/apiWrite'
 
 const t = texts.contract.members
 
@@ -141,8 +142,8 @@ function MemberCard({ m, onEdit }: { m: ContractMember; onEdit: () => void }) {
 
 type Props = {
   members: ContractMember[]
-  onEdit: (next: ContractMember, ticket: string) => void
-  onAdd: (member: ContractMember, ticket: string) => void
+  onEdit: (next: ContractMember, audit: Audit) => void | Promise<void>
+  onAdd: (member: ContractMember, audit: Audit) => void | Promise<void>
 }
 
 /** 참여 유저 탭 */
@@ -268,8 +269,8 @@ export function MembersTab({ members, onEdit, onAdd }: Props) {
         <MemberEditModal
           member={editing}
           onClose={() => setEditing(null)}
-          onSave={(next, ticket) => {
-            onEdit(next, ticket)
+          onSave={async (next, audit) => {
+            await onEdit(next, audit)
             setEditing(null)
           }}
         />
@@ -279,8 +280,8 @@ export function MembersTab({ members, onEdit, onAdd }: Props) {
           kind={adding}
           members={members}
           onClose={() => setAdding(null)}
-          onSave={(member, ticket) => {
-            onAdd(member, ticket)
+          onSave={async (member, audit) => {
+            await onAdd(member, audit)
             setAdding(null)
           }}
         />

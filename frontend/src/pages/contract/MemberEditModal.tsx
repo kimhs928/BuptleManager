@@ -8,6 +8,7 @@ import type { ContractMember } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { makeAudit } from './audit'
 import { joinList } from './format'
+import type { Audit } from '../../lib/apiWrite'
 
 const t = texts.contract.memberEdit
 const opt = texts.contract.memberOptions
@@ -44,7 +45,7 @@ function show(key: FieldKey, m: ContractMember): string {
 type Props = {
   member: ContractMember
   onClose: () => void
-  onSave: (next: ContractMember, ticket: string) => void
+  onSave: (next: ContractMember, audit: Audit) => void | Promise<void>
 }
 
 /** 계약 참여 유저 수정 (내부·외부 유저 공용) */
@@ -82,7 +83,7 @@ export function MemberEditModal({ member, onClose, onSave }: Props) {
       reason={reason}
       onReasonChange={setReason}
       onClose={onClose}
-      onSave={() => onSave(form, ticket.trim())}
+      onSave={(_at, requester) => onSave(form, { ticket: ticket.trim(), requester, reason: reason.trim() })}
     >
       <FieldGroup title={t.groups.info}>
         <Field label={t.fields.name} readOnlyHint={internal}>

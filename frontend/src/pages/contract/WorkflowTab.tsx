@@ -6,6 +6,7 @@ import type { GuideStage, HistoryRow, Workflow, WorkflowUser } from '../../mocks
 import { texts } from '../../texts'
 import { orderedAttrs } from './contractAdapter'
 import { WorkflowEditModal } from './WorkflowEditModal'
+import type { Audit } from '../../lib/apiWrite'
 
 const t = texts.contract.workflow
 
@@ -14,7 +15,7 @@ type Props = {
   guide: GuideStage[]
   users: WorkflowUser[]
   history: HistoryRow[]
-  onSave: (next: Workflow, changeCount: number, ticket: string) => void
+  onSave: (next: Workflow, changeCount: number, audit: Audit) => void | Promise<void>
 }
 
 /** '있음'을 뜻하는 설정 값. 회색 대신 붉은색으로 눈에 띄게 보여 준다 */
@@ -167,8 +168,8 @@ export function WorkflowTab({ workflow, guide, users, history, onSave }: Props) 
         <WorkflowEditModal
           workflow={workflow}
           onClose={() => setEditing(false)}
-          onSave={(next, count, ticket) => {
-            onSave(next, count, ticket)
+          onSave={async (next, count, audit) => {
+            await onSave(next, count, audit)
             setEditing(false)
           }}
         />

@@ -125,6 +125,9 @@ export type WorkflowApi = {
   currentStage: string
 }
 
+import { sendJson } from './apiWrite'
+import type { Audit } from './apiWrite'
+
 const base = (schema: string) => `/api/biz/companies/${encodeURIComponent(schema)}/contracts`
 
 async function get<T>(url: string, signal?: AbortSignal): Promise<T> {
@@ -144,4 +147,67 @@ export const contractApi = {
   detail: (schema: string, id: string, signal?: AbortSignal) => get<ContractDetailApi>(`${base(schema)}/${encodeURIComponent(id)}`, signal),
   search: (schema: string, q: string, includeDeleted: boolean, signal?: AbortSignal) =>
     get<ContractPage>(`${base(schema)}?q=${encodeURIComponent(q)}&includeDeleted=${includeDeleted}&size=50`, signal),
+  // 수정·추가 (Biz DB 에 쓴다)
+  update: (schema: string, id: string, body: ContractUpdateBody) =>
+    sendJson<{ item: ContractInfoApi; changeCount: number; historyIds: number[] }>('PATCH', `${base(schema)}/${encodeURIComponent(id)}`, body),
+  updateMember: (schema: string, id: string, memberId: string, body: MemberUpdateBody) =>
+    sendJson<{ item: MemberApi; changeCount: number; historyIds: number[] }>('PATCH', `${base(schema)}/${encodeURIComponent(id)}/members/${encodeURIComponent(memberId)}`, body),
+  addMember: (schema: string, id: string, body: MemberCreateBody) =>
+    sendJson<{ item: MemberApi; historyIds: number[] }>('POST', `${base(schema)}/${encodeURIComponent(id)}/members`, body),
+  updateHistory: (schema: string, id: string, historyId: string, body: HistoryUpdateBody) =>
+    sendJson<{ item: HistoryApi; changeCount: number; historyIds: number[] }>('PATCH', `${base(schema)}/${encodeURIComponent(id)}/history/${encodeURIComponent(historyId)}`, body),
+  updateWorkflow: (schema: string, id: string, body: { attrs: { key: string; value: string[] }[]; audit: Audit }) =>
+    sendJson<{ workflow: WorkflowApi; changeCount: number; historyIds: number[] }>('PATCH', `${base(schema)}/${encodeURIComponent(id)}/workflow`, body),
 }
+
+export type ContractUpdateBody = {
+  name?: string
+  summary?: string
+  amount?: number
+  lang?: string
+  statusCode?: number
+  deleted?: boolean
+  startDate?: string
+  endDate?: string
+  createdAt?: string
+  updatedAt?: string
+  deletedAt?: string
+  autoRenew?: boolean
+  audit: Audit
+}
+
+export type MemberUpdateBody = {
+  name?: string
+  email?: string
+  company?: string
+  dept?: string
+  phone?: string
+  roles?: string[]
+  perm?: string[]
+  lang?: string
+  signMethod?: string
+  signType?: string
+  signStatus?: string
+  joinedAt?: string
+  updatedAt?: string
+  deleted?: boolean
+  deletedAt?: string
+  audit: Audit
+}
+
+export type MemberCreateBody = {
+  kind: 'internal' | 'external'
+  name: string
+  email: string
+  company?: string
+  dept?: string
+  phone?: string
+  roles?: string[]
+  perm?: string[]
+  lang: string
+  signMethod: string
+  signType: string
+  audit: Audit
+}
+
+export type HistoryUpdateBody = { user?: string; at?: string; deleted?: boolean; comment?: string; audit: Audit }

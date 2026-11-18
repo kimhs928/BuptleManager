@@ -5,6 +5,10 @@ import { Button } from '../../components/ui'
 import { useContractBundle } from '../../hooks/useContractBundle'
 import { currentCompany, replaceUrl } from '../../lib/selectedCompany'
 import { cn } from '../../lib/cn'
+import { contractApi } from '../../lib/contractApi'
+import type { ContractUpdateBody, HistoryUpdateBody, MemberUpdateBody } from '../../lib/contractApi'
+import { localToIso } from '../../lib/apiWrite'
+import type { Audit } from '../../lib/apiWrite'
 import type { ContractDetail, ContractEmail, ContractMember, HistoryRow, Workflow } from '../../mocks/contract'
 import { texts } from '../../texts'
 import { BasicTab } from './BasicTab'
@@ -89,6 +93,85 @@ function ContractDetailView({ initial, docs, template, initialMembers, initialHi
   const [history, setHistory] = useState<HistoryRow[]>(initialHistory)
   const [toast, setToast] = useState('')
   const [query, setQuery] = useState(contractId)
+
+  const schema = currentCompany().schema
+
+  const saveBasic = async (next: ContractDetail, count: number, audit: Audit) => {
+    const body: ContractUpdateBody = { audit }
+    if (next.name !== contract.name) body.name = next.name
+    if (next.summary !== contract.summary) body.summary = next.summary
+    if (next.amount !== contract.amount) body.amount = next.amount
+    if (next.lang !== contract.lang) body.lang = next.lang
+    if (next.statusCode && next.statusCode !== contract.statusCode) body.statusCode = Number(next.statusCode)
+    if (next.startDate !== contract.startDate && next.startDate) body.startDate = next.startDate
+    if (next.endDate !== contract.endDate && next.endDate) body.endDate = next.endDate
+    if (next.deleted !== contract.deleted) body.deleted = next.deleted
+    if (next.createdAt !== contract.createdAt) body.createdAt = localToIso(next.createdAt)
+    if (next.updatedAt !== contract.updatedAt) body.updatedAt = localToIso(next.updatedAt)
+    if (next.deletedAt !== contract.deletedAt) body.deletedAt = localToIso(next.deletedAt)
+    if (next.autoRenew !== contract.autoRenew) body.autoRenew = next.autoRenew
+    const res = await contractApi.update(schema, contractId, body)
+    setContract((prev) => ({ ...toContractDetail({ contract: res.item, template: null }), kind: prev.kind, signType: prev.signType, grade: prev.grade }))
+    setToast(t.toast.basicSaved(res.changeCount || count, audit.ticket))
+  }
+
+  const saveMember = async (next: ContractMember, audit: Audit) => {
+    const before = members.find((m) => m.id === next.id)
+    if (!before) return
+    const body: MemberUpdateBody = { audit }
+    if (next.name !== before.name) body.name = next.name
+    if (next.email !== before.email) body.email = next.email
+    if (next.company !== before.company) body.company = next.company
+    if (next.dept !== before.dept) body.dept = next.dept
+    if (next.phone !== before.phone) body.phone = next.phone
+    if (next.lang !== before.lang) body.lang = next.lang
+    if (next.roles.join('|') !== before.roles.join('|')) body.roles = next.roles
+    if (next.perm.join('|') !== before.perm.join('|')) body.perm = next.perm
+    if (next.signMethod !== before.signMethod) body.signMethod = next.signMethod
+    if (next.signType !== before.signType) body.signType = next.signType
+    if (next.signStatus !== before.signStatus) body.signStatus = next.signStatus
+    if (next.joinedAt !== before.joinedAt) body.joinedAt = localToIso(next.joinedAt)
+    if (next.updatedAt !== before.updatedAt) body.updatedAt = localToIso(next.updatedAt)
+    if (next.deleted !== before.deleted) body.deleted = next.deleted
+    if (next.deletedAt !== before.deletedAt) body.deletedAt = localToIso(next.deletedAt)
+    const res = await contractApi.updateMember(schema, contractId, next.id, body)
+    const saved = toMember(res.item)
+    setMembers((prev) => prev.map((m) => (m.id === saved.id ? saved : m)))
+    setToast(t.toast.memberSaved(saved.name, audit.ticket))
+  }
+
+  const addMember = async (member: ContractMember, audit: Audit) => {
+    const res = await contractApi.addMember(schema, contractId, {
+      kind: member.kind, name: member.name, email: member.email, company: member.company, dept: member.dept, phone: member.phone,
+      roles: member.roles, perm: member.perm, lang: member.lang, signMethod: member.signMethod, signType: member.signType, audit,
+    })
+    const saved = toMember(res.item)
+    setMembers((prev) => [...prev, saved])
+    setToast(t.toast.memberAdded(saved.name, audit.ticket))
+  }
+
+  const saveHistory = async (next: HistoryRow, audit: Audit) => {
+    const before = history.find((h) => h.id === next.id)
+    if (!before) return
+    const body: HistoryUpdateBody = { audit }
+    if (next.comment !== before.comment) body.comment = next.comment
+    if (next.user !== before.user) body.user = next.user
+    if (next.at !== before.at) body.at = localToIso(next.at.replace(' ', 'T'))
+    if (next.deleted !== before.deleted) body.deleted = next.deleted
+    const res = await contractApi.updateHistory(schema, contractId, next.id, body)
+    const saved = toHistoryRow(res.item)
+    setHistory((prev) => prev.map((h) => (h.id === saved.id ? saved : h)))
+    setToast(t.toast.historySaved(saved.action, audit.ticket))
+  }
+
+  const saveWorkflow = async (next: Workflow, count: number, audit: Audit) => {
+    const attrs = next.attrs
+      .filter((a, i) => a.value.join('|') !== workflow.attrs[i]?.value.join('|'))
+      .map((a) => ({ key: a.key, value: a.value }))
+    const res = await contractApi.updateWorkflow(schema, contractId, { attrs, audit })
+    setWorkflow(toWorkflow(res.workflow).workflow)
+    setToast(t.toast.workflowSaved(res.changeCount || count, audit.ticket))
+  }
 
   const changeTab = (next: ContractTab) => {
     setTab(next)
@@ -197,24 +280,15 @@ function ContractDetailView({ initial, docs, template, initialMembers, initialHi
               contract={contract}
               docs={docs}
               template={template}
-              onSave={(next, count, ticket) => {
-                setContract(next)
-                setToast(t.toast.basicSaved(count, ticket))
-              }}
+              onSave={saveBasic}
               onShowWorkflow={() => changeTab('workflow')}
             />
           )}
           {tab === 'members' && (
             <MembersTab
               members={members}
-              onEdit={(next, ticket) => {
-                setMembers((prev) => prev.map((m) => (m.id === next.id ? next : m)))
-                setToast(t.toast.memberSaved(next.name, ticket))
-              }}
-              onAdd={(member, ticket) => {
-                setMembers((prev) => [...prev, member])
-                setToast(t.toast.memberAdded(member.name, ticket))
-              }}
+              onEdit={saveMember}
+              onAdd={addMember}
             />
           )}
           {tab === 'workflow' && (
@@ -224,19 +298,13 @@ function ContractDetailView({ initial, docs, template, initialMembers, initialHi
                 guide={workflowView.guide}
                 users={workflowView.users}
                 history={history}
-                onSave={(next, count, ticket) => {
-                  setWorkflow(next)
-                  setToast(t.toast.workflowSaved(count, ticket))
-                }}
+                onSave={saveWorkflow}
               />
               <HistoryTab
                 history={history}
                 emails={emails}
                 members={historyUsers}
-                onSaveRow={(next, ticket) => {
-                  setHistory((prev) => prev.map((h) => (h.id === next.id ? next : h)))
-                  setToast(t.toast.historySaved(next.action, ticket))
-                }}
+                onSaveRow={saveHistory}
               />
             </div>
           )}

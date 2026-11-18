@@ -11,6 +11,7 @@ import { showDateTime } from './format'
 import type { ContractDoc, ContractTemplate } from './contractAdapter'
 import { StatusDot } from './shared'
 import { mockStatusOf } from './statusMap'
+import type { Audit } from '../../lib/apiWrite'
 
 /** 최근 히스토리에 보여 주는 최대 건수 */
 const RECENT_LIMIT = 10
@@ -57,7 +58,7 @@ type Props = {
   docs: ContractDoc[]
   /** 템플릿 없이 만든 계약이면 null */
   template: ContractTemplate | null
-  onSave: (next: ContractDetail, changeCount: number, ticket: string) => void
+  onSave: (next: ContractDetail, changeCount: number, audit: Audit) => void | Promise<void>
   onShowWorkflow: () => void
 }
 
@@ -258,8 +259,8 @@ export function BasicTab({ contract, docs, template: tpl, onSave, onShowWorkflow
         <BasicEditModal
           contract={contract}
           onClose={() => setEditing(false)}
-          onSave={(next, count, ticket) => {
-            onSave(next, count, ticket)
+          onSave={async (next, count, audit) => {
+            await onSave(next, count, audit)
             setEditing(false)
           }}
           onGoWorkflow={() => {

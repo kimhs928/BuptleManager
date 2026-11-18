@@ -50,6 +50,7 @@ export const common = {
     defaultDescription: '변경 전/후 값이 히스토리에 함께 저장됩니다.',
     asideLabel: '변경 항목 및 히스토리 기록',
     save: '저장 · 히스토리 기록',
+    saveFailed: '저장하지 못했습니다',
     changes: {
       title: '변경 항목',
       empty: '아직 변경한 항목이 없습니다.',
