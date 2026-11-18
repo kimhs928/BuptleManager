@@ -5,6 +5,7 @@ import type { Change } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { formatDateTime, formatTime } from '../../lib/date'
 import { platformLabel } from '../../lib/platform'
+import type { Audit } from '../../lib/apiWrite'
 import { MOCK_ACCOUNT } from '../../mocks/auth'
 import type { CompanyDetail, LiveUser } from '../../mocks/companyDetail'
 import { texts } from '../../texts'
@@ -17,7 +18,7 @@ type Props = {
   loading?: boolean
   error?: boolean
   onRefresh: () => void
-  onForceLogout: (ids: string[], ticket: string) => void
+  onForceLogout: (ids: string[], audit: Audit) => void | Promise<void>
 }
 
 const th = 'whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-semibold tracking-wide text-ink-4'
@@ -53,10 +54,11 @@ export function LiveUsersTab({ company, users, loading, error, onRefresh, onForc
   }
   const closeModal = () => setModalAt(null)
 
-  const confirm = () => {
-    onForceLogout(
+  const confirm = async (_at: string, requester: string) => {
+    // 실패하면 팝업을 닫지 않고 오류를 보여 준다
+    await onForceLogout(
       selectedUsers.map((u) => u.id),
-      ticket.trim(),
+      { ticket: ticket.trim(), requester, reason: reason.trim() },
     )
     setSelected([])
     setTicket('')

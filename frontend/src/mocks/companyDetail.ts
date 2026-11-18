@@ -91,6 +91,8 @@ export type LiveUser = {
   employeeNo: string
   ip: string
   session: string
+  /** 세션 ID 전체. 강제 로그아웃할 때 서버로 보낸다 (화면에는 가려서 보여 준다) */
+  sessionId?: string
   lastActive: string
   /** 최근 활동 중(초록 점) 여부 */
   recent: boolean

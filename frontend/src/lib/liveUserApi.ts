@@ -12,7 +12,15 @@ export type LiveUserApi = {
 
 export type LiveUsersApi = { refreshedAt: string; items: LiveUserApi[]; total: number }
 
+import { sendJson } from './apiWrite'
+import type { Audit } from './apiWrite'
+
+export type ForceLogoutApi = { loggedOut: { id: string; name: string }[]; historyIds: number[] }
+
 export const liveUserApi = {
+  /** 선택한 세션을 끊는다 (Biz login_info.active = false) */
+  forceLogout: (schema: string, sessionIds: string[], audit: Audit) =>
+    sendJson<ForceLogoutApi>('POST', `/api/biz/companies/${encodeURIComponent(schema)}/live-users/force-logout`, { sessionIds, audit }),
   list: async (schema: string, signal?: AbortSignal): Promise<LiveUsersApi> => {
     const res = await fetch(`/api/biz/companies/${encodeURIComponent(schema)}/live-users`, { signal })
     if (!res.ok) throw new Error(String(res.status))

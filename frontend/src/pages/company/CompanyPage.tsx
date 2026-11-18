@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { CompanyShell } from '../../components/layout/CompanyShell'
 import { CloseIcon } from '../../components/icons'
 import { useCompanyDetail } from '../../hooks/useCompanyDetail'
+import { liveUserApi } from '../../lib/liveUserApi'
+import type { Audit } from '../../lib/apiWrite'
 import { useLiveUsers } from '../../hooks/useLiveUsers'
 import { cn } from '../../lib/cn'
 import type { ServicePlatform } from '../../lib/platform'
@@ -52,7 +54,7 @@ function SelectedCompany({ initialTab, platform, schema }: { initialTab: Company
 function CompanyView({ company, initialTab }: { company: CompanyDetail; initialTab: CompanyTab }) {
   const [tab, setTab] = useState<CompanyTab>(initialTab)
   const live = useLiveUsers(company.platform, company.schema)
-  // 강제 로그아웃한 유저는 새로 불러올 때까지 목록에서 뺀다 (실제 세션 종료는 아직 연결되지 않았다)
+  // 강제 로그아웃한 유저는 다시 불러오는 동안 목록에서 먼저 뺀다
   const [loggedOut, setLoggedOut] = useState<string[]>([])
   const users = live.users.filter((u) => !loggedOut.includes(u.id))
   const [toast, setToast] = useState('')
@@ -71,10 +73,15 @@ function CompanyView({ company, initialTab }: { company: CompanyDetail; initialT
     window.history.replaceState(null, '', `${base}${next === 'basic' ? '' : `&tab=${next}`}`)
   }
 
-  const forceLogout = (ids: string[], ticket: string) => {
+  const forceLogout = async (ids: string[], audit: Audit) => {
     const targets = users.filter((u) => ids.includes(u.id))
-    setLoggedOut((prev) => [...prev, ...ids])
-    setToast(t.toast.forceLogoutDone(targets.length, targets.map((u) => u.name).join(', '), ticket))
+    const sessionIds = targets.map((u) => u.sessionId).filter((s): s is string => !!s)
+    const res = await liveUserApi.forceLogout(company.schema, sessionIds, audit)
+    // 서버가 실제로 끊은 유저만 보여 준다
+    const done = res.loggedOut
+    setLoggedOut((prev) => [...prev, ...done.map((d) => d.id)])
+    setToast(t.toast.forceLogoutDone(done.length, done.map((d) => d.name).join(', '), audit.ticket))
+    live.reload()
   }
 
   const tabLabel = t.tabs[tabKeys[tab] as keyof typeof t.tabs]

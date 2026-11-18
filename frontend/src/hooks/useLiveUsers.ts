@@ -28,6 +28,7 @@ function toLiveUser(u: LiveUserApi, now: number): LiveUser {
     employeeNo: u.employeeNo || '-',
     ip: u.ip || '-',
     session: maskSession(u.sessionId),
+    sessionId: u.sessionId,
     lastActive: relative(u.lastActiveAt, now),
     recent: minutes < RECENT_MINUTES,
     loginAt: u.loginAt ? formatDateTime(new Date(u.loginAt)) : '-',
