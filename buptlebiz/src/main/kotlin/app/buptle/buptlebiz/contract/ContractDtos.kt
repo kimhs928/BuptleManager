@@ -155,6 +155,8 @@ data class ContractUpdateRequest(
 	@Schema(allowableValues = ["ko", "en", "ja"])
 	val lang: String? = null,
 	val status: ContractStatus? = null,
+	@Schema(description = "바꿀 계약 상태 코드 (enum BIZ_CONTRACT_STATUS). contract_bcontract.status_on_workflow", example = "100")
+	val statusCode: Int? = null,
 	@Schema(description = "true 로 바꾸면 deletedAt 은 서버 시각, false 로 바꾸면 null")
 	val deleted: Boolean? = null,
 	val startDate: LocalDate? = null,
